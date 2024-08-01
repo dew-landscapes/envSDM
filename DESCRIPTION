@@ -1,0 +1,52 @@
+Package: envSDM
+Type: Package
+Title: Generate tuned and spatially validated SDM's for many taxa
+Version: 0.2.0
+Authors@R:
+    c(
+    person(given = "Stuart",
+           family = "Brown",
+           role = c("aut"),
+           email = "stuart.brown@sa.gov.au"),
+    person(given = "Nigel",
+           family = "Willoughby",
+           role = c("aut", "cre"),
+           email = "nigel.willoughby@sa.gov.au")
+    )
+Description: The goal of envSDM is to help automate the creation, validation,
+    and prediction of species distribution models (SDMs). For each taxa the
+    preparation, tuning, selection of best model and prediction are covered.
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+BugReports: https://github.com/acanthiza/envSDM/issues
+RoxygenNote: 7.3.2
+Imports:
+    MASS,
+    blockCV,
+    data.table,
+    exactextractr,
+    flexsdm,
+    forcats,
+    fs,
+    purrr,
+    readr,
+    rio,
+    sfarrow,
+    tibble,
+    tidyr,
+    tidyselect,
+    tmap,
+    ggplot2,
+    ks,
+    maxnet,
+    randomForest,
+    predicts,
+    sf,
+    terra,
+    dplyr,
+    magrittr
+Remotes:
+    github::acanthiza/envFunc
+    github::acanthiza/envRaster
+    

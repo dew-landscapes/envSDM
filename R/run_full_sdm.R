@@ -1,0 +1,134 @@
+
+#' Run an SDM using no cross validation and previously established tune arguments
+#'
+#' @param this_taxa Character. Name of taxa. Used to name outputs. If `NULL`,
+#' this will be `basename(dirname(out_dir))`.
+#' @param out_dir Character. Name of directory containing previous tunes and
+#' into which results will be saved.
+#' @param tune_args List with element `algo` and elements: `fc`, `rm`, `trees`,
+#' `mtry` and `nodesize` as appropriate to the `algo.` If supplied as `NULL` an
+#' attempt will be made to load 'best' tune from `evaluation.csv` in `out_dir`
+#' @param force_new Logical. If outputs already exist, should they be remade?
+#' @param do_gc Logical. Run `base::rm(list = ls)` and `base::gc()` at end of
+#' function? Useful when running SDMs for many, many taxa, especially if done in
+#' parallel.
+#' @param save_to Character. Name of path to save results. Defaults to
+#' `fs::path(out_dir, "best")`
+#' @param ... Passed to `tune_sdm()`
+#'
+#' @return `invisible(NULL)`. `tune.rds` saved into `save_to` directory. log
+#' written.
+#' @export
+#'
+#' @examples
+  run_full_sdm <- function(this_taxa = NULL
+                           , out_dir
+                           , tune_args = NULL
+                           , force_new = FALSE
+                           , save_to = fs::path(out_dir, "best")
+                           , do_gc = FALSE
+                           , ...
+                           ) {
+
+    message(paste0("run full model for ", basename(out_dir)))
+
+    # prep -----
+
+    ## files ------
+    # existing
+    prep_file <- fs::path(out_dir, "prep.rds")
+
+    prep_log <- fs::path(out_dir, "prep.log")
+
+    ## new
+    tune_file <- fs::path(save_to, "tune.rds")
+    full_sdm_log <- fs::path(save_to, "full_sdm.log")
+
+    # run?-----
+    prep_log_text <- paste0(readLines(prep_log), collapse = " ")
+
+    run <- all(file.exists(prep_file)
+               , !grepl("SDM abandoned", prep_log_text)
+               , grepl("prep end", prep_log_text)
+               )
+
+    if(run) {
+
+      run_tune <- if(file.exists(tune_file)) force_new else TRUE
+
+      if(run_tune) {
+
+        # to create
+        fs::dir_create(save_to)
+
+        # start timer ------
+        full_sdm_timer <- envFunc::timer(process = "full SDM start"
+                            , file = "full"
+                            , time_df = NULL
+                            , log = full_sdm_log
+                            , write_log = TRUE
+                            )
+
+        # deal with tune_args
+        if(is.null(tune_args)) {
+
+          message("assuming 'best' run and attempting to load best tune args")
+
+          tune_args <- rio::import(fs::path(out_dir, "evaluation.csv")
+                                   , setclass = "tibble"
+                                   ) %>%
+            dplyr::filter(best)
+
+        }
+
+        if(length(tune_args)) {
+
+          # mod --------
+
+          tune_sdm(out_dir = out_dir
+                   , algo = tune_args$algo
+                   , fc = tune_args$fc
+                   , rm = tune_args$rm
+                   , trees = tune_args$trees
+                   , mtry = tune_args$mtry
+                   , nodesize = tune_args$nodesize
+                   , keep_model = TRUE
+                   , best_run = TRUE
+                   , do_gc = do_gc
+                   , save_to = save_to
+                   , ...
+                   )
+
+          full_sdm_timer <- envFunc::timer("full SDM end"
+                            , time_df = full_sdm_timer
+                            )
+
+          if(do_gc) {
+
+            rm(list = ls())
+
+            gc()
+
+          }
+
+        } else {
+
+          full_sdm_timer <- envFunc::timer("warning"
+                              , notes = "No tune results found"
+                              , time_df = full_sdm_timer
+                              )
+
+          full_sdm_timer <- envFunc::timer("full sdm end"
+                                  , timer_df = full_sdm_timer
+                                  )
+
+        }
+
+      }
+
+    }
+
+    return(invisible(NULL))
+
+  }
+

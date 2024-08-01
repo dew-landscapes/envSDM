@@ -1,0 +1,8 @@
+^.*\.Rproj$
+^\.Rproj\.user$
+^R/make_data\.R$
+^R/make_model_old\.R$
+^R/test_model\.R$
+^R/make_data_KI\.R$
+^R/test_model_KI\.R$
+^LICENSE\.md$
