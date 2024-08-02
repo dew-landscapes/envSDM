@@ -26,7 +26,6 @@ Imports:
     blockCV,
     data.table,
     exactextractr,
-    flexsdm,
     forcats,
     fs,
     purrr,
@@ -48,5 +47,6 @@ Imports:
     magrittr
 Remotes:
     github::acanthiza/envFunc,
-    github::acanthiza/envRaster
+    github::acanthiza/envRaster,
+    sjevelazco/flexsdm
     
