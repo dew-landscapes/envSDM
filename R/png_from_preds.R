@@ -18,8 +18,7 @@
 #' @return `invisible(NULL)`. Writes .png files with the same file name as any
 #' .tif files
 #' @export
-#'
-#' @examples
+#' @example inst/examples/predict_sdm_ex.R
   png_from_preds <- function(dir
                               , trim = TRUE
                               , force_new = FALSE

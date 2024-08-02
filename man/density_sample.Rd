@@ -2,7 +2,7 @@
 % Please edit documentation in R/density_sample.R
 \name{density_sample}
 \alias{density_sample}
-\title{Create a spatial sample}
+\title{Create a spatially thickened background sample}
 \usage{
 density_sample(x, dens_rast, samp_df, max_sample = 200, verbose = FALSE)
 }
@@ -26,6 +26,6 @@ Dataframe
 \description{
 Same idea as `terra::spatSample(weights = weight_raster)`, but can use a
 density raster with a different spatial resolution. Can be much quicker than
-`terra::spatSample()` for large areas and small resolutions.
+`terra::spatSample()` for large areas with small resolutions.
 }
 \keyword{internal}

@@ -38,8 +38,13 @@ parallel.}
 }
 \value{
 `invisible(NULL)`. `tune.rds` saved into `save_to` directory. log
-written.
+written. `tune.rds` is a data frame but performs poorly, due to list columns
+, if not imported as a tibble (e.g. via
+`rio::import(tune.rds, setclass = "tibble"))`)
 }
 \description{
 Run an SDM using no cross validation and previously established tune arguments
+}
+\examples{
+inst/examples/predict_sdm_ex.R
 }

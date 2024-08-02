@@ -41,10 +41,10 @@
 #' will default to `fs::path(out_dir, "best")`. Otherwise set as anything.
 #' @param ... Passed to `evaluate_sdm()`
 #'
-#' @return
+#' @return `invisible(NULL)`. `tune.rds` and log written in `save_to`
 #' @export
 #'
-#' @examples man/examples/tune_sdm_ex.R
+#' @example inst/examples/tune_sdm_ex.R
   tune_sdm <- function(this_taxa = NULL
                        , out_dir
                        , algo = c("all", "maxnet", "bioclim", "envelope", "rf") # envelope = bioclim

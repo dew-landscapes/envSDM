@@ -5,9 +5,9 @@
 #' this will be `basename(dirname(out_dir))`.
 #' @param out_dir Character. Name of directory containing model to predict from
 #' and into which results will be saved.
-#' @param predictors Character. Directory in which predictor `.tif` files live.
-#' `envRaster::name_env_tif()` is used internally to parse so should follow that
-#' naming convention. :( (might work otherwise, but seems unlikely).
+#' @param predictors Character. Vector of paths to predictor `.tif` files.
+#' @param is_env_pred Logical. Does the naming of the directory and files in
+#' `predictors` follow the pattern required by `envRaster::parse_env_tif()`?
 #' @param terra_options Passed to `terra::terraOptions()`. e.g. list(memfrac = 0.6)
 #' @param doClamp Passed to `terra::predict()` (which then passes as `...` to
 #' `fun`). Possibly orphaned from older envSDM?
@@ -24,15 +24,15 @@
 #' `terra::rast()` and delete them if they do. Useful after crash during predict.
 #' @param ... Not used.
 #'
-#' @return `invisible(NULL)`. Output `.tif` files are created.
+#' @return `invisible(NULL)`. Output `.tif`, log, and optional .png, written to `out_dir`
 #' @export
 #'
-#' @examples
-#'
+#' @example inst/examples/predict_sdm_ex.R
 #'
   predict_sdm <- function(this_taxa = NULL
                           , out_dir
                           , predictors = NULL
+                          , is_env_pred = TRUE
                           , terra_options = NULL # list(memfrac = 0.6)
                           , doClamp = TRUE
                           , limit_to_mcp = TRUE
@@ -144,12 +144,20 @@
         if(algo == "env") requireNamespace("predicts", quietly = TRUE)
 
         ## predictors -----
-        pred_names <- envRaster::name_env_tif(tibble::tibble(path = predictors), parse = TRUE) %>%
-          dplyr::mutate(name = paste0(season,"__", layer)) %>%
-          dplyr::pull(name)
+        if(is_env_pred) {
 
-        x <- terra::rast(predictors)
-        names(x) <- pred_names
+          pred_names <- envRaster::name_env_tif(tibble::tibble(path = predictors), parse = TRUE) %>%
+            dplyr::mutate(name = paste0(season,"__", layer)) %>%
+            dplyr::pull(name)
+
+          x <- terra::rast(predictors)
+          names(x) <- pred_names
+
+        } else {
+
+          x <- terra::rast(predictors)
+
+        }
 
         safe_predict <- purrr::safely(terra::predict)
 

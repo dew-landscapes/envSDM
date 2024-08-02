@@ -13,11 +13,13 @@
 #' parallel. Note, actually usees `rm(list = ls(pattern = "^[^e$]"))`.
 #' @param ... Passed to both `terra::predict()` and `predicts::pa_evaluate()`
 #'
-#' @return
+#' @return paModelEvaluation (see `predicts::pa_evaluate()`) with extra metrics
+#' from `flexsdm::sdm_eval()`: AUC as auc_po_flexsdm; BOYCE as CBI; CBI_rescale
+#' (CBI is -1 to 1, CBI_rescale is 0 to 1); and IMAE.
 #' @export
 #' @keywords internal
 #'
-#' @examples
+#' @example inst/examples/evaluate_sdm_ex.R
   evaluate_sdm <- function(m
                            , p_test # presence test data
                            , b_test # background (or absence) test data
@@ -29,6 +31,9 @@
 
     # predict not working for envelope models. Don't think it could find the appropriate predict. no issue for rf or maxnet
     requireNamespace("predicts", quietly = TRUE)
+
+    # requireNamespace not fixing issue
+    if("envelope_model" %in% class(m)) library("predicts")
 
     new_data <- dplyr::bind_rows(p_test, b_test)
 

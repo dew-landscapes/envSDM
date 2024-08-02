@@ -1,5 +1,7 @@
 
-  out_dir <- here::here("inst", "examples")
+  library("envSDM")
+
+  out_dir <- file.path(system.file(package = "envSDM"), "examples")
 
   data <- file.path(system.file(package = "predicts"), "ex") |>
     fs::dir_ls(regexp = "\\.csv$") |>
@@ -15,7 +17,7 @@
                   , out_dir = fs::path(out_dir, taxa)
                   )
 
-  env_dat <- system.file("ex/bio.tif", package="predicts")
+  env_dat <- system.file("ex/bio.tif", package = "predicts")
 
   purrr::pwalk(list(data$taxa
                     , data$out_dir
@@ -30,11 +32,49 @@
                                             , is_env_pred = FALSE
                                             , pred_limit = TRUE
                                             , limit_buffer = 10000
-                                            , dens_res = 1000 # ignored as decimal degress preds
+                                            , dens_res = 1000 # ignored as decimal degrees preds
+                                            , use_ecdf = TRUE
                                             )
                )
 
-  fs::dir_ls(out_dir
-             , recurse = TRUE
-             )
+  prep_ex <- rio::import(fs::path(data$out_dir[[1]], "prep.rds"))
 
+  names(prep_ex)
+
+  # Predict boundary with presences on 'land'
+  m <- terra::plot(!is.na(terra::rast(env_dat)[[1]]))
+
+  m <- m %>%
+    terra::plot(terra::vect(prep_ex$predict_boundary)
+                , add = TRUE
+                , col = 5
+                , alpha = 0.5
+                )
+
+  presences <- prep_ex$presence %>%
+    sf::st_as_sf(coords = c("x", "y")
+                 , crs = sf::st_crs(terra::rast(env_dat[[1]]))
+                 ) %>%
+    terra::vect()
+
+  m <- m %>%
+    terra::plot(presences, add = TRUE)
+
+  m
+
+  # Spatial blocks
+  head(prep_ex$blocks)
+
+  background <- prep_ex$blocks %>%
+    dplyr::filter(pa == 0) %>%
+    sf::st_as_sf(coords = c("x", "y")
+                 , crs = sf::st_crs(terra::rast(env_dat[[1]]))
+                 ) %>%
+    terra::vect()
+
+  terra::plot(background
+              , pch = 4
+              , cex = 0.5
+              , col = scales::alpha("blue", 0.5)
+              , add = TRUE
+              )

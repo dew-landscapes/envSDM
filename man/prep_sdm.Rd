@@ -57,9 +57,7 @@ limit), `FALSE` (do not limit) or path to existing sf to use.}
 \item{pred_clip}{sf. Optional sf to clip the pred_limit back to (e.g. to
 prevent prediction into ocean)}
 
-\item{predictors}{Character. Vector of paths to predictor `.tif` files.
-`envRaster::name_env_tif()` is used internally to parse so should follow that
-naming convention. :( (might work otherwise, but seems unlikely).}
+\item{predictors}{Character. Vector of paths to predictor `.tif` files.}
 
 \item{is_env_pred}{Logical. Does the naming of the directory and files in
 `predictors` follow the pattern required by `envRaster::parse_env_tif()`?}
@@ -122,12 +120,17 @@ parallel.}
 
 \item{force_new}{Logical. If outputs already exist, should they be remade?}
 }
+\value{
+`invisible(NULL)`. `prep.rds` (a list) and log written to `out_dir`
+}
 \description{
 Prepare for running an SDM
 }
 \examples{
 
-  out_dir <- here::here("inst", "examples")
+  library("envSDM")
+
+  out_dir <- file.path(system.file(package = "envSDM"), "examples")
 
   data <- file.path(system.file(package = "predicts"), "ex") |>
     fs::dir_ls(regexp = "\\\\.csv$") |>
@@ -143,7 +146,7 @@ Prepare for running an SDM
                   , out_dir = fs::path(out_dir, taxa)
                   )
 
-  env_dat <- system.file("ex/bio.tif", package="predicts")
+  env_dat <- system.file("ex/bio.tif", package = "predicts")
 
   purrr::pwalk(list(data$taxa
                     , data$out_dir
@@ -158,12 +161,46 @@ Prepare for running an SDM
                                             , is_env_pred = FALSE
                                             , pred_limit = TRUE
                                             , limit_buffer = 10000
-                                            , dens_res = 1000 # ignored as decimal degress preds
+                                            , dens_res = 1000 # ignored as decimal degrees preds
+                                            , use_ecdf = TRUE
                                             )
                )
 
-  fs::dir_ls(out_dir
-             , recurse = TRUE
-             )
+  prep_ex <- rio::import(fs::path(data$out_dir[[1]], "prep.rds"))
 
+  names(prep_ex)
+
+  # Predict boundary with presences on 'land'
+  terra::plot(!is.na(terra::rast(env_dat)[[1]]))
+
+  terra::plot(terra::vect(prep_ex$predict_boundary)
+              , add = TRUE
+              , col = 5
+              , alpha = 0.5
+              )
+
+  presences <- prep_ex$presence \%>\%
+    sf::st_as_sf(coords = c("x", "y")
+                 , crs = sf::st_crs(terra::rast(env_dat[[1]]))
+                 ) \%>\%
+    terra::vect()
+
+  terra::plot(presences, add = TRUE)
+
+  # Spatial blocks
+  head(prep_ex$blocks)
+
+  background <- prep_ex$blocks \%>\%
+    dplyr::filter(pa == 0) \%>\%
+    sf::st_as_sf(coords = c("x", "y")
+                 , crs = sf::st_crs(terra::rast(env_dat[[1]]))
+                 ) \%>\%
+    terra::vect()
+
+  terra::plot(background
+              , pch = 4
+              , cex = 0.5
+              , col = scales::alpha("blue", 0.5)
+              , add = TRUE
+              )
 }

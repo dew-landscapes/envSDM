@@ -1,9 +1,9 @@
 
-#' Create a spatial sample
+#' Create a spatially thickened background sample
 #'
 #' Same idea as `terra::spatSample(weights = weight_raster)`, but can use a
 #' density raster with a different spatial resolution. Can be much quicker than
-#' `terra::spatSample()` for large areas and small resolutions.
+#' `terra::spatSample()` for large areas with small resolutions.
 #'
 #' @param x spatRaster. Sample will be cell XY values from this raster.
 #' @param dens_rast spatRaster. Density raster. This is equivalent to the
@@ -18,7 +18,6 @@
 #' @export
 #' @keywords internal
 #'
-#' @examples
   density_sample <- function(x
                              , dens_rast
                              , samp_df

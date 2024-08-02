@@ -19,8 +19,44 @@ parallel. Note, actually usees `rm(list = ls(pattern = "^[^e$]"))`.}
 
 \item{...}{Passed to both `terra::predict()` and `predicts::pa_evaluate()`}
 }
+\value{
+paModelEvaluation (see `predicts::pa_evaluate()`) with extra metrics
+from `flexsdm::sdm_eval()`: AUC as auc_po_flexsdm; BOYCE as CBI; CBI_rescale
+(CBI is -1 to 1, CBI_rescale is 0 to 1); and IMAE.
+}
 \description{
 Returns various evaluation metrics from `predicts::pa_evaluate()` and
 `flexsdm::sdm_eval()`.
+}
+\examples{
+
+  library("envSDM")
+
+  out_dir <- file.path(system.file(package = "envSDM"), "examples", "acaule")
+
+  prep <- rio::import(fs::path(out_dir, "prep.rds"))
+
+  presences <- prep$blocks[prep$blocks$pa == 1 & prep$blocks$block != 1, ]
+  background <- prep$blocks[prep$blocks$pa == 0 & prep$blocks$block != 1, ]
+
+  evaluate_ex_dir <- fs::path(out_dir, "evaluate_example")
+
+  tune_sdm(out_dir = out_dir
+           , algo = "rf"
+           , trees = 500
+           , mtry = FALSE
+           , nodesize = FALSE
+           , keep_model = TRUE
+           , save_to = evaluate_ex_dir
+           )
+
+  tune <- rio::import(fs::path(evaluate_ex_dir, "tune.rds")
+                      , setclass = "tibble"
+                      )
+
+  evaluate_sdm(tune$m[[1]]
+               , p_test = presences
+               , b_test = background
+               )
 }
 \keyword{internal}

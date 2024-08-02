@@ -1,5 +1,3 @@
-# `envSDM`: an R package to automate creation of species distribution models
-
 The goal of `envSDM` is to help automate the preparation, tuning and prediction
 of species distribution models. `envSDM` attempts to make decisions at each of
 these steps that are robust(ish) for running SDMs for many, many taxa.

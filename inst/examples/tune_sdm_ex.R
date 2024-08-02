@@ -1,6 +1,7 @@
 
+  library("envSDM")
 
-  out_dir <- here::here("inst", "examples")
+  out_dir <- file.path(system.file(package = "envSDM"), "examples")
 
   data <- file.path(system.file(package = "predicts"), "ex") |>
     fs::dir_ls(regexp = "\\.csv$") |>
@@ -19,13 +20,3 @@
   purrr::walk(data$out_dir
               , \(x) tune_sdm(out_dir = x)
               )
-
-  if(FALSE) {
-
-    purrr::walk(data$out_dir
-              , \(x) tune_sdm(out_dir = x
-                              , force_new = TRUE
-                              )
-              )
-
-  }

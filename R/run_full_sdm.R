@@ -17,10 +17,12 @@
 #' @param ... Passed to `tune_sdm()`
 #'
 #' @return `invisible(NULL)`. `tune.rds` saved into `save_to` directory. log
-#' written.
+#' written. `tune.rds` is a data frame but performs poorly, due to list columns
+#' , if not imported as a tibble (e.g. via
+#' `rio::import(tune.rds, setclass = "tibble"))`)
 #' @export
 #'
-#' @examples
+#' @examples inst/examples/predict_sdm_ex.R
   run_full_sdm <- function(this_taxa = NULL
                            , out_dir
                            , tune_args = NULL

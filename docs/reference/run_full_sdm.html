@@ -103,9 +103,17 @@ parallel.</p></dd>
     
 
 <p>`invisible(NULL)`. `tune.rds` saved into `save_to` directory. log
-written.</p>
+written. `tune.rds` is a data frame but performs poorly, due to list columns
+, if not imported as a tibble (e.g. via
+`rio::import(tune.rds, setclass = "tibble"))`)</p>
     </div>
 
+    <div id="ref-examples">
+    <h2>Examples</h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">inst</span><span class="op">/</span><span class="va">examples</span><span class="op">/</span><span class="va">predict_sdm_ex.R</span></span></span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in eval(expr, envir, enclos):</span> object 'inst' not found</span>
+</code></pre></div>
+    </div>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top"><h2 data-toc-skip>Contents</h2>

@@ -15,8 +15,6 @@
 #' @param pred_clip sf. Optional sf to clip the pred_limit back to (e.g. to
 #' prevent prediction into ocean)
 #' @param predictors Character. Vector of paths to predictor `.tif` files.
-#' `envRaster::name_env_tif()` is used internally to parse so should follow that
-#' naming convention. :( (might work otherwise, but seems unlikely).
 #' @param is_env_pred Logical. Does the naming of the directory and files in
 #' `predictors` follow the pattern required by `envRaster::parse_env_tif()`?
 #' @param cat_preds Character. Vector of predictor names that are character.
@@ -60,10 +58,10 @@
 #' parallel.
 #' @param force_new Logical. If outputs already exist, should they be remade?
 #'
-#' @return
+#' @return `invisible(NULL)`. `prep.rds` (a list) and log written to `out_dir`
 #' @export
 #'
-#' @example man/examples/prep_sdm_ex.R
+#' @example inst/examples/prep_sdm_ex.R
   prep_sdm <- function(this_taxa = NULL
                        , out_dir
                        , presence
@@ -377,7 +375,7 @@
 
           if(use_ecdf) {
 
-            ras_ecdf <- stats::ecdf(values(target_density))
+            ras_ecdf <- stats::ecdf(terra::values(target_density))
 
             target_density <- terra::app(target_density
                                          , fun = \(i) ras_ecdf(i)
