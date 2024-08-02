@@ -47,6 +47,6 @@ Imports:
     dplyr,
     magrittr
 Remotes:
-    github::acanthiza/envFunc
+    github::acanthiza/envFunc,
     github::acanthiza/envRaster
     
