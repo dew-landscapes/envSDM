@@ -6,3 +6,7 @@
 ^R/make_data_KI\.R$
 ^R/test_model_KI\.R$
 ^LICENSE\.md$
+^\.github$
+^_pkgdown\.yml$
+^docs$
+^pkgdown$
