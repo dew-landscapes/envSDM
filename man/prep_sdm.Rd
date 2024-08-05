@@ -129,6 +129,7 @@ Prepare for running an SDM
 \examples{
 
   library("envSDM")
+  library("tmap")
 
   out_dir <- file.path(system.file(package = "envSDM"), "examples")
 
@@ -166,41 +167,46 @@ Prepare for running an SDM
                                             )
                )
 
-  prep_ex <- rio::import(fs::path(data$out_dir[[1]], "prep.rds"))
+  prep_ex <- rio::import(fs::path(data$out_dir[[2]], "prep.rds"))
 
   names(prep_ex)
 
-  # Predict boundary with presences on 'land'
-  terra::plot(!is.na(terra::rast(env_dat)[[1]]))
+  # Density raster
+  land <- !is.na(terra::rast(env_dat)[[1]])
+  dens_ras <- terra::rast(fs::path(data$out_dir[[2]], "density.tif")) * land \%>\%
+    terra::trim()
 
-  terra::plot(terra::vect(prep_ex$predict_boundary)
-              , add = TRUE
-              , col = 5
-              , alpha = 0.5
-              )
+  m <- tm_shape(land) +
+    tm_raster() +
+    tm_shape(dens_ras) +
+    tm_raster(title = "Presence density"
+              , drop.levels = TRUE
+              ) +
+    tm_legend(outside = TRUE) +
+    tm_compass() +
+    tm_scale_bar() +
+    tm_layout(main.title = paste0("Prep for ",  prep_ex$inputs$this_taxa))
 
-  presences <- prep_ex$presence \%>\%
-    sf::st_as_sf(coords = c("x", "y")
-                 , crs = sf::st_crs(terra::rast(env_dat[[1]]))
-                 ) \%>\%
-    terra::vect()
-
-  terra::plot(presences, add = TRUE)
+  m
 
   # Spatial blocks
   head(prep_ex$blocks)
 
-  background <- prep_ex$blocks \%>\%
-    dplyr::filter(pa == 0) \%>\%
+  blocks <- prep_ex$blocks \%>\%
+    dplyr::mutate(blocks = factor(block)) \%>\% # for map
     sf::st_as_sf(coords = c("x", "y")
                  , crs = sf::st_crs(terra::rast(env_dat[[1]]))
-                 ) \%>\%
-    terra::vect()
+                 )
 
-  terra::plot(background
-              , pch = 4
-              , cex = 0.5
-              , col = scales::alpha("blue", 0.5)
-              , add = TRUE
-              )
+  presences <- blocks \%>\%
+    dplyr::filter(pa == 1)
+
+  m +
+    tm_shape(blocks) +
+      tm_dots(col = "block"
+              , palette = "viridis"
+              , title = "Blocks"
+              ) +
+    tm_shape(presences) +
+      tm_dots(col = "red")
 }

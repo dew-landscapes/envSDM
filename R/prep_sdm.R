@@ -183,7 +183,8 @@
             # use exsiting MCP polygon file for the predict boundary
 
             prep$predict_boundary <- sfarrow::st_read_parquet(pred_limit) %>%
-              sf::st_transform(crs = sf::st_crs(predictors[[1]]))
+              sf::st_transform(crs = sf::st_crs(predictors[[1]])) %>%
+              sf::st_make_valid()
 
           } else {
             # create new MCP polygon around the presences for the predict boundary
@@ -195,7 +196,9 @@
                            ) %>%
               sf::st_transform(crs = sf::st_crs(predictors[[1]])) %>%
               sf::st_union() %>%
-              sf::st_convex_hull()
+              sf::st_convex_hull() %>%
+              sf::st_as_sf() %>%
+              sf::st_make_valid()
 
           }
 
@@ -206,14 +209,16 @@
 
           prep$predict_boundary <- sf::st_bbox(predictors) %>%
             sf::st_as_sfc() %>%
-            sf::st_as_sf()
+            sf::st_as_sf() %>%
+            sf::st_make_valid()
 
         }
 
         if(all(pred_limit, as.logical(limit_buffer))) {
 
           prep$predict_boundary <- prep$predict_boundary %>%
-            sf::st_buffer(limit_buffer)
+            sf::st_buffer(limit_buffer) %>%
+            sf::st_make_valid()
 
         }
 
@@ -222,7 +227,8 @@
           prep$predict_boundary <- prep$predict_boundary %>%
             sf::st_intersection(pred_clip %>%
                                   sf::st_transform(crs = sf::st_crs(prep$predict_boundary))
-                                )
+                                ) %>%
+            sf::st_make_valid()
 
 
         }
