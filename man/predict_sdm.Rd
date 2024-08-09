@@ -2,11 +2,12 @@
 % Please edit documentation in R/predict_sdm.R
 \name{predict_sdm}
 \alias{predict_sdm}
-\title{Predict an SDM}
+\title{Predict from  SDM}
 \usage{
 predict_sdm(
   this_taxa = NULL,
-  out_dir,
+  in_dir,
+  out_dir = NULL,
   predictors = NULL,
   is_env_pred = TRUE,
   terra_options = NULL,
@@ -23,8 +24,14 @@ predict_sdm(
 \item{this_taxa}{Character. Name of taxa. Used to name outputs. If `NULL`,
 this will be `basename(dirname(out_dir))`.}
 
-\item{out_dir}{Character. Name of directory containing model to predict from
-and into which results will be saved.}
+\item{in_dir}{Character. Name of directory containing: `prep.rds` (created
+with `envSDM::prep_sdm()`); and model to predict from (`tune.rds`, created
+with `envSDM::tune_sdm()`). Note that any `tune.rds` can be used but only the
+model in the first row will be used, thus more usually this `tune.rds` will
+have been created directly by `envSDM::run_full_sdm()`}
+
+\item{out_dir}{Character. Name of directory into which results will be saved.
+Will be created if it does not exist.}
 
 \item{predictors}{Character. Vector of paths to predictor `.tif` files.}
 
@@ -37,8 +44,12 @@ and into which results will be saved.}
 `fun`). Possibly orphaned from older envSDM?}
 
 \item{limit_to_mcp}{Logical. If `predict_boundary` exists within `prep` and
-`limit_to_mcp == TRUE`, the output raster will be limted to within
-`predict_boundary`.}
+`limit_to_mcp == TRUE`, an output raster (`mask.tif`) will be created within
+`predict_boundary` using `terra::mask()`. Irrespective of `limit_to_mcp`,
+`full.tif` is always created at the full extent of the predictors. Thus all
+`mask.tif` files can be 'stacked' as they have the same extent. If needed,
+limiting the predictions for a taxa to its predict boundary can then be done
+via `terra::trim(mask.tif)`.}
 
 \item{apply_thresh}{Logical. If `TRUE`, an output raster `thresh.tif` will be
 created using the threshold `mod$e[[1]]@thresholds$max_spec_sens`}
@@ -46,26 +57,31 @@ created using the threshold `mod$e[[1]]@thresholds$max_spec_sens`}
 \item{force_new}{Logical. If outputs already exist, should they be remade?}
 
 \item{do_gc}{Logical. Run `base::rm(list = ls)` and `base::gc()` at end of
-function? Useful when running SDMs for many, many taxa, especially if done in
-parallel.}
+function? Useful to keep RAM use down when running SDMs for many, many taxa,
+especially if done in parallel.}
 
-\item{check_tifs}{Logical. Check that any output `.tif` files error on
-`terra::rast()` and delete them if they do. Useful after crash during predict.}
+\item{check_tifs}{Logical. Check if any output `.tif` files error on
+`terra::rast()` and delete them if they do. Useful after a crash during
+predict.}
 
 \item{...}{Not used.}
 }
 \value{
-`invisible(NULL)`. Output `.tif`, log, and optional .png, written to `out_dir`
+`invisible(NULL)`. Output .tif, .log, and optional .png, written to
+`out_dir`
 }
 \description{
-Predict an SDM
+Predict from  SDM
 }
 \examples{
 
-  library("envSDM")
+  # setup -------
+  in_dir <- file.path(system.file(package = "envSDM"), "examples")
 
-  out_dir <- file.path(system.file(package = "envSDM"), "examples")
+  env_dat <- system.file("ex/bio.tif", package = "predicts")
 
+
+  # data ------
   data <- file.path(system.file(package = "predicts"), "ex") |>
     fs::dir_ls(regexp = "\\\\.csv$") |>
     tibble::enframe(name = NULL, value = "path") |>
@@ -77,21 +93,21 @@ Predict an SDM
                                                           , !is.na(lon)
                                                           )
                                           )
-                  , out_dir = fs::path(out_dir, taxa)
+                  , out_dir = fs::path(in_dir, taxa)
                   )
 
-  # Run a single model using all the data from the 'best' tune
+  # Best combo--------
+  ## run full SDM --------
   purrr::pwalk(list(data$out_dir)
                  , \(a) run_full_sdm(out_dir = a
                                      , metrics_df = envSDM::sdm_metrics
                                      )
                  )
 
-  env_dat <- system.file("ex/bio.tif", package = "predicts")
 
-  # Predict from the best model
+  ## predict -------
   purrr::pwalk(list(data$out_dir)
-               , \(a) predict_sdm(out_dir = fs::path(a, "best")
+               , \(a) predict_sdm(in_dir = fs::path(a, "combo")
                                   , predictors = env_dat
                                   , is_env_pred = FALSE
                                   , limit_to_mcp = TRUE
@@ -99,7 +115,7 @@ Predict an SDM
                                   )
                )
 
-  # make .png for each predict
+  ## .pngs -------
   purrr::walk(data$out_dir
               , \(x) png_from_preds(x
                                     , recurse = 1
@@ -107,22 +123,63 @@ Predict an SDM
                                     )
               )
 
-  # example plots
-
-  # masked to mcp
+  ## visualise-------
+  ### mask -------
   purrr::walk(data$out_dir
-              , \(x) fs::path(x, "best", "mask.tif") \%>\%
+              , \(x) fs::path(x, "combo", "mask.tif") \%>\%
                 terra::rast() \%>\%
                 terra::trim() \%>\%
                 terra::plot()
               )
 
-  # threshold
+  ### threshold ------
   purrr::walk(data$out_dir
-              , \(x) fs::path(x, "best", "thresh.tif") \%>\%
+              , \(x) fs::path(x, "combo", "thresh.tif") \%>\%
                 terra::rast() \%>\%
                 terra::trim() \%>\%
                 terra::plot()
               )
+
+  # Best auc--------
+  ## run full SDM --------
+  purrr::pwalk(list(data$out_dir)
+                 , \(a) run_full_sdm(out_dir = a
+                                     , metrics_df = envSDM::sdm_metrics
+                                     , metric = "auc_po"
+                                     , save_to = fs::path(a, "auc_po")
+                                     )
+                 )
+
+
+  ## predict -------
+  purrr::pwalk(list(data$out_dir)
+               , \(a) predict_sdm(in_dir = fs::path(a, "auc_po")
+                                  , predictors = env_dat
+                                  , is_env_pred = FALSE
+                                  , limit_to_mcp = TRUE
+                                  , check_tifs = TRUE
+                                  )
+               )
+
+
+  ## visualise-------
+  ### mask -------
+  purrr::walk(data$out_dir
+              , \(x) fs::path(x, "auc_po", "mask.tif") \%>\%
+                terra::rast() \%>\%
+                terra::trim() \%>\%
+                terra::plot()
+              )
+
+  ### threshold ------
+  purrr::walk(data$out_dir
+              , \(x) fs::path(x, "auc_po", "thresh.tif") \%>\%
+                terra::rast() \%>\%
+                terra::trim() \%>\%
+                terra::plot()
+              )
+
+
+
 
 }

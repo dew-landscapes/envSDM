@@ -30,8 +30,6 @@ Returns various evaluation metrics from `predicts::pa_evaluate()` and
 }
 \examples{
 
-  library("envSDM")
-
   out_dir <- file.path(system.file(package = "envSDM"), "examples", "acaule")
 
   prep <- rio::import(fs::path(out_dir, "prep.rds"))

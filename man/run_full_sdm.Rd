@@ -7,9 +7,9 @@
 run_full_sdm(
   this_taxa = NULL,
   out_dir,
-  tune_args = NULL,
+  use_metric = "combo",
   force_new = FALSE,
-  save_to = fs::path(out_dir, "best"),
+  save_to = fs::path(out_dir, use_metric),
   do_gc = FALSE,
   ...
 )
@@ -21,14 +21,15 @@ this will be `basename(dirname(out_dir))`.}
 \item{out_dir}{Character. Name of directory containing previous tunes and
 into which results will be saved.}
 
-\item{tune_args}{List with element `algo` and elements: `fc`, `rm`, `trees`,
-`mtry` and `nodesize` as appropriate to the `algo.` If supplied as `NULL` an
-attempt will be made to load 'best' tune from `evaluation.csv` in `out_dir`}
+\item{use_metric}{Character. Which metric to use to find the 'best' tune
+arguments from previous tuning results? Default is `combo`, the product of
+`auc_po`, `CBI_rescale` and `IMAE`. `use_metric` must be `combo` or have been
+ used in the use_metrics argument to `tune_sdm()`.}
 
 \item{force_new}{Logical. If outputs already exist, should they be remade?}
 
 \item{save_to}{Character. Name of path to save results. Defaults to
-`fs::path(out_dir, "best")`}
+`fs::path(out_dir, use_metric)`}
 
 \item{do_gc}{Logical. Run `base::rm(list = ls)` and `base::gc()` at end of
 function? Useful when running SDMs for many, many taxa, especially if done in

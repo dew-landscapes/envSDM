@@ -42,7 +42,7 @@
 #'
   predict_sdm <- function(this_taxa = NULL
                           , in_dir
-                          , out_dir = in_dir
+                          , out_dir = NULL
                           , predictors = NULL
                           , is_env_pred = TRUE
                           , terra_options = NULL
@@ -56,6 +56,7 @@
                           ) {
 
     this_taxa <- basename(dirname(in_dir))
+    if(is.null(out_dir)) out_dir <- in_dir
 
     # files -----
     ## existing

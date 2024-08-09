@@ -14,7 +14,7 @@
 #' function? Useful when running SDMs for many, many taxa, especially if done in
 #' parallel.
 #' @param save_to Character. Name of path to save results. Defaults to
-#' `fs::path(out_dir, "best")`
+#' `fs::path(out_dir, use_metric)`
 #' @param ... Passed to `tune_sdm()`
 #'
 #' @return `invisible(NULL)`. `tune.rds` saved into `save_to` directory. log
@@ -26,9 +26,9 @@
 #' @examples inst/examples/predict_sdm_ex.R
   run_full_sdm <- function(this_taxa = NULL
                            , out_dir
-                           , metric = "combo"
+                           , use_metric = "combo"
                            , force_new = FALSE
-                           , save_to = fs::path(out_dir, metric)
+                           , save_to = fs::path(out_dir, use_metric)
                            , do_gc = FALSE
                            , ...
                            ) {
@@ -76,7 +76,7 @@
         tune_args <- rio::import(fs::path(out_dir, "evaluation.csv")
                                  , setclass = "tibble"
                                  ) %>%
-          dplyr::mutate(filter_col = !!rlang::ensym(metric)) %>%
+          dplyr::mutate(filter_col = !!rlang::ensym(use_metric)) %>%
           dplyr::filter(filter_col == max(filter_col))
 
         if(length(tune_args)) {

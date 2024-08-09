@@ -1,6 +1,4 @@
 
-  library("envSDM")
-
   out_dir <- file.path(system.file(package = "envSDM"), "examples")
 
   data <- file.path(system.file(package = "predicts"), "ex") |>

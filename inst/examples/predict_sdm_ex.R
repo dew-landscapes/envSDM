@@ -1,7 +1,5 @@
 
   # setup -------
-  library("envSDM")
-
   in_dir <- file.path(system.file(package = "envSDM"), "examples")
 
   env_dat <- system.file("ex/bio.tif", package = "predicts")
@@ -23,7 +21,7 @@
                   )
 
   # Best combo--------
-  ## full model --------
+  ## run full SDM --------
   purrr::pwalk(list(data$out_dir)
                  , \(a) run_full_sdm(out_dir = a
                                      , metrics_df = envSDM::sdm_metrics
@@ -67,7 +65,7 @@
               )
 
   # Best auc--------
-  ## full model --------
+  ## run full SDM --------
   purrr::pwalk(list(data$out_dir)
                  , \(a) run_full_sdm(out_dir = a
                                      , metrics_df = envSDM::sdm_metrics
