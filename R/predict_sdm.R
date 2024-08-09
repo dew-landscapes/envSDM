@@ -1,10 +1,15 @@
 
-#' Predict an SDM
+#' Predict from  SDM
 #'
 #' @param this_taxa Character. Name of taxa. Used to name outputs. If `NULL`,
 #' this will be `basename(dirname(out_dir))`.
-#' @param out_dir Character. Name of directory containing model to predict from
-#' and into which results will be saved.
+#' @param in_dir Character. Name of directory containing: `prep.rds` (created
+#' with `envSDM::prep_sdm()`); and model to predict from (`tune.rds`, created
+#' with `envSDM::tune_sdm()`). Note that any `tune.rds` can be used but only the
+#' model in the first row will be used, thus more usually this `tune.rds` will
+#' have been created directly by `envSDM::run_full_sdm()`
+#' @param out_dir Character. Name of directory into which results will be saved.
+#' Will be created if it does not exist.
 #' @param predictors Character. Vector of paths to predictor `.tif` files.
 #' @param is_env_pred Logical. Does the naming of the directory and files in
 #' `predictors` follow the pattern required by `envRaster::parse_env_tif()`?
@@ -12,28 +17,35 @@
 #' @param doClamp Passed to `terra::predict()` (which then passes as `...` to
 #' `fun`). Possibly orphaned from older envSDM?
 #' @param limit_to_mcp Logical. If `predict_boundary` exists within `prep` and
-#' `limit_to_mcp == TRUE`, the output raster will be limted to within
-#' `predict_boundary`.
+#' `limit_to_mcp == TRUE`, an output raster (`mask.tif`) will be created within
+#' `predict_boundary` using `terra::mask()`. Irrespective of `limit_to_mcp`,
+#' `full.tif` is always created at the full extent of the predictors. Thus all
+#' `mask.tif` files can be 'stacked' as they have the same extent. If needed,
+#' limiting the predictions for a taxa to its predict boundary can then be done
+#' via `terra::trim(mask.tif)`.
 #' @param apply_thresh Logical. If `TRUE`, an output raster `thresh.tif` will be
 #' created using the threshold `mod$e[[1]]@thresholds$max_spec_sens`
 #' @param force_new Logical. If outputs already exist, should they be remade?
 #' @param do_gc Logical. Run `base::rm(list = ls)` and `base::gc()` at end of
-#' function? Useful when running SDMs for many, many taxa, especially if done in
-#' parallel.
-#' @param check_tifs Logical. Check that any output `.tif` files error on
-#' `terra::rast()` and delete them if they do. Useful after crash during predict.
+#' function? Useful to keep RAM use down when running SDMs for many, many taxa,
+#' especially if done in parallel.
+#' @param check_tifs Logical. Check if any output `.tif` files error on
+#' `terra::rast()` and delete them if they do. Useful after a crash during
+#' predict.
 #' @param ... Not used.
 #'
-#' @return `invisible(NULL)`. Output `.tif`, log, and optional .png, written to `out_dir`
+#' @return `invisible(NULL)`. Output .tif, .log, and optional .png, written to
+#' `out_dir`
 #' @export
 #'
 #' @example inst/examples/predict_sdm_ex.R
 #'
   predict_sdm <- function(this_taxa = NULL
-                          , out_dir
+                          , in_dir
+                          , out_dir = in_dir
                           , predictors = NULL
                           , is_env_pred = TRUE
-                          , terra_options = NULL # list(memfrac = 0.6)
+                          , terra_options = NULL
                           , doClamp = TRUE
                           , limit_to_mcp = TRUE
                           , apply_thresh = TRUE
@@ -43,13 +55,13 @@
                           , ...
                           ) {
 
-    this_taxa <- basename(dirname(out_dir))
+    this_taxa <- basename(dirname(in_dir))
 
     # files -----
     ## existing
-    prep_file <- fs::path(dirname(out_dir), "prep.rds")
-    tune_file <- fs::path(out_dir, "tune.rds")
-    prep_log <- fs::path(dirname(out_dir), "prep.log")
+    prep_file <- fs::path(dirname(in_dir), "prep.rds")
+    tune_file <- fs::path(in_dir, "tune.rds")
+    prep_log <- fs::path(dirname(in_dir), "prep.log")
 
     ## new
     pred_file <- fs::path(out_dir, "full.tif")
@@ -102,17 +114,19 @@
 
     if(run) {
 
+      fs::dir_create(out_dir)
+
       prep <- rio::import(prep_file)
 
       # start timer ------
       pred_timer <- envFunc::timer(process = "predict start"
-                          , file = "predict"
-                          , time_df = NULL
-                          , log = pred_log
-                          , write_log = TRUE
-                          )
+                                   , file = "predict"
+                                   , time_df = NULL
+                                   , log = pred_log
+                                   , write_log = TRUE
+                                   )
 
-      mod <- rio::import(fs::path(out_dir, "tune.rds")
+      mod <- rio::import(fs::path(in_dir, "tune.rds")
                          , setclass = "tibble"
                          )
 

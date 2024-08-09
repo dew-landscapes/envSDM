@@ -32,6 +32,8 @@
 #' no cross-validation.
 #' @param metrics_df Dataframe. Defines which metrics to use when deciding on
 #' 'good' SDMs.
+#' @param use_metrics Character. Vector of values in metrics_df$metric to use
+#' when finding the 'best' model.
 #' @param do_gc Logical. Run `base::rm(list = ls)` and `base::gc()` at end of
 #' function? Useful when running SDMs for many, many taxa, especially if done in
 #' parallel.
@@ -39,7 +41,10 @@
 #' @param save_to Character. Name of path to save results. Defaults to out_dir
 #' which works if not `best_run`. For a best run from `run_full_sdm()`, this
 #' will default to `fs::path(out_dir, "best")`. Otherwise set as anything.
-#' @param ... Passed to `evaluate_sdm()`
+#' @param ... Passed to `evaluate_sdm()`. e.g. thresholds for use in
+#' `predicts::pa_evaluate()` (as `tr` argument, although if used, the values of
+#' the `thresholds` element of the `pa_ModelEvaluation` object returned by
+#' `predicts::pa_evaluate()` will be limited to the values in `tr`).
 #'
 #' @return `invisible(NULL)`. `tune.rds` and log written in `save_to`
 #' @export
@@ -57,6 +62,7 @@
                        , keep_model = FALSE
                        , best_run = FALSE
                        , metrics_df = envSDM::sdm_metrics
+                       , use_metrics = c("auc_po", "CBI_rescale", "IMAE")
                        , do_gc = TRUE
                        , force_new = FALSE
                        , save_to = out_dir
@@ -285,13 +291,14 @@
               dplyr::mutate(m = purrr::map(m, "result")) %>%
               dplyr::filter(purrr::map_lgl(m, \(x) !is.null(x))) %>%
               dplyr::mutate(e = purrr::pmap(list(m
-                                                   , p_data_test
-                                                   , a_data_test
-                                                   )
-                                              , evaluate_sdm
-                                              , ...
-                                              , do_gc = do_gc
-                                              )
+                                                 , p_data_test
+                                                 , a_data_test
+                                                 )
+                                            , \(a, b, c) evaluate_sdm(a, b, c
+                                                                      , ...
+                                                                      , do_gc = do_gc
+                                                                      )
+                                            )
                             ) %>%
               {if(keep_model) (.) %>% dplyr::select(! dplyr::where(is.list), m, e) else (.) %>% dplyr::select(! dplyr::where(is.list), e)}
 
@@ -449,13 +456,14 @@
               dplyr::mutate(m = purrr::map(m, "result")) %>%
               dplyr::filter(purrr::map_lgl(m, \(x) !is.null(x))) %>%
               dplyr::mutate(e = purrr::pmap(list(m
-                                                 , p_data_test
-                                                 , a_data_test
-                                                 )
-                                            , evaluate_sdm
-                                            , ...
-                                            , do_gc = do_gc
-                                            )
+                                                   , p_data_test
+                                                   , a_data_test
+                                                   )
+                                              , \(a, b, c) evaluate_sdm(a, b, c
+                                                                        , ...
+                                                                        , do_gc = do_gc
+                                                                        )
+                                              )
                             ) %>%
               {if(keep_model) (.) %>% dplyr::select(! dplyr::where(is.list), m, e) else (.) %>% dplyr::select(! dplyr::where(is.list), e)}
 
@@ -499,7 +507,11 @@
 
         # find best ------
 
-        message(paste0("find best model for ", basename(out_dir)))
+        message("find best model for "
+                , basename(out_dir)
+                , " using the product of metrics: "
+                , envFunc::vec_to_sentence(use_metrics)
+                )
 
         run <- if(file.exists(eval_file)) force_new else TRUE
 
@@ -507,17 +519,22 @@
 
           if(!exists("tunes", where = environment(), inherits = FALSE)) {
 
-            tunes <- rio::import(fs::path(out_dir, "tune.rds"))
+            tunes <- rio::import(fs::path(out_dir, "tune.rds")
+                                 , setclass = "tibble"
+                                 )
 
           }
 
-          if(is.null(metrics_df)) warning("Can't find best model without metrics") else {
+          if(is.null(metrics_df)) warning("Can't find best model without metrics_df") else {
 
             if(nrow(tunes) > 0) {
 
               keeps <- c("algo", "spatial", "tune_args", "tunes"
                          , "fc", "rm", "treshold", "trees", "nodesize"
                          )
+
+              metrics_df <- metrics_df %>%
+                dplyr::mutate(summary_mets = metric %in% use_metrics)
 
               ## model stats-----
               stats <- if(any(!metrics_df$is_thresh[metrics_df$summary_mets])) {

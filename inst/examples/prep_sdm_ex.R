@@ -47,36 +47,40 @@
   dens_ras <- terra::rast(fs::path(data$out_dir[[2]], "density.tif")) * land %>%
     terra::trim()
 
-  m <- tm_shape(land) +
-    tm_raster() +
-    tm_shape(dens_ras) +
-    tm_raster(title = "Presence density"
-              , drop.levels = TRUE
-              ) +
-    tm_legend(outside = TRUE) +
-    tm_compass() +
-    tm_scale_bar() +
-    tm_layout(main.title = paste0("Prep for ",  prep_ex$inputs$this_taxa))
+  if(require("tmap")) {
 
-  m
+    m <- tm_shape(land) +
+      tm_raster() +
+      tm_shape(dens_ras) +
+      tm_raster(title = "Presence density"
+                , drop.levels = TRUE
+                ) +
+      tm_legend(outside = TRUE) +
+      tm_compass() +
+      tm_scale_bar() +
+      tm_layout(main.title = paste0("Prep for ",  prep_ex$inputs$this_taxa))
 
-  # Spatial blocks
-  head(prep_ex$blocks)
+    m
 
-  blocks <- prep_ex$blocks %>%
-    dplyr::mutate(blocks = factor(block)) %>% # for map
-    sf::st_as_sf(coords = c("x", "y")
-                 , crs = sf::st_crs(terra::rast(env_dat[[1]]))
-                 )
+    # Spatial blocks
+    head(prep_ex$blocks)
 
-  presences <- blocks %>%
-    dplyr::filter(pa == 1)
+    blocks <- prep_ex$blocks %>%
+      dplyr::mutate(blocks = factor(block)) %>% # for map
+      sf::st_as_sf(coords = c("x", "y")
+                   , crs = sf::st_crs(terra::rast(env_dat[[1]]))
+                   )
 
-  m +
-    tm_shape(blocks) +
-      tm_dots(col = "block"
-              , palette = "viridis"
-              , title = "Blocks"
-              ) +
-    tm_shape(presences) +
-      tm_dots(col = "red")
+    presences <- blocks %>%
+      dplyr::filter(pa == 1)
+
+    m +
+      tm_shape(blocks) +
+        tm_dots(col = "block"
+                , palette = "viridis"
+                , title = "Blocks"
+                ) +
+      tm_shape(presences) +
+        tm_dots(col = "red")
+
+  }

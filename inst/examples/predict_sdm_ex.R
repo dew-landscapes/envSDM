@@ -1,8 +1,13 @@
 
+  # setup -------
   library("envSDM")
 
-  out_dir <- file.path(system.file(package = "envSDM"), "examples")
+  in_dir <- file.path(system.file(package = "envSDM"), "examples")
 
+  env_dat <- system.file("ex/bio.tif", package = "predicts")
+
+
+  # data ------
   data <- file.path(system.file(package = "predicts"), "ex") |>
     fs::dir_ls(regexp = "\\.csv$") |>
     tibble::enframe(name = NULL, value = "path") |>
@@ -14,21 +19,21 @@
                                                           , !is.na(lon)
                                                           )
                                           )
-                  , out_dir = fs::path(out_dir, taxa)
+                  , out_dir = fs::path(in_dir, taxa)
                   )
 
-  # Run a single model using all the data from the 'best' tune
+  # Best combo--------
+  ## full model --------
   purrr::pwalk(list(data$out_dir)
                  , \(a) run_full_sdm(out_dir = a
                                      , metrics_df = envSDM::sdm_metrics
                                      )
                  )
 
-  env_dat <- system.file("ex/bio.tif", package = "predicts")
 
-  # Predict from the best model
+  ## predict -------
   purrr::pwalk(list(data$out_dir)
-               , \(a) predict_sdm(out_dir = fs::path(a, "best")
+               , \(a) predict_sdm(in_dir = fs::path(a, "combo")
                                   , predictors = env_dat
                                   , is_env_pred = FALSE
                                   , limit_to_mcp = TRUE
@@ -36,7 +41,7 @@
                                   )
                )
 
-  # make .png for each predict
+  ## .pngs -------
   purrr::walk(data$out_dir
               , \(x) png_from_preds(x
                                     , recurse = 1
@@ -44,21 +49,62 @@
                                     )
               )
 
-  # example plots
-
-  # masked to mcp
+  ## visualise-------
+  ### mask -------
   purrr::walk(data$out_dir
-              , \(x) fs::path(x, "best", "mask.tif") %>%
+              , \(x) fs::path(x, "combo", "mask.tif") %>%
                 terra::rast() %>%
                 terra::trim() %>%
                 terra::plot()
               )
 
-  # threshold
+  ### threshold ------
   purrr::walk(data$out_dir
-              , \(x) fs::path(x, "best", "thresh.tif") %>%
+              , \(x) fs::path(x, "combo", "thresh.tif") %>%
                 terra::rast() %>%
                 terra::trim() %>%
                 terra::plot()
               )
+
+  # Best auc--------
+  ## full model --------
+  purrr::pwalk(list(data$out_dir)
+                 , \(a) run_full_sdm(out_dir = a
+                                     , metrics_df = envSDM::sdm_metrics
+                                     , metric = "auc_po"
+                                     , save_to = fs::path(a, "auc_po")
+                                     )
+                 )
+
+
+  ## predict -------
+  purrr::pwalk(list(data$out_dir)
+               , \(a) predict_sdm(in_dir = fs::path(a, "auc_po")
+                                  , predictors = env_dat
+                                  , is_env_pred = FALSE
+                                  , limit_to_mcp = TRUE
+                                  , check_tifs = TRUE
+                                  )
+               )
+
+
+  ## visualise-------
+  ### mask -------
+  purrr::walk(data$out_dir
+              , \(x) fs::path(x, "auc_po", "mask.tif") %>%
+                terra::rast() %>%
+                terra::trim() %>%
+                terra::plot()
+              )
+
+  ### threshold ------
+  purrr::walk(data$out_dir
+              , \(x) fs::path(x, "auc_po", "thresh.tif") %>%
+                terra::rast() %>%
+                terra::trim() %>%
+                terra::plot()
+              )
+
+
+
 

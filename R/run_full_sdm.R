@@ -5,9 +5,10 @@
 #' this will be `basename(dirname(out_dir))`.
 #' @param out_dir Character. Name of directory containing previous tunes and
 #' into which results will be saved.
-#' @param tune_args List with element `algo` and elements: `fc`, `rm`, `trees`,
-#' `mtry` and `nodesize` as appropriate to the `algo.` If supplied as `NULL` an
-#' attempt will be made to load 'best' tune from `evaluation.csv` in `out_dir`
+#' @param use_metric Character. Which metric to use to find the 'best' tune
+#' arguments from previous tuning results? Default is `combo`, the product of
+#' `auc_po`, `CBI_rescale` and `IMAE`. `use_metric` must be `combo` or have been
+#'  used in the use_metrics argument to `tune_sdm()`.
 #' @param force_new Logical. If outputs already exist, should they be remade?
 #' @param do_gc Logical. Run `base::rm(list = ls)` and `base::gc()` at end of
 #' function? Useful when running SDMs for many, many taxa, especially if done in
@@ -25,9 +26,9 @@
 #' @examples inst/examples/predict_sdm_ex.R
   run_full_sdm <- function(this_taxa = NULL
                            , out_dir
-                           , tune_args = NULL
+                           , metric = "combo"
                            , force_new = FALSE
-                           , save_to = fs::path(out_dir, "best")
+                           , save_to = fs::path(out_dir, metric)
                            , do_gc = FALSE
                            , ...
                            ) {
@@ -65,23 +66,18 @@
 
         # start timer ------
         full_sdm_timer <- envFunc::timer(process = "full SDM start"
-                            , file = "full"
-                            , time_df = NULL
-                            , log = full_sdm_log
-                            , write_log = TRUE
-                            )
+                                         , file = "full"
+                                         , time_df = NULL
+                                         , log = full_sdm_log
+                                         , write_log = TRUE
+                                         )
 
-        # deal with tune_args
-        if(is.null(tune_args)) {
-
-          message("assuming 'best' run and attempting to load best tune args")
-
-          tune_args <- rio::import(fs::path(out_dir, "evaluation.csv")
-                                   , setclass = "tibble"
-                                   ) %>%
-            dplyr::filter(best)
-
-        }
+        # tune_args------
+        tune_args <- rio::import(fs::path(out_dir, "evaluation.csv")
+                                 , setclass = "tibble"
+                                 ) %>%
+          dplyr::mutate(filter_col = !!rlang::ensym(metric)) %>%
+          dplyr::filter(filter_col == max(filter_col))
 
         if(length(tune_args)) {
 
@@ -102,8 +98,8 @@
                    )
 
           full_sdm_timer <- envFunc::timer("full SDM end"
-                            , time_df = full_sdm_timer
-                            )
+                                           , time_df = full_sdm_timer
+                                           )
 
           if(do_gc) {
 
@@ -116,13 +112,13 @@
         } else {
 
           full_sdm_timer <- envFunc::timer("warning"
-                              , notes = "No tune results found"
-                              , time_df = full_sdm_timer
-                              )
+                                           , notes = "No tune results found"
+                                           , time_df = full_sdm_timer
+                                           )
 
           full_sdm_timer <- envFunc::timer("full sdm end"
-                                  , timer_df = full_sdm_timer
-                                  )
+                                           , timer_df = full_sdm_timer
+                                           )
 
         }
 
