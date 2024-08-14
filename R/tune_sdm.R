@@ -80,9 +80,9 @@
     ## new
     tune_file <- fs::path(save_to, "tune.rds")
 
-    eval_file <- fs::path(out_dir
+    eval_file <- fs::path(save_to
                           , "evaluation.csv"
-                          ) # eval_file is always in taxa folder, not save_to folder
+                          )
 
     tune_log <- fs::path(save_to
                          , "tune.log"
@@ -525,7 +525,7 @@
 
           }
 
-          if(is.null(metrics_df)) warning("Can't find best model without metrics_df") else {
+          if(is.null(metrics_df)) stop("Can't find best model without metrics_df") else {
 
             if(nrow(tunes) > 0) {
 
