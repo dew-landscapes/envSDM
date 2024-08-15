@@ -135,11 +135,15 @@
                          , setclass = "tibble"
                          )
 
-      if(copy_tune) {
+      if(out_dir != in_dir) {
 
-        rio::export(mod
-                    , fs::path(out_dir, "tune.rds")
-                    )
+        if(copy_tune) {
+
+          rio::export(mod
+                      , fs::path(out_dir, "tune.rds")
+                      )
+
+        }
 
       }
 
