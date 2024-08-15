@@ -32,6 +32,9 @@
 #' @param check_tifs Logical. Check if any output `.tif` files error on
 #' `terra::rast()` and delete them if they do. Useful after a crash during
 #' predict.
+#' @param copy_tune Logical. If in_dir != out_dir, should the `tune.rds` file
+#' in `in_dir` be copied to `out_dir`. Can be useful for creating .pngs
+#' populated with SDM metrics (see `png_from_tif()`).
 #' @param ... Not used.
 #'
 #' @return `invisible(NULL)`. Output .tif, .log, and optional .png, written to
@@ -52,6 +55,7 @@
                           , force_new = FALSE
                           , do_gc = FALSE
                           , check_tifs = TRUE
+                          , copy_tune = TRUE
                           , ...
                           ) {
 
@@ -130,6 +134,14 @@
       mod <- rio::import(fs::path(in_dir, "tune.rds")
                          , setclass = "tibble"
                          )
+
+      if(copy_tune) {
+
+        rio::export(mod
+                    , fs::path(out_dir, "tune.rds")
+                    )
+
+      }
 
       ## limit -----
       if(!exists("predict_boundary", where = prep)) {
