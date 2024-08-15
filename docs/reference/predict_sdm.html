@@ -61,6 +61,7 @@
 <span>  force_new <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  do_gc <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  check_tifs <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  copy_tune <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -132,6 +133,12 @@ especially if done in parallel.</p></dd>
 <dd><p>Logical. Check if any output `.tif` files error on
 `terra::rast()` and delete them if they do. Useful after a crash during
 predict.</p></dd>
+
+
+<dt>copy_tune</dt>
+<dd><p>Logical. If in_dir != out_dir, should the `tune.rds` file
+in `in_dir` be copied to `out_dir`. Can be useful for creating .pngs
+populated with SDM metrics (see `png_from_tif()`).</p></dd>
 
 
 <dt>...</dt>
