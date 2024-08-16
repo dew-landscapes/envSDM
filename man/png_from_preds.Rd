@@ -5,23 +5,24 @@
 \title{Generate .png (map) files for each prediction}
 \usage{
 png_from_preds(
-  dir,
+  pred_dir,
+  tune_dir = NULL,
   trim = TRUE,
   force_new = FALSE,
-  include_blocks = TRUE,
   do_gc = TRUE,
   ...
 )
 }
 \arguments{
-\item{dir}{Character. Name of directory containing predicted .tif(s) to
+\item{pred_dir}{Character. Name of directory containing predicted .tif(s) to
 save as .png}
+
+\item{tune_dir}{Character. Name of directory containing the tune results used
+to make the predictions in pred_dir.}
 
 \item{trim}{Logical. Trim NA values from outside (using `terra::trim()`)}
 
 \item{force_new}{Logical. If .png file already exists, recreate it?}
-
-\item{include_blocks}{Logical. Make a .png (map) of the blocks?}
 
 \item{do_gc}{Logical. Run `base::rm(list = ls)` and `base::gc()` at end of
 function? Useful when running SDMs for many, many taxa, especially if done in
@@ -34,7 +35,7 @@ parallel.}
 .tif files
 }
 \description{
-Finds any .tif files in `dir` and writes them to .png files. Includes the
+Finds any .tif files in `pred_dir` and writes them to .png files. Includes the
 retrieval and addition to the map of: various SDM metrics; and the original
 presence points.
 }
@@ -84,7 +85,7 @@ presence points.
   purrr::walk(data$out_dir
               , \(x) png_from_preds(x
                                     , recurse = 1
-                                    , include_blocks = FALSE
+                                    , force_new = TRUE
                                     )
               )
 

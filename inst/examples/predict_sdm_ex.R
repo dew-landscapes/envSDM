@@ -43,7 +43,7 @@
   purrr::walk(data$out_dir
               , \(x) png_from_preds(x
                                     , recurse = 1
-                                    , include_blocks = FALSE
+                                    , force_new = TRUE
                                     )
               )
 
