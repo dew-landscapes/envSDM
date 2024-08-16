@@ -81,11 +81,11 @@ png_from_preds <- function(pred_dir
                            , recs
                            ) {
 
-        text <- paste0("'best' "
+        text <- paste0("'best' tune arguments with "
                        , basename(dirname(tif))
+                       , " metric:"
                         , "\n"
-                        , paste0("tune args: "
-                                 , tune_args
+                        , paste0(tune_args
                                  , ". "
                                  )
                         , paste0("auc_po: "
@@ -110,14 +110,18 @@ png_from_preds <- function(pred_dir
         title <- basename(dirname(dirname(terra::sources(ras))))
 
         m <- tmap::tm_shape(ras) +
-          tmap::tm_raster(title = title) +
+          tmap::tm_raster() +
           tmap::tm_shape(recs) +
           tmap::tm_dots(alpha = 0.5) +
           tmap::tm_credits(text = text
-                           , position = c("left", "bottom")
+                           , bg.color = "grey"
+                           , bg.alpha = 0.5
                            ) +
-          tmap::tm_compass() +
-          tmap::tm_scale_bar()
+          tmap::tm_graticules() +
+          tmap::tm_layout(title = title
+                          , legend.bg.color = "grey"
+                          , legend.bg.alpha = 0.2
+                          )
 
         tmap::tmap_save(m
                         , png

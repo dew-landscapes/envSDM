@@ -148,27 +148,51 @@ parallel.</p></dd>
 <span class="r-in"><span>               <span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>  <span class="co">## .pngs -------</span></span></span>
-<span class="r-in"><span>  <span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">walk</a></span><span class="op">(</span><span class="va">data</span><span class="op">$</span><span class="va">out_dir</span></span></span>
-<span class="r-in"><span>              , \<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu">png_from_preds</span><span class="op">(</span><span class="va">x</span></span></span>
-<span class="r-in"><span>                                    , recurse <span class="op">=</span> <span class="fl">1</span></span></span>
-<span class="r-in"><span>                                    , force_new <span class="op">=</span> <span class="cn">TRUE</span></span></span>
-<span class="r-in"><span>                                    <span class="op">)</span></span></span>
-<span class="r-in"><span>              <span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Scale bar set for latitude km and will be different at the top and bottom of the map.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Map saved to H:\temp\nige\RtmpUJIl6h\temp_libpath371812172f1d\envSDM\examples\acaule\auc_po\full.png</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Resolution: 2051.308 by 2149.848 pixels</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Size: 6.837694 by 7.166158 inches (300 dpi)</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Scale bar set for latitude km and will be different at the top and bottom of the map.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Map saved to H:\temp\nige\RtmpUJIl6h\temp_libpath371812172f1d\envSDM\examples\acaule\auc_po\mask.png</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Resolution: 1694.775 by 2602.116 pixels</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Size: 5.649248 by 8.67372 inches (300 dpi)</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in map(.x, .f, ..., .progress = .progress):</span> <span style="color: #00BBBB;">ℹ</span> In index: 1.</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Caused by error in `pmap()`:</span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> In index: 3.</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> With name:</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>   H:/temp/nige/RtmpUJIl6h/temp_libpath371812172f1d/envSDM/examples/acaule/auc_po/thresh.tif.</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Caused by error in `if (any(na.omit(x) &lt; min(breaks)) &amp;&amp; show.warnings) ...`:</span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">!</span> missing value where TRUE/FALSE needed</span>
+<span class="r-in"><span>  <span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://purrr.tidyverse.org/reference/map2.html" class="external-link">walk2</a></span><span class="op">(</span><span class="va">data</span><span class="op">$</span><span class="va">out_dir</span></span></span>
+<span class="r-in"><span>               , <span class="va">data</span><span class="op">$</span><span class="va">out_dir</span></span></span>
+<span class="r-in"><span>               , \<span class="op">(</span><span class="va">x</span>, <span class="va">y</span><span class="op">)</span> <span class="fu">png_from_preds</span><span class="op">(</span>pred_dir <span class="op">=</span> <span class="va">x</span></span></span>
+<span class="r-in"><span>                                        , tune_dir <span class="op">=</span> <span class="va">y</span></span></span>
+<span class="r-in"><span>                                        , trim <span class="op">=</span> <span class="cn">FALSE</span></span></span>
+<span class="r-in"><span>                                        , force_new <span class="op">=</span> <span class="cn">TRUE</span></span></span>
+<span class="r-in"><span>                                        , recurse <span class="op">=</span> <span class="fl">1</span></span></span>
+<span class="r-in"><span>                                        <span class="op">)</span></span></span>
+<span class="r-in"><span>               <span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Map saved to H:\temp\nige\RtmpE5trBi\temp_libpath33e04d2a7754\envSDM\examples\acaule\auc_po\full.png</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Resolution: 2056.845 by 2144.061 pixels</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Size: 6.85615 by 7.146869 inches (300 dpi)</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Map saved to H:\temp\nige\RtmpE5trBi\temp_libpath33e04d2a7754\envSDM\examples\acaule\auc_po\mask.png</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Resolution: 2056.845 by 2144.061 pixels</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Size: 6.85615 by 7.146869 inches (300 dpi)</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Map saved to H:\temp\nige\RtmpE5trBi\temp_libpath33e04d2a7754\envSDM\examples\acaule\auc_po\thresh.png</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Resolution: 2056.845 by 2144.061 pixels</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Size: 6.85615 by 7.146869 inches (300 dpi)</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Map saved to H:\temp\nige\RtmpE5trBi\temp_libpath33e04d2a7754\envSDM\examples\acaule\combo\full.png</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Resolution: 2056.845 by 2144.061 pixels</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Size: 6.85615 by 7.146869 inches (300 dpi)</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Map saved to H:\temp\nige\RtmpE5trBi\temp_libpath33e04d2a7754\envSDM\examples\acaule\combo\mask.png</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Resolution: 2056.845 by 2144.061 pixels</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Size: 6.85615 by 7.146869 inches (300 dpi)</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Map saved to H:\temp\nige\RtmpE5trBi\temp_libpath33e04d2a7754\envSDM\examples\acaule\combo\thresh.png</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Resolution: 2056.845 by 2144.061 pixels</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Size: 6.85615 by 7.146869 inches (300 dpi)</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Map saved to H:\temp\nige\RtmpE5trBi\temp_libpath33e04d2a7754\envSDM\examples\bradypus\auc_po\full.png</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Resolution: 2056.845 by 2144.061 pixels</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Size: 6.85615 by 7.146869 inches (300 dpi)</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Map saved to H:\temp\nige\RtmpE5trBi\temp_libpath33e04d2a7754\envSDM\examples\bradypus\auc_po\mask.png</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Resolution: 2056.845 by 2144.061 pixels</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Size: 6.85615 by 7.146869 inches (300 dpi)</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Map saved to H:\temp\nige\RtmpE5trBi\temp_libpath33e04d2a7754\envSDM\examples\bradypus\auc_po\thresh.png</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Resolution: 2056.845 by 2144.061 pixels</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Size: 6.85615 by 7.146869 inches (300 dpi)</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Map saved to H:\temp\nige\RtmpE5trBi\temp_libpath33e04d2a7754\envSDM\examples\bradypus\combo\full.png</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Resolution: 2056.845 by 2144.061 pixels</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Size: 6.85615 by 7.146869 inches (300 dpi)</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Map saved to H:\temp\nige\RtmpE5trBi\temp_libpath33e04d2a7754\envSDM\examples\bradypus\combo\mask.png</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Resolution: 2056.845 by 2144.061 pixels</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Size: 6.85615 by 7.146869 inches (300 dpi)</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Map saved to H:\temp\nige\RtmpE5trBi\temp_libpath33e04d2a7754\envSDM\examples\bradypus\combo\thresh.png</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Resolution: 2056.845 by 2144.061 pixels</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Size: 6.85615 by 7.146869 inches (300 dpi)</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>  <span class="co">## visualise-------</span></span></span>
 <span class="r-in"><span>  <span class="co">### mask -------</span></span></span>
@@ -178,6 +202,8 @@ parallel.</p></dd>
 <span class="r-in"><span>                <span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rspatial.github.io/terra/reference/trim.html" class="external-link">trim</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
 <span class="r-in"><span>                <span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rspatial.github.io/terra/reference/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-in"><span>              <span class="op">)</span></span></span>
+<span class="r-plt img"><img src="png_from_preds-1.png" alt="" width="700" height="433"></span>
+<span class="r-plt img"><img src="png_from_preds-2.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>  <span class="co">### threshold ------</span></span></span>
 <span class="r-in"><span>  <span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">walk</a></span><span class="op">(</span><span class="va">data</span><span class="op">$</span><span class="va">out_dir</span></span></span>
@@ -186,6 +212,8 @@ parallel.</p></dd>
 <span class="r-in"><span>                <span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rspatial.github.io/terra/reference/trim.html" class="external-link">trim</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
 <span class="r-in"><span>                <span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rspatial.github.io/terra/reference/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-in"><span>              <span class="op">)</span></span></span>
+<span class="r-plt img"><img src="png_from_preds-3.png" alt="" width="700" height="433"></span>
+<span class="r-plt img"><img src="png_from_preds-4.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>  <span class="co"># Best auc--------</span></span></span>
 <span class="r-in"><span>  <span class="co">## run full SDM --------</span></span></span>
@@ -219,6 +247,8 @@ parallel.</p></dd>
 <span class="r-in"><span>                <span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rspatial.github.io/terra/reference/trim.html" class="external-link">trim</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
 <span class="r-in"><span>                <span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rspatial.github.io/terra/reference/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-in"><span>              <span class="op">)</span></span></span>
+<span class="r-plt img"><img src="png_from_preds-5.png" alt="" width="700" height="433"></span>
+<span class="r-plt img"><img src="png_from_preds-6.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>  <span class="co">### threshold ------</span></span></span>
 <span class="r-in"><span>  <span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">walk</a></span><span class="op">(</span><span class="va">data</span><span class="op">$</span><span class="va">out_dir</span></span></span>
@@ -227,6 +257,8 @@ parallel.</p></dd>
 <span class="r-in"><span>                <span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rspatial.github.io/terra/reference/trim.html" class="external-link">trim</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
 <span class="r-in"><span>                <span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rspatial.github.io/terra/reference/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-in"><span>              <span class="op">)</span></span></span>
+<span class="r-plt img"><img src="png_from_preds-7.png" alt="" width="700" height="433"></span>
+<span class="r-plt img"><img src="png_from_preds-8.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span></span></span>

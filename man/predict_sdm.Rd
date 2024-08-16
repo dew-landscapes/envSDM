@@ -116,12 +116,15 @@ Predict from  SDM
                )
 
   ## .pngs -------
-  purrr::walk(data$out_dir
-              , \(x) png_from_preds(x
-                                    , recurse = 1
-                                    , force_new = TRUE
-                                    )
-              )
+  purrr::walk2(data$out_dir
+               , data$out_dir
+               , \(x, y) png_from_preds(pred_dir = x
+                                        , tune_dir = y
+                                        , trim = FALSE
+                                        , force_new = TRUE
+                                        , recurse = 1
+                                        )
+               )
 
   ## visualise-------
   ### mask -------
