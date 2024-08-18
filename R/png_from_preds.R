@@ -30,10 +30,23 @@ png_from_preds <- function(pred_dir
 
   if(is.null(tune_dir)) tune_dir = pred_dir
 
-  tifs <- fs::dir_ls(pred_dir
-                     , regexp = "tif$"
-                     , ...
-                     )
+  if(dir.exists(pred_dir)) {
+
+    tifs <- fs::dir_ls(pred_dir
+                       , regexp = "tif$"
+                       , ...
+                       )
+
+  } else {
+
+    tifs <- NULL
+
+    mes <- paste0("The directory: "
+                  , pred_dir
+                  , " does not exist"
+                  )
+
+  }
 
   if(length(tifs)) {
 
@@ -148,6 +161,12 @@ png_from_preds <- function(pred_dir
                    )
 
     }
+
+  } else {
+
+    if(! exists("mes")) mes <- paste0("No tifs found in ", pred_dir)
+
+    message(mes)
 
   }
 
