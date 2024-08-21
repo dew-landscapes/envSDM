@@ -40,14 +40,13 @@
 #' trouble with model predictions into these areas.
 #' @param use_cuts Numeric. Used to set number of thresholds in `samp_df`. See
 #' `envSDM::density_sample()`.
+#' @param min_dens_prop_max Numeric. Within the sampling dataframe returned from
+#' as `prep$samp_df`, if the proportion of maximum density falls
+#' below this value, the next lowest density is applied.
 #' @param dens_res `NULL` or numeric. Resolution (in metres) of density raster.
 #' Set to `NULL` to use the same resolution as the predictors.
 #' @param max_samp_iter Numeric. Passed to max_sample argument of
 #' `envSDM::density_sample()`.
-#' @param low_boost Numeric. Divisor for the lowest density cf the 2nd lowest
-#' density. If the lowest density falls below this value, extra background
-#' points are added. Helps to stop predicting high probabilities into areas with
-#' very few background points.
 #' @param save_pngs Logical. Save out a .png of the density raster and spatial
 #' blocks
 #' @param remove_corr Logical. If TRUE, predictors with high correlation
@@ -83,9 +82,9 @@
                        , min_fold_n = 8
                        , min_dens = 0.1
                        , use_cuts = 100
+                       , min_dens_prop_max = 0.01
                        , dens_res = 1000
                        , max_samp_iter = 1000
-                       , low_boost = FALSE
                        , save_pngs = TRUE
                        , remove_corr = TRUE
                        , corr_thresh = 0.9
@@ -293,7 +292,7 @@
 
             temp_ras <- terra::rast(resolution = use_res
                                     , crs = terra::crs(predictors[[1]])
-                                    , extent = terra::ext(predictors[[1]])
+                                    , extent = terra::ext(prep$predict_boundary)
                                     , vals = 1
                                     )
 
@@ -319,15 +318,21 @@
             # weighted bandwidth
             ## same method as spatialEco::sf.kde
 
+            temp_ras <- terra::rast(resolution = terra::res(predictors)
+                                    , crs = terra::crs(predictors[[1]])
+                                    , extent = terra::ext(prep$predict_boundary)
+                                    , vals = 1
+                                    )
+
             pres_ras <- terra::rasterize(prep$original %>%
-                                         sf::st_as_sf(coords = c(pres_x, pres_y)
-                                                      , crs = pres_crs
-                                                      ) %>%
-                                         sf::st_transform(sf::st_crs(predictors[[1]]))
-                                       , y = predictors[[1]]
-                                       , fun = length
-                                       , touches = TRUE
-                                       )
+                                           sf::st_as_sf(coords = c(pres_x, pres_y)
+                                                        , crs = pres_crs
+                                                        ) %>%
+                                           sf::st_transform(sf::st_crs(predictors[[1]]))
+                                         , y = temp_ras
+                                         , fun = length
+                                         , touches = TRUE
+                                         )
 
             pres <- terra::as.data.frame(pres_ras, xy = TRUE) %>%
               tibble::as_tibble()
@@ -391,14 +396,17 @@
 
 
           # reclass helps deterimine 'expected' points per 'zone'
-          rcl <- tibble::tibble(from = utils::head(seq(0, 1, length.out = use_cuts + 1), -1)
-                                , to = utils::tail(seq(min_dens, 1, length.out = use_cuts + 1), -1)
+          rcl <- tibble::tibble(from = head(seq(min_dens, 1, length.out = use_cuts + 1), -1)
+                                , to = tail(seq(min_dens, 1, length.out = use_cuts + 1), -1)
                                 ) %>%
-            dplyr::mutate(value = to) %>%
+            dplyr::mutate(from = dplyr::if_else(from == min(from), -1, from)
+                          , value = to
+                          ) %>%
             as.matrix()
 
+
           target_density <- target_density %>%
-            terra::stretch(min_dens, 1) %>%
+            terra::stretch(0, 1) %>%
             terra::classify(rcl)
 
           if(FALSE) terra::plot(target_density)
@@ -438,37 +446,31 @@
           }
 
           # used in the calculation of expected points per zone
-          divisor <- num_bg / (sum(unique(terra::values(target_density)), na.rm = TRUE) * num_bg)
+          divisor <- 1 / sum(unique(terra::values(target_density)), na.rm = TRUE)
 
 
           ## samp_df -------
 
-          point_density <- function(x, samp_df, low_boost) {
+          point_density <- function(x, samp_df, min_dens_prop_max) {
 
             d <- samp_df %>%
-              dplyr::mutate(ha = purrr::map2_dbl(from
-                                                , to
-                                                , \(a, b) sum(terra::values(x) > a & terra::values(x) <= b, na.rm = TRUE) *
-                                                  terra::res(x)[[1]] *
-                                                  terra::res(x)[[2]] /
-                                                  10000
-                                               )
-                            , density = target / ha
+              dplyr::mutate(cells = purrr::map2_dbl(from
+                                                    , to
+                                                    , \(a, b) terra::global(x > a & x <= b, sum, na.rm = TRUE)[1,1]
+                                                    )
+                            , density = target / cells
                             , original_target = target
-                            )
+                            #, target = dplyr::if_else(target > cells, cells, target)
+                            ) %>%
+              dplyr::filter(cells > 0)
+
 
             # low_boost ------
-            if(low_boost) {
+            if(any(d$density < min_dens_prop_max)) {
 
-              old <- d$target[[1]]
+              d$density[d$density / max(d$density) < min_dens_prop_max] <- max(d$density) * min_dens_prop_max
 
-              d$target[[1]] <- round(d$ha[[1]] * d$density[[2]] / low_boost)
-
-              if(d$target[[1]] < old) d$target[[1]] <- old
-
-              if(d$target[[1]] > num_bg) d$target[[1]] <- num_bg
-
-              d$density[[1]] <- d$target[[1]] / d$ha[[1]]
+              d$target <- ceiling(d$density * d$cells)
 
             }
 
@@ -478,19 +480,22 @@
 
           prep$samp_df <- tibble::as_tibble(rcl) %>%
             dplyr::mutate(target = round(num_bg * value * divisor, 0)) %>%
-            point_density(target_density, ., low_boost)
+            point_density(target_density, ., min_dens_prop_max)
 
           rio::export(prep
                       , prep_file
                       )
 
+          low_boost <- any(prep$samp_df$target > prep$samp_df$original_target)
+
           prep$timer <- envFunc::timer("density"
-                              , notes = if(low_boost) paste0("low boost = "
-                                                             , low_boost
-                                                             , ". This took the number of sites in the minimum density area from "
-                                                             , prep$samp_df[1, "original_target"]
+                              , notes = if(low_boost) paste0("min_dens_prop_max = "
+                                                             , min_dens_prop_max
+                                                             , ". This took the total number of background points "
+                                                             , "from "
+                                                             , num_bg
                                                              , " to "
-                                                             , prep$samp_df[1, "target"]
+                                                             , sum(prep$samp_df$target)
                                                              )
                               , time_df = prep$timer
                               , write_log = TRUE
