@@ -62,6 +62,7 @@
                   , cex = 0.5
                   , col = scales::alpha("blue", 0.5)
                   , add = TRUE
+                  , range = c(0, 1)
                   )
 
     }
