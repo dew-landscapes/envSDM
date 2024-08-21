@@ -460,7 +460,7 @@
                                                     )
                             , density = target / cells
                             , original_target = target
-                            #, target = dplyr::if_else(target > cells, cells, target)
+                            , target = dplyr::if_else(target > cells, cells, target)
                             ) %>%
               dplyr::filter(cells > 0)
 
