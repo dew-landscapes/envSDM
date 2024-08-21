@@ -31,7 +31,7 @@
                                             , pred_limit = TRUE
                                             , limit_buffer = 10000
                                             , dens_res = 1000 # ignored as decimal degrees preds
-                                            , use_ecdf = TRUE
+                                            , use_ecdf = FALSE
                                             )
                )
 
