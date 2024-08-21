@@ -11,7 +11,11 @@ Authors@R:
     person(given = "Nigel",
            family = "Willoughby",
            role = c("aut", "cre"),
-           email = "nigel.willoughby@sa.gov.au")
+           email = "nigel.willoughby@sa.gov.au"),
+    person(given = "Joel",
+            familiy = "Allan",
+            role = c("aut"),
+            email = "joel.allan@sa.gov.au")
     )
 Description: The goal of envSDM is to help automate the creation, validation,
     and prediction of species distribution models (SDMs). For each taxa the
