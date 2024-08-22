@@ -70,9 +70,9 @@
 <span>  min_fold_n <span class="op">=</span> <span class="fl">8</span>,</span>
 <span>  min_dens <span class="op">=</span> <span class="fl">0.1</span>,</span>
 <span>  use_cuts <span class="op">=</span> <span class="fl">100</span>,</span>
+<span>  min_dens_prop_max <span class="op">=</span> <span class="fl">0.01</span>,</span>
 <span>  dens_res <span class="op">=</span> <span class="fl">1000</span>,</span>
 <span>  max_samp_iter <span class="op">=</span> <span class="fl">1000</span>,</span>
-<span>  low_boost <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  save_pngs <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  remove_corr <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  corr_thresh <span class="op">=</span> <span class="fl">0.9</span>,</span>
@@ -179,6 +179,12 @@ trouble with model predictions into these areas.</p></dd>
 `envSDM::density_sample()`.</p></dd>
 
 
+<dt>min_dens_prop_max</dt>
+<dd><p>Numeric. Within the sampling dataframe returned from
+as `prep$samp_df`, if the proportion of maximum density falls
+below this value, the next lowest density is applied.</p></dd>
+
+
 <dt>dens_res</dt>
 <dd><p>`NULL` or numeric. Resolution (in metres) of density raster.
 Set to `NULL` to use the same resolution as the predictors.</p></dd>
@@ -187,13 +193,6 @@ Set to `NULL` to use the same resolution as the predictors.</p></dd>
 <dt>max_samp_iter</dt>
 <dd><p>Numeric. Passed to max_sample argument of
 `envSDM::density_sample()`.</p></dd>
-
-
-<dt>low_boost</dt>
-<dd><p>Numeric. Divisor for the lowest density cf the 2nd lowest
-density. If the lowest density falls below this value, extra background
-points are added. Helps to stop predicting high probabilities into areas with
-very few background points.</p></dd>
 
 
 <dt>save_pngs</dt>
@@ -262,7 +261,7 @@ parallel.</p></dd>
 <span class="r-in"><span>                                            , pred_limit <span class="op">=</span> <span class="cn">TRUE</span></span></span>
 <span class="r-in"><span>                                            , limit_buffer <span class="op">=</span> <span class="fl">10000</span></span></span>
 <span class="r-in"><span>                                            , dens_res <span class="op">=</span> <span class="fl">1000</span> <span class="co"># ignored as decimal degrees preds</span></span></span>
-<span class="r-in"><span>                                            , use_ecdf <span class="op">=</span> <span class="cn">TRUE</span></span></span>
+<span class="r-in"><span>                                            , use_ecdf <span class="op">=</span> <span class="cn">FALSE</span></span></span>
 <span class="r-in"><span>                                            <span class="op">)</span></span></span>
 <span class="r-in"><span>               <span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
@@ -329,7 +328,7 @@ parallel.</p></dd>
 
 
     <footer><div class="pkgdown-footer-left">
-  <p></p><p>Developed by Stuart Brown, Nigel Willoughby.</p>
+  <p></p><p>Developed by Stuart Brown, Nigel Willoughby, Joel Allan.</p>
 </div>
 
 <div class="pkgdown-footer-right">

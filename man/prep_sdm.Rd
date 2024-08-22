@@ -26,9 +26,9 @@ prep_sdm(
   min_fold_n = 8,
   min_dens = 0.1,
   use_cuts = 100,
+  min_dens_prop_max = 0.01,
   dens_res = 1000,
   max_samp_iter = 1000,
-  low_boost = FALSE,
   save_pngs = TRUE,
   remove_corr = TRUE,
   corr_thresh = 0.9,
@@ -95,16 +95,15 @@ trouble with model predictions into these areas.}
 \item{use_cuts}{Numeric. Used to set number of thresholds in `samp_df`. See
 `envSDM::density_sample()`.}
 
+\item{min_dens_prop_max}{Numeric. Within the sampling dataframe returned from
+as `prep$samp_df`, if the proportion of maximum density falls
+below this value, the next lowest density is applied.}
+
 \item{dens_res}{`NULL` or numeric. Resolution (in metres) of density raster.
 Set to `NULL` to use the same resolution as the predictors.}
 
 \item{max_samp_iter}{Numeric. Passed to max_sample argument of
 `envSDM::density_sample()`.}
-
-\item{low_boost}{Numeric. Divisor for the lowest density cf the 2nd lowest
-density. If the lowest density falls below this value, extra background
-points are added. Helps to stop predicting high probabilities into areas with
-very few background points.}
 
 \item{save_pngs}{Logical. Save out a .png of the density raster and spatial
 blocks}
@@ -160,7 +159,7 @@ Prepare for running an SDM
                                             , pred_limit = TRUE
                                             , limit_buffer = 10000
                                             , dens_res = 1000 # ignored as decimal degrees preds
-                                            , use_ecdf = TRUE
+                                            , use_ecdf = FALSE
                                             )
                )
 
