@@ -197,6 +197,7 @@
               sf::st_union() %>%
               sf::st_convex_hull() %>%
               sf::st_as_sf() %>%
+              {if(limit_buffer > 0) (.) %>% sf::st_buffer(limit_buffer) else (.)} %>%
               sf::st_make_valid()
 
           }
@@ -209,14 +210,6 @@
           prep$predict_boundary <- sf::st_bbox(predictors) %>%
             sf::st_as_sfc() %>%
             sf::st_as_sf() %>%
-            sf::st_make_valid()
-
-        }
-
-        if(all(pred_limit, as.logical(limit_buffer))) {
-
-          prep$predict_boundary <- prep$predict_boundary %>%
-            sf::st_buffer(limit_buffer) %>%
             sf::st_make_valid()
 
         }
@@ -460,19 +453,21 @@
                                                     )
                             , density = target / cells
                             , original_target = target
+                            , original_density = density
                             , target = dplyr::if_else(target > cells, cells, target)
+                            , density = dplyr::case_when(density / max(density) < min_dens_prop_max ~ max(density) * min_dens_prop_max
+                                                         , TRUE ~ density
+                                                         )
+                            , low_boost_density = density
+                            , target = ceiling(density * cells)
+                            , low_boost_target = target
+                            , target = dplyr::case_when(target > num_bg ~ num_bg
+                                                        , target > cells ~ cells
+                                                        , TRUE ~ target
+                                                        )
+                            , density = target / cells
                             ) %>%
               dplyr::filter(cells > 0)
-
-
-            # low_boost ------
-            if(any(d$density < min_dens_prop_max)) {
-
-              d$density[d$density / max(d$density) < min_dens_prop_max] <- max(d$density) * min_dens_prop_max
-
-              d$target <- ceiling(d$density * d$cells)
-
-            }
 
             return(d)
 
