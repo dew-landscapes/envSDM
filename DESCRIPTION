@@ -13,7 +13,7 @@ Authors@R:
            role = c("aut", "cre"),
            email = "nigel.willoughby@sa.gov.au"),
     person(given = "Joel",
-            familiy = "Allan",
+            family = "Allan",
             role = c("aut"),
             email = "joel.allan@sa.gov.au")
     )
