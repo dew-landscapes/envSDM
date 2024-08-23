@@ -10,6 +10,9 @@
 #' `weights` argument of `terra::spatSample()` but does not have to be at the
 #' same resolution as `x`. Usually made within `prep_sdm()`
 #' @param samp_df Dataframe. Usually built by `prep_sdm()`
+#' @param boundary sf. Boundary within which to sample cells from `x`
+#' @param mult Numeric. In each iteration try sampling `mult` *
+#' `sum(samp_df$target)` points
 #' @param max_sample Numeric. How many iterations to try to meet the density
 #' targets in `samp_df`.
 #' @param verbose Logical. Prints how many iterations have been attempted.
@@ -21,13 +24,17 @@
   density_sample <- function(x
                              , dens_rast
                              , samp_df
+                             , boundary
+                             , mult = 2
                              , max_sample = 200
                              , verbose = FALSE
                              ) {
 
-    a_sample <- function(x, dens_rast, samp_df) {
+    cell_ids <- terra::cells(x, terra::vect(boundary))[,2]
 
-      sample(1:(terra::ncell(x)), sum(samp_df$target)) %>%
+    a_sample <- function(x, dens_rast, mult, samp_df) {
+
+      sample(cell_ids, sum(samp_df$target) * mult) %>%
         terra::xyFromCell(x, .) %>%
         as.data.frame %>%
         cbind(terra::extract(dens_rast, as.matrix(.))) %>%
@@ -37,14 +44,14 @@
 
     }
 
-    new <- a_sample(x, dens_rast, samp_df)
+    new <- a_sample(x, dens_rast, mult, samp_df)
 
     todo <- TRUE
     counter <- 1
 
     while(all(counter < max_sample, todo)) {
 
-      new <- rbind(new[,1:4], a_sample(x, dens_rast, samp_df)) %>%
+      new <- rbind(new[,1:4], a_sample(x, dens_rast, mult, samp_df)) %>%
         dplyr::add_count(value
                          , name = "n"
                          ) %>%

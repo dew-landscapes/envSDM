@@ -442,16 +442,20 @@
                                                     , \(a, b) terra::global(x > a & x <= b, sum, na.rm = TRUE)[1,1]
                                                     )
                             , pred_cells = floor(cells * x_cell_area / pred_cell_area)
+                            # original target density
                             , density = target / pred_cells
                             , original_target = target
                             , original_density = density
+                            # lower target if there are not enough pred cells
                             , target = dplyr::if_else(target > pred_cells, pred_cells, target)
+                            # boost target if it falls below min_dens_prop_max
                             , density = dplyr::case_when(density / max(density) < min_dens_prop_max ~ max(density) * min_dens_prop_max
                                                          , TRUE ~ density
                                                          )
                             , low_boost_density = density
                             , target = floor(density * pred_cells)
                             , low_boost_target = target
+                            # catch any that are moved above available cells or
                             , target = dplyr::case_when(target > num_bg ~ num_bg
                                                         , target > pred_cells ~ pred_cells
                                                         , TRUE ~ target
@@ -521,6 +525,7 @@
           prep$bg_points <- density_sample(x = predictors[[1]]
                                            , dens_rast = target_density
                                            , samp_df = prep$samp_df
+                                           , boundary = prep$predict_boundary
                                            , max_sample = max_samp_iter
                                            ) %>%
             sf::st_as_sf(coords = c("x", "y")
