@@ -421,23 +421,6 @@
           # make sure bg points are always at least 2 * presences
           if(num_bg < many_p_prop * nrow(prep$presence)) num_bg <- many_p_prop * nrow(prep$presence)
 
-          if(FALSE) {
-
-            # This doesn't improve anything as it still doesn't enable limiting each target density to the
-            # maximum number of cells available within that density range.
-            if(pred_limit) {
-
-              total_values <- terra::global(temp_ras
-                                            , fun = "sum"
-                                            , na.rm = TRUE
-                                            )[[1]]
-
-              if(total_values < num_bg) num_bg <- total_values
-
-            }
-
-          }
-
           # used in the calculation of expected points per zone
           divisor <- 1 / sum(unique(terra::values(target_density)), na.rm = TRUE)
 
@@ -446,26 +429,30 @@
 
           point_density <- function(x, samp_df, min_dens_prop_max) {
 
+            x_cell_area <- terra::res(x)[[1]] * terra::res(x)[[2]]
+            pred_cell_area <- terra::res(predictors)[[1]] * terra::res(predictors)[[1]]
+
             d <- samp_df %>%
               dplyr::mutate(cells = purrr::map2_dbl(from
                                                     , to
                                                     , \(a, b) terra::global(x > a & x <= b, sum, na.rm = TRUE)[1,1]
                                                     )
-                            , density = target / cells
+                            , pred_cells = floor(cells * x_cell_area / pred_cell_area)
+                            , density = target / pred_cells
                             , original_target = target
                             , original_density = density
-                            , target = dplyr::if_else(target > cells, cells, target)
+                            , target = dplyr::if_else(target > pred_cells, pred_cells, target)
                             , density = dplyr::case_when(density / max(density) < min_dens_prop_max ~ max(density) * min_dens_prop_max
                                                          , TRUE ~ density
                                                          )
                             , low_boost_density = density
-                            , target = ceiling(density * cells)
+                            , target = floor(density * pred_cells)
                             , low_boost_target = target
                             , target = dplyr::case_when(target > num_bg ~ num_bg
-                                                        , target > cells ~ cells
+                                                        , target > pred_cells ~ pred_cells
                                                         , TRUE ~ target
                                                         )
-                            , density = target / cells
+                            , density = target / pred_cells
                             ) %>%
               dplyr::filter(cells > 0)
 
