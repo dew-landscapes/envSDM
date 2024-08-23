@@ -2,6 +2,11 @@ The goal of `envSDM` is to help automate the preparation, tuning and prediction
 of species distribution models. `envSDM` attempts to make decisions at each of
 these steps that are robust(ish) for running SDMs for many, many taxa.
 
+`envSDM` assumes that your are trying to run many, many taxa, thus there is
+currently no option to run a single taxa in parallel. The functions are all
+designed around the potential to run many taxa in parallel (assuming each taxa
+is run on a single core).
+
 Preparation includes generating:
 
 * optional generation of a (possibly buffered) minimum convex polygon around

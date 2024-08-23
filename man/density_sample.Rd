@@ -4,7 +4,15 @@
 \alias{density_sample}
 \title{Create a spatially thickened background sample}
 \usage{
-density_sample(x, dens_rast, samp_df, max_sample = 200, verbose = FALSE)
+density_sample(
+  x,
+  dens_rast,
+  samp_df,
+  boundary,
+  mult = 2,
+  max_sample = 200,
+  verbose = FALSE
+)
 }
 \arguments{
 \item{x}{spatRaster. Sample will be cell XY values from this raster.}
@@ -14,6 +22,11 @@ density_sample(x, dens_rast, samp_df, max_sample = 200, verbose = FALSE)
 same resolution as `x`. Usually made within `prep_sdm()`}
 
 \item{samp_df}{Dataframe. Usually built by `prep_sdm()`}
+
+\item{boundary}{sf. Boundary within which to sample cells from `x`}
+
+\item{mult}{Numeric. In each iteration try sampling `mult` *
+`sum(samp_df$target)` points}
 
 \item{max_sample}{Numeric. How many iterations to try to meet the density
 targets in `samp_df`.}

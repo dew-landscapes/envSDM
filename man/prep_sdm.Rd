@@ -19,16 +19,13 @@ prep_sdm(
   cat_preds = NULL,
   num_bg = 10000,
   prop_abs = "abs",
-  use_ecdf = FALSE,
   many_p_prop = 2,
   folds = 5,
   spatial_folds = TRUE,
   min_fold_n = 8,
+  stretch_value = 10,
   min_dens = 0.1,
-  use_cuts = 100,
-  min_dens_prop_max = 0.01,
   dens_res = 1000,
-  max_samp_iter = 1000,
   save_pngs = TRUE,
   remove_corr = TRUE,
   corr_thresh = 0.9,
@@ -69,10 +66,6 @@ prevent prediction into ocean)}
 \item{prop_abs}{Character. Is `num_bg` a proportion (`prop`) of the number of
 records in `presence` or an absolute (`abs`) number?}
 
-\item{use_ecdf}{Logical. If `TRUE` the density raster is converted via
-`ras_ecdf <- ecdf(values(target_density)), target_density <- terra::app(target_density, fun = \(i) ras_ecdf(i))`.
-Creates wider density bands.}
-
 \item{many_p_prop}{Numeric. Ensure the number of background points is at
 least `many_p_prop * number of presences`. e.g. If there are more than 5000
 presences and num_bg is set at `10000` and `many_p_prop` is `2`, then num_bg
@@ -88,22 +81,14 @@ not enough presences to support more than one fold.}
 \item{min_fold_n}{Numeric. Sets both minimum number of presences, and,
 by default, the minimum number of presences required for a model.}
 
+\item{stretch_value}{Numeric. Stretch the density raster to this value.}
+
 \item{min_dens}{Numeric. Usually a little above 0. Sets the minimum density
 for background points. If zero, large areas of no background points can cause
 trouble with model predictions into these areas.}
 
-\item{use_cuts}{Numeric. Used to set number of thresholds in `samp_df`. See
-`envSDM::density_sample()`.}
-
-\item{min_dens_prop_max}{Numeric. Within the sampling dataframe returned from
-as `prep$samp_df`, if the proportion of maximum density falls
-below this value, the next lowest density is applied.}
-
 \item{dens_res}{`NULL` or numeric. Resolution (in metres) of density raster.
 Set to `NULL` to use the same resolution as the predictors.}
-
-\item{max_samp_iter}{Numeric. Passed to max_sample argument of
-`envSDM::density_sample()`.}
 
 \item{save_pngs}{Logical. Save out a .png of the density raster and spatial
 blocks}
@@ -118,12 +103,17 @@ function? Useful when running SDMs for many, many taxa, especially if done in
 parallel.}
 
 \item{force_new}{Logical. If outputs already exist, should they be remade?}
+
+\item{use_ecdf}{Logical. If `TRUE` the density raster is converted via
+`ras_ecdf <- ecdf(values(target_density)), target_density <- terra::app(target_density, fun = \(i) ras_ecdf(i))`.
+Creates wider density bands.}
 }
 \value{
 `invisible(NULL)`. `prep.rds` (a list) and log written to `out_dir`
 }
 \description{
-Prepare for running an SDM
+The background sampling includes code based on a [stackoverflow post]() by
+user [spacedman](https://stackoverflow.com/users/211116/spacedman).
 }
 \examples{
 
