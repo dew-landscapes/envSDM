@@ -469,6 +469,12 @@
                             ) %>%
               dplyr::filter(cells > 0)
 
+            stuff <- grep("d", ls(), value = TRUE, invert = TRUE)
+
+            rm(list = ls())
+
+            gc()
+
             return(d)
 
           }

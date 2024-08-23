@@ -73,6 +73,13 @@
 
     }
 
+    stuff <- ls() %>%
+      grep("res", value = TRUE, invert = TRUE)
+
+    rm(list = stuff)
+
+    gc()
+
     return(new)
 
   }
