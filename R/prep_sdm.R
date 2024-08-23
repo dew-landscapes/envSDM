@@ -409,6 +409,10 @@
                              , overwrite = TRUE
                              )
 
+          prep$timer <- envFunc::timer("density"
+                              , time_df = prep$timer
+                              , write_log = TRUE
+                              )
 
           ## num_bg adj------
 
@@ -452,6 +456,11 @@
                                                         , target > pred_cells ~ pred_cells
                                                         , TRUE ~ target
                                                         )
+                            , catch_target = target
+                            , density = target / pred_cells
+                            , catch_density = density
+                            , target = target * num_bg / sum(target, na.rm = TRUE)
+                            , target = ceiling(target)
                             , density = target / pred_cells
                             ) %>%
               dplyr::filter(cells > 0)
@@ -468,17 +477,7 @@
                       , prep_file
                       )
 
-          low_boost <- any(prep$samp_df$target > prep$samp_df$original_target)
-
-          prep$timer <- envFunc::timer("density"
-                              , notes = if(low_boost) paste0("min_dens_prop_max = "
-                                                             , min_dens_prop_max
-                                                             , ". This took the total number of background points "
-                                                             , "from "
-                                                             , num_bg
-                                                             , " to "
-                                                             , sum(prep$samp_df$target)
-                                                             )
+          prep$timer <- envFunc::timer("sampling df"
                               , time_df = prep$timer
                               , write_log = TRUE
                               )
