@@ -7,26 +7,26 @@
 evaluate_sdm(m, p_test, b_test, do_gc = FALSE, ...)
 }
 \arguments{
-\item{m}{SDM result within `tune_sdm()`}
+\item{m}{SDM result within \code{tune_sdm()}}
 
-\item{p_test}{Presence test data generated within `tune_sdm()`}
+\item{p_test}{Presence test data generated within \code{tune_sdm()}}
 
-\item{b_test}{Background test data generated within `tune_sdm()`}
+\item{b_test}{Background test data generated within \code{tune_sdm()}}
 
-\item{do_gc}{Logical. Run `base::rm(list = ls)` and `base::gc()` at end of
+\item{do_gc}{Logical. Run \code{base::rm(list = ls)} and \code{base::gc()} at end of
 function? Useful when running SDMs for many, many taxa, especially if done in
-parallel. Note, actually usees `rm(list = ls(pattern = "^[^e$]"))`.}
+parallel. Note, actually usees \code{rm(list = ls(pattern = "^[^e$]"))}.}
 
-\item{...}{Passed to both `terra::predict()` and `predicts::pa_evaluate()`}
+\item{...}{Passed to both \code{terra::predict()} and \code{predicts::pa_evaluate()}}
 }
 \value{
-paModelEvaluation (see `predicts::pa_evaluate()`) with extra metrics
-from `flexsdm::sdm_eval()`: AUC as auc_po_flexsdm; BOYCE as CBI; CBI_rescale
+paModelEvaluation (see \code{predicts::pa_evaluate()}) with extra metrics
+from \code{flexsdm::sdm_eval()}: AUC as auc_po_flexsdm; BOYCE as CBI; CBI_rescale
 (CBI is -1 to 1, CBI_rescale is 0 to 1); and IMAE.
 }
 \description{
-Returns various evaluation metrics from `predicts::pa_evaluate()` and
-`flexsdm::sdm_eval()`.
+Returns various evaluation metrics from \code{predicts::pa_evaluate()} and
+\code{flexsdm::sdm_eval()}.
 }
 \examples{
 

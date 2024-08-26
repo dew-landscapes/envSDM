@@ -1,8 +1,10 @@
 
 #' Prepare for running an SDM
 #'
-#' The background sampling includes code based on a [stackoverflow post]() by
-#' user [spacedman](https://stackoverflow.com/users/211116/spacedman).
+#' The background sampling includes code based on a
+#' [Geographic Information Systems stack exchange](https://gis.stackexchange.com/)
+#' [answer](https://gis.stackexchange.com/a/224347)
+#' by user [Spacedman](https://gis.stackexchange.com/users/865/spacedman).
 #'
 #' @param this_taxa Character. Name of taxa. Used to name outputs. If `NULL`,
 #' this will be `basename(dirname(out_dir))`.

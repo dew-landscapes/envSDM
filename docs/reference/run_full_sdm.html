@@ -62,8 +62,8 @@
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>this_taxa</dt>
-<dd><p>Character. Name of taxa. Used to name outputs. If `NULL`,
-this will be `basename(dirname(out_dir))`.</p></dd>
+<dd><p>Character. Name of taxa. Used to name outputs. If <code>NULL</code>,
+this will be <code>basename(dirname(out_dir))</code>.</p></dd>
 
 
 <dt>out_dir</dt>
@@ -73,9 +73,9 @@ into which results will be saved.</p></dd>
 
 <dt>use_metric</dt>
 <dd><p>Character. Which metric to use to find the 'best' tune
-arguments from previous tuning results? Default is `combo`, the product of
-`auc_po`, `CBI_rescale` and `IMAE`. `use_metric` must be `combo` or have been
- used in the use_metrics argument to `tune_sdm()`.</p></dd>
+arguments from previous tuning results? Default is <code>combo</code>, the product of
+<code>auc_po</code>, <code>CBI_rescale</code> and <code>IMAE</code>. <code>use_metric</code> must be <code>combo</code> or have been
+used in the use_metrics argument to <code><a href="tune_sdm.html">tune_sdm()</a></code>.</p></dd>
 
 
 <dt>force_new</dt>
@@ -84,27 +84,27 @@ arguments from previous tuning results? Default is `combo`, the product of
 
 <dt>save_to</dt>
 <dd><p>Character. Name of path to save results. Defaults to
-`fs::path(out_dir, use_metric)`</p></dd>
+<code>fs::path(out_dir, use_metric)</code></p></dd>
 
 
 <dt>do_gc</dt>
-<dd><p>Logical. Run `base::rm(list = ls)` and `base::gc()` at end of
+<dd><p>Logical. Run <code>base::rm(list = ls)</code> and <code><a href="https://rdrr.io/r/base/gc.html" class="external-link">base::gc()</a></code> at end of
 function? Useful when running SDMs for many, many taxa, especially if done in
 parallel.</p></dd>
 
 
 <dt>...</dt>
-<dd><p>Passed to `tune_sdm()`</p></dd>
+<dd><p>Passed to <code><a href="tune_sdm.html">tune_sdm()</a></code></p></dd>
 
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     
 
-<p>`invisible(NULL)`. `tune.rds` saved into `save_to` directory. log
-written. `tune.rds` is a data frame but performs poorly, due to list columns
+<p><code>invisible(NULL)</code>. <code>tune.rds</code> saved into <code>save_to</code> directory. log
+written. <code>tune.rds</code> is a data frame but performs poorly, due to list columns
 , if not imported as a tibble (e.g. via
-`rio::import(tune.rds, setclass = "tibble"))`)</p>
+<code>rio::import(tune.rds, setclass = "tibble"))</code>)</p>
     </div>
 
     <div class="section level2">

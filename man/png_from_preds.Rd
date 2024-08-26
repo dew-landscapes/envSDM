@@ -20,22 +20,22 @@ save as .png}
 \item{tune_dir}{Character. Name of directory containing the tune results used
 to make the predictions in pred_dir.}
 
-\item{trim}{Logical. Trim NA values from outside (using `terra::trim()`)}
+\item{trim}{Logical. Trim NA values from outside (using \code{terra::trim()})}
 
 \item{force_new}{Logical. If .png file already exists, recreate it?}
 
-\item{do_gc}{Logical. Run `base::rm(list = ls)` and `base::gc()` at end of
+\item{do_gc}{Logical. Run \code{base::rm(list = ls)} and \code{base::gc()} at end of
 function? Useful when running SDMs for many, many taxa, especially if done in
 parallel.}
 
-\item{...}{Passed to `fs::dir_ls()`}
+\item{...}{Passed to \code{fs::dir_ls()}}
 }
 \value{
-`invisible(NULL)`. Writes .png files with the same file name as any
+\code{invisible(NULL)}. Writes .png files with the same file name as any
 .tif files
 }
 \description{
-Finds any .tif files in `pred_dir` and writes them to .png files. Includes the
+Finds any .tif files in \code{pred_dir} and writes them to .png files. Includes the
 retrieval and addition to the map of: various SDM metrics; and the original
 presence points.
 }

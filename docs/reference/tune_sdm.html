@@ -72,8 +72,8 @@
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>this_taxa</dt>
-<dd><p>Character. Name of taxa. Used to name outputs. If `NULL`,
-this will be `basename(dirname(out_dir))`.</p></dd>
+<dd><p>Character. Name of taxa. Used to name outputs. If <code>NULL</code>,
+this will be <code>basename(dirname(out_dir))</code>.</p></dd>
 
 
 <dt>out_dir</dt>
@@ -85,51 +85,51 @@ this will be `basename(dirname(out_dir))`.</p></dd>
 
 
 <dt>fc</dt>
-<dd><p>Character. Used to generate levels of `classes` argument to
-`maxnet::maxnet()` that are tuned.</p></dd>
+<dd><p>Character. Used to generate levels of <code>classes</code> argument to
+<code><a href="https://rdrr.io/pkg/maxnet/man/maxnet.html" class="external-link">maxnet::maxnet()</a></code> that are tuned.</p></dd>
 
 
 <dt>limit_p</dt>
-<dd><p>`TRUE`, `FALSE` or number of predictor variables above which
-to limit the use of `p` in the classes argument used in `maxnet::maxnet()`.
+<dd><p><code>TRUE</code>, <code>FALSE</code> or number of predictor variables above which
+to limit the use of <code>p</code> in the classes argument used in <code><a href="https://rdrr.io/pkg/maxnet/man/maxnet.html" class="external-link">maxnet::maxnet()</a></code>.
 Useful with many predictor variables when it becomes unwieldy to generate
 interactions for all predictors.</p></dd>
 
 
 <dt>rm</dt>
-<dd><p>Numeric. Used to generate levels of `regmult` argument to
-`maxnet::maxnet()` that are tuned.</p></dd>
+<dd><p>Numeric. Used to generate levels of <code>regmult</code> argument to
+<code><a href="https://rdrr.io/pkg/maxnet/man/maxnet.html" class="external-link">maxnet::maxnet()</a></code> that are tuned.</p></dd>
 
 
 <dt>trees</dt>
-<dd><p>Used to generate the levels of `ntree` argument to
-`randomForest::randomForest()` that are tuned. `TRUE` (tune with default
-`trees`), `FALSE` (don't tune `trees`) or numeric (the `trees` values to tune
- with).</p></dd>
+<dd><p>Used to generate the levels of <code>ntree</code> argument to
+<code><a href="https://rdrr.io/pkg/randomForest/man/randomForest.html" class="external-link">randomForest::randomForest()</a></code> that are tuned. <code>TRUE</code> (tune with default
+<code>trees</code>), <code>FALSE</code> (don't tune <code>trees</code>) or numeric (the <code>trees</code> values to tune
+with).</p></dd>
 
 
 <dt>mtry</dt>
-<dd><p>Used to generate the levels of `mtry` argument to
-`randomForest::randomForest()` that are tuned. `TRUE` (tune with sensible guesses for
-`mtry`), `FALSE` (only use default `randomForest::randomForest()` `mtry`) or
-numeric (the `mtry` values to tune with).</p></dd>
+<dd><p>Used to generate the levels of <code>mtry</code> argument to
+<code><a href="https://rdrr.io/pkg/randomForest/man/randomForest.html" class="external-link">randomForest::randomForest()</a></code> that are tuned. <code>TRUE</code> (tune with sensible guesses for
+<code>mtry</code>), <code>FALSE</code> (only use default <code><a href="https://rdrr.io/pkg/randomForest/man/randomForest.html" class="external-link">randomForest::randomForest()</a></code> <code>mtry</code>) or
+numeric (the <code>mtry</code> values to tune with).</p></dd>
 
 
 <dt>nodesize</dt>
-<dd><p>Used to generate the levels of `nodesize` argument to
-`randomForest::randomForest()` that are tuned. `TRUE` (tune with default
-`nodesize`), `FALSE` (only use default `randomForest::randomForest()`
-`nodesize`) or numeric (the `nodesize` values to tune with).</p></dd>
+<dd><p>Used to generate the levels of <code>nodesize</code> argument to
+<code><a href="https://rdrr.io/pkg/randomForest/man/randomForest.html" class="external-link">randomForest::randomForest()</a></code> that are tuned. <code>TRUE</code> (tune with default
+<code>nodesize</code>), <code>FALSE</code> (only use default <code><a href="https://rdrr.io/pkg/randomForest/man/randomForest.html" class="external-link">randomForest::randomForest()</a></code>
+<code>nodesize</code>) or numeric (the <code>nodesize</code> values to tune with).</p></dd>
 
 
 <dt>keep_model</dt>
-<dd><p>Logical. If `TRUE` the model results will be appended as a
-list column in the returned tibble (as column `m`)</p></dd>
+<dd><p>Logical. If <code>TRUE</code> the model results will be appended as a
+list column in the returned tibble (as column <code>m</code>)</p></dd>
 
 
 <dt>best_run</dt>
-<dd><p>Logical. If `TRUE` this alters the behaviour of the
-`tune_sdm()` by, well, not tuning. :). Sets all blocks to the same value so
+<dd><p>Logical. If <code>TRUE</code> this alters the behaviour of the
+<code>tune_sdm()</code> by, well, not tuning. :). Sets all blocks to the same value so
 no cross-validation.</p></dd>
 
 
@@ -144,7 +144,7 @@ when finding the 'best' model.</p></dd>
 
 
 <dt>do_gc</dt>
-<dd><p>Logical. Run `base::rm(list = ls)` and `base::gc()` at end of
+<dd><p>Logical. Run <code>base::rm(list = ls)</code> and <code><a href="https://rdrr.io/r/base/gc.html" class="external-link">base::gc()</a></code> at end of
 function? Useful when running SDMs for many, many taxa, especially if done in
 parallel.</p></dd>
 
@@ -155,22 +155,24 @@ parallel.</p></dd>
 
 <dt>save_to</dt>
 <dd><p>Character. Name of path to save results. Defaults to out_dir
-which works if not `best_run`. For a best run from `run_full_sdm()`, this
-will default to `fs::path(out_dir, "best")`. Otherwise set as anything.</p></dd>
+which works if not <code>best_run</code>. For a best run from <code><a href="run_full_sdm.html">run_full_sdm()</a></code>, this
+will default to <code>fs::path(out_dir, "best")</code>. Otherwise set as anything.</p></dd>
 
 
 <dt>...</dt>
-<dd><p>Passed to `evaluate_sdm()`. e.g. thresholds for use in
-`predicts::pa_evaluate()` (as `tr` argument, although if used, the values of
-the `thresholds` element of the `pa_ModelEvaluation` object returned by
-`predicts::pa_evaluate()` will be limited to the values in `tr`).</p></dd>
+<dd><p>Passed to <code><a href="evaluate_sdm.html">evaluate_sdm()</a></code>. e.g. thresholds for use in
+<code><a href="https://rdrr.io/pkg/predicts/man/pa_evaluate.html" class="external-link">predicts::pa_evaluate()</a></code> (as <code>tr</code> argument, although if used, the values of
+the <code>thresholds</code> element of the <code>pa_ModelEvaluation</code> object returned by
+<code><a href="https://rdrr.io/pkg/predicts/man/pa_evaluate.html" class="external-link">predicts::pa_evaluate()</a></code> will be limited to the values in <code>tr</code>).</p></dd>
 
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     
 
-<p>`invisible(NULL)`. `tune.rds` and log written in `save_to`</p>
+<p><code>invisible(NULL)</code>. <code>tune.rds</code> and log written in <code>save_to</code></p>
+
+
     </div>
 
     <div class="section level2">

@@ -21,54 +21,54 @@ predict_sdm(
 )
 }
 \arguments{
-\item{this_taxa}{Character. Name of taxa. Used to name outputs. If `NULL`,
-this will be `basename(dirname(out_dir))`.}
+\item{this_taxa}{Character. Name of taxa. Used to name outputs. If \code{NULL},
+this will be \code{basename(dirname(out_dir))}.}
 
-\item{in_dir}{Character. Name of directory containing: `prep.rds` (created
-with `envSDM::prep_sdm()`); and model to predict from (`tune.rds`, created
-with `envSDM::tune_sdm()`). Note that any `tune.rds` can be used but only the
-model in the first row will be used, thus more usually this `tune.rds` will
-have been created directly by `envSDM::run_full_sdm()`}
+\item{in_dir}{Character. Name of directory containing: \code{prep.rds} (created
+with \code{envSDM::prep_sdm()}); and model to predict from (\code{tune.rds}, created
+with \code{envSDM::tune_sdm()}). Note that any \code{tune.rds} can be used but only the
+model in the first row will be used, thus more usually this \code{tune.rds} will
+have been created directly by \code{envSDM::run_full_sdm()}}
 
 \item{out_dir}{Character. Name of directory into which results will be saved.
 Will be created if it does not exist.}
 
-\item{predictors}{Character. Vector of paths to predictor `.tif` files.}
+\item{predictors}{Character. Vector of paths to predictor \code{.tif} files.}
 
 \item{is_env_pred}{Logical. Does the naming of the directory and files in
-`predictors` follow the pattern required by `envRaster::parse_env_tif()`?}
+\code{predictors} follow the pattern required by \code{envRaster::parse_env_tif()}?}
 
-\item{terra_options}{Passed to `terra::terraOptions()`. e.g. list(memfrac = 0.6)}
+\item{terra_options}{Passed to \code{terra::terraOptions()}. e.g. list(memfrac = 0.6)}
 
-\item{doClamp}{Passed to `terra::predict()` (which then passes as `...` to
-`fun`). Possibly orphaned from older envSDM?}
+\item{doClamp}{Passed to \code{terra::predict()} (which then passes as \code{...} to
+\code{fun}). Possibly orphaned from older envSDM?}
 
-\item{limit_to_mcp}{Logical. If `predict_boundary` exists within `prep` and
-`limit_to_mcp == TRUE`, an output raster (`mask.tif`) will be created within
-`predict_boundary` using `terra::mask()`. Irrespective of `limit_to_mcp`,
-`full.tif` is always created at the full extent of the predictors. Thus all
-`mask.tif` files can be 'stacked' as they have the same extent. If needed,
+\item{limit_to_mcp}{Logical. If \code{predict_boundary} exists within \code{prep} and
+\code{limit_to_mcp == TRUE}, an output raster (\code{mask.tif}) will be created within
+\code{predict_boundary} using \code{terra::mask()}. Irrespective of \code{limit_to_mcp},
+\code{full.tif} is always created at the full extent of the predictors. Thus all
+\code{mask.tif} files can be 'stacked' as they have the same extent. If needed,
 limiting the predictions for a taxa to its predict boundary can then be done
-via `terra::trim(mask.tif)`.}
+via \code{terra::trim(mask.tif)}.}
 
-\item{apply_thresh}{Logical. If `TRUE`, an output raster `thresh.tif` will be
-created using the threshold `mod$e[[1]]@thresholds$max_spec_sens`}
+\item{apply_thresh}{Logical. If \code{TRUE}, an output raster \code{thresh.tif} will be
+created using the threshold \code{mod$e[[1]]@thresholds$max_spec_sens}}
 
 \item{force_new}{Logical. If outputs already exist, should they be remade?}
 
-\item{do_gc}{Logical. Run `base::rm(list = ls)` and `base::gc()` at end of
+\item{do_gc}{Logical. Run \code{base::rm(list = ls)} and \code{base::gc()} at end of
 function? Useful to keep RAM use down when running SDMs for many, many taxa,
 especially if done in parallel.}
 
-\item{check_tifs}{Logical. Check if any output `.tif` files error on
-`terra::rast()` and delete them if they do. Useful after a crash during
+\item{check_tifs}{Logical. Check if any output \code{.tif} files error on
+\code{terra::rast()} and delete them if they do. Useful after a crash during
 predict.}
 
 \item{...}{Not used.}
 }
 \value{
-`invisible(NULL)`. Output .tif, .log, and optional .png, written to
-`out_dir`
+\code{invisible(NULL)}. Output .tif, .log, and optional .png, written to
+\code{out_dir}
 }
 \description{
 Predict from  SDM

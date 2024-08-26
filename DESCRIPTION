@@ -54,3 +54,4 @@ Remotes:
     github::acanthiza/envRaster,
     sjevelazco/flexsdm
 URL: https://acanthiza.github.io/envSDM/
+Roxygen: list(markdown = TRUE)

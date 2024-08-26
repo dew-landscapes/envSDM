@@ -18,18 +18,18 @@ density_sample(
 \item{x}{spatRaster. Sample will be cell XY values from this raster.}
 
 \item{dens_rast}{spatRaster. Density raster. This is equivalent to the
-`weights` argument of `terra::spatSample()` but does not have to be at the
-same resolution as `x`. Usually made within `prep_sdm()`}
+\code{weights} argument of \code{terra::spatSample()} but does not have to be at the
+same resolution as \code{x}. Usually made within \code{prep_sdm()}}
 
-\item{samp_df}{Dataframe. Usually built by `prep_sdm()`}
+\item{samp_df}{Dataframe. Usually built by \code{prep_sdm()}}
 
-\item{boundary}{sf. Boundary within which to sample cells from `x`}
+\item{boundary}{sf. Boundary within which to sample cells from \code{x}}
 
-\item{mult}{Numeric. In each iteration try sampling `mult` *
-`sum(samp_df$target)` points}
+\item{mult}{Numeric. In each iteration try sampling \code{mult} *
+\code{sum(samp_df$target)} points}
 
 \item{max_sample}{Numeric. How many iterations to try to meet the density
-targets in `samp_df`.}
+targets in \code{samp_df}.}
 
 \item{verbose}{Logical. Prints how many iterations have been attempted.}
 }
@@ -37,8 +37,8 @@ targets in `samp_df`.}
 Dataframe
 }
 \description{
-Same idea as `terra::spatSample(weights = weight_raster)`, but can use a
+Same idea as \code{terra::spatSample(weights = weight_raster)}, but can use a
 density raster with a different spatial resolution. Can be much quicker than
-`terra::spatSample()` for large areas with small resolutions.
+\code{terra::spatSample()} for large areas with small resolutions.
 }
 \keyword{internal}

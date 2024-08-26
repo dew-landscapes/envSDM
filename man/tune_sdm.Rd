@@ -25,44 +25,44 @@ tune_sdm(
 )
 }
 \arguments{
-\item{this_taxa}{Character. Name of taxa. Used to name outputs. If `NULL`,
-this will be `basename(dirname(out_dir))`.}
+\item{this_taxa}{Character. Name of taxa. Used to name outputs. If \code{NULL},
+this will be \code{basename(dirname(out_dir))}.}
 
 \item{out_dir}{Character. Name of directory into which results will be saved.}
 
 \item{algo}{Character. Name of algorithm to use.}
 
-\item{fc}{Character. Used to generate levels of `classes` argument to
-`maxnet::maxnet()` that are tuned.}
+\item{fc}{Character. Used to generate levels of \code{classes} argument to
+\code{maxnet::maxnet()} that are tuned.}
 
-\item{limit_p}{`TRUE`, `FALSE` or number of predictor variables above which
-to limit the use of `p` in the classes argument used in `maxnet::maxnet()`.
+\item{limit_p}{\code{TRUE}, \code{FALSE} or number of predictor variables above which
+to limit the use of \code{p} in the classes argument used in \code{maxnet::maxnet()}.
 Useful with many predictor variables when it becomes unwieldy to generate
 interactions for all predictors.}
 
-\item{rm}{Numeric. Used to generate levels of `regmult` argument to
-`maxnet::maxnet()` that are tuned.}
+\item{rm}{Numeric. Used to generate levels of \code{regmult} argument to
+\code{maxnet::maxnet()} that are tuned.}
 
-\item{trees}{Used to generate the levels of `ntree` argument to
-`randomForest::randomForest()` that are tuned. `TRUE` (tune with default
-`trees`), `FALSE` (don't tune `trees`) or numeric (the `trees` values to tune
- with).}
+\item{trees}{Used to generate the levels of \code{ntree} argument to
+\code{randomForest::randomForest()} that are tuned. \code{TRUE} (tune with default
+\code{trees}), \code{FALSE} (don't tune \code{trees}) or numeric (the \code{trees} values to tune
+with).}
 
-\item{mtry}{Used to generate the levels of `mtry` argument to
-`randomForest::randomForest()` that are tuned. `TRUE` (tune with sensible guesses for
-`mtry`), `FALSE` (only use default `randomForest::randomForest()` `mtry`) or
-numeric (the `mtry` values to tune with).}
+\item{mtry}{Used to generate the levels of \code{mtry} argument to
+\code{randomForest::randomForest()} that are tuned. \code{TRUE} (tune with sensible guesses for
+\code{mtry}), \code{FALSE} (only use default \code{randomForest::randomForest()} \code{mtry}) or
+numeric (the \code{mtry} values to tune with).}
 
-\item{nodesize}{Used to generate the levels of `nodesize` argument to
-`randomForest::randomForest()` that are tuned. `TRUE` (tune with default
-`nodesize`), `FALSE` (only use default `randomForest::randomForest()`
-`nodesize`) or numeric (the `nodesize` values to tune with).}
+\item{nodesize}{Used to generate the levels of \code{nodesize} argument to
+\code{randomForest::randomForest()} that are tuned. \code{TRUE} (tune with default
+\code{nodesize}), \code{FALSE} (only use default \code{randomForest::randomForest()}
+\code{nodesize}) or numeric (the \code{nodesize} values to tune with).}
 
-\item{keep_model}{Logical. If `TRUE` the model results will be appended as a
-list column in the returned tibble (as column `m`)}
+\item{keep_model}{Logical. If \code{TRUE} the model results will be appended as a
+list column in the returned tibble (as column \code{m})}
 
-\item{best_run}{Logical. If `TRUE` this alters the behaviour of the
-`tune_sdm()` by, well, not tuning. :). Sets all blocks to the same value so
+\item{best_run}{Logical. If \code{TRUE} this alters the behaviour of the
+\code{tune_sdm()} by, well, not tuning. :). Sets all blocks to the same value so
 no cross-validation.}
 
 \item{metrics_df}{Dataframe. Defines which metrics to use when deciding on
@@ -71,23 +71,23 @@ no cross-validation.}
 \item{use_metrics}{Character. Vector of values in metrics_df$metric to use
 when finding the 'best' model.}
 
-\item{do_gc}{Logical. Run `base::rm(list = ls)` and `base::gc()` at end of
+\item{do_gc}{Logical. Run \code{base::rm(list = ls)} and \code{base::gc()} at end of
 function? Useful when running SDMs for many, many taxa, especially if done in
 parallel.}
 
 \item{force_new}{Logical. If outputs already exist, should they be remade?}
 
 \item{save_to}{Character. Name of path to save results. Defaults to out_dir
-which works if not `best_run`. For a best run from `run_full_sdm()`, this
-will default to `fs::path(out_dir, "best")`. Otherwise set as anything.}
+which works if not \code{best_run}. For a best run from \code{run_full_sdm()}, this
+will default to \code{fs::path(out_dir, "best")}. Otherwise set as anything.}
 
-\item{...}{Passed to `evaluate_sdm()`. e.g. thresholds for use in
-`predicts::pa_evaluate()` (as `tr` argument, although if used, the values of
-the `thresholds` element of the `pa_ModelEvaluation` object returned by
-`predicts::pa_evaluate()` will be limited to the values in `tr`).}
+\item{...}{Passed to \code{evaluate_sdm()}. e.g. thresholds for use in
+\code{predicts::pa_evaluate()} (as \code{tr} argument, although if used, the values of
+the \code{thresholds} element of the \code{pa_ModelEvaluation} object returned by
+\code{predicts::pa_evaluate()} will be limited to the values in \code{tr}).}
 }
 \value{
-`invisible(NULL)`. `tune.rds` and log written in `save_to`
+\code{invisible(NULL)}. \code{tune.rds} and log written in \code{save_to}
 }
 \description{
 Tune, and evaluate, species distribution models

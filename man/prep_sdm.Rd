@@ -34,48 +34,48 @@ prep_sdm(
 )
 }
 \arguments{
-\item{this_taxa}{Character. Name of taxa. Used to name outputs. If `NULL`,
-this will be `basename(dirname(out_dir))`.}
+\item{this_taxa}{Character. Name of taxa. Used to name outputs. If \code{NULL},
+this will be \code{basename(dirname(out_dir))}.}
 
 \item{out_dir}{Character. Name of directory into which results will be saved.}
 
-\item{presence}{Dataframe of presences. Needs columns called `lat` (latitude)
-and `long` (longitude) both in decimal degrees.}
+\item{presence}{Dataframe of presences. Needs columns called \code{lat} (latitude)
+and \code{long} (longitude) both in decimal degrees.}
 
 \item{pres_crs}{Anything that will return a legitimate crs when passed to the
 crs attribute of st_transform or st_as_sf}
 
 \item{pred_limit}{Logical. area of interest limits (i.e. MCP around points).
-Can be `TRUE` (use points to generate a minimum convex polygon to use as a
-limit), `FALSE` (do not limit) or path to existing sf to use.}
+Can be \code{TRUE} (use points to generate a minimum convex polygon to use as a
+limit), \code{FALSE} (do not limit) or path to existing sf to use.}
 
-\item{limit_buffer}{Numeric. Apply this buffer to `pred_limit` (in metres).}
+\item{limit_buffer}{Numeric. Apply this buffer to \code{pred_limit} (in metres).}
 
 \item{pred_clip}{sf. Optional sf to clip the pred_limit back to (e.g. to
 prevent prediction into ocean)}
 
-\item{predictors}{Character. Vector of paths to predictor `.tif` files.}
+\item{predictors}{Character. Vector of paths to predictor \code{.tif} files.}
 
 \item{is_env_pred}{Logical. Does the naming of the directory and files in
-`predictors` follow the pattern required by `envRaster::parse_env_tif()`?}
+\code{predictors} follow the pattern required by \code{envRaster::parse_env_tif()}?}
 
 \item{cat_preds}{Character. Vector of predictor names that are character.}
 
 \item{num_bg}{Numeric. How many background points?}
 
-\item{prop_abs}{Character. Is `num_bg` a proportion (`prop`) of the number of
-records in `presence` or an absolute (`abs`) number?}
+\item{prop_abs}{Character. Is \code{num_bg} a proportion (\code{prop}) of the number of
+records in \code{presence} or an absolute (\code{abs}) number?}
 
 \item{many_p_prop}{Numeric. Ensure the number of background points is at
-least `many_p_prop * number of presences`. e.g. If there are more than 5000
-presences and num_bg is set at `10000` and `many_p_prop` is `2`, then num_bg
-will be increased to `many_p_prop * nrow(presences)`}
+least \verb{many_p_prop * number of presences}. e.g. If there are more than 5000
+presences and num_bg is set at \code{10000} and \code{many_p_prop} is \code{2}, then num_bg
+will be increased to \code{many_p_prop * nrow(presences)}}
 
 \item{folds}{Numeric. How many folds to use in cross validation? Will be
-adjusted downwards if number of presences do not support `folds * min_fold_n`}
+adjusted downwards if number of presences do not support \code{folds * min_fold_n}}
 
-\item{spatial_folds}{Logical. Use spatial folds? Even if `TRUE`, can resort
-to non-spatial cv if presences per fold do not meet `min_fold_n` or there are
+\item{spatial_folds}{Logical. Use spatial folds? Even if \code{TRUE}, can resort
+to non-spatial cv if presences per fold do not meet \code{min_fold_n} or there are
 not enough presences to support more than one fold.}
 
 \item{min_fold_n}{Numeric. Sets both minimum number of presences, and,
@@ -87,33 +87,35 @@ by default, the minimum number of presences required for a model.}
 for background points. If zero, large areas of no background points can cause
 trouble with model predictions into these areas.}
 
-\item{dens_res}{`NULL` or numeric. Resolution (in metres) of density raster.
-Set to `NULL` to use the same resolution as the predictors.}
+\item{dens_res}{\code{NULL} or numeric. Resolution (in metres) of density raster.
+Set to \code{NULL} to use the same resolution as the predictors.}
 
 \item{save_pngs}{Logical. Save out a .png of the density raster and spatial
 blocks}
 
 \item{remove_corr}{Logical. If TRUE, predictors with high correlation
-_at presences_ are removed.}
+\emph{at presences} are removed.}
 
-\item{corr_thresh}{Numeric. Definition of 'high' correlation for `remove_corr`}
+\item{corr_thresh}{Numeric. Definition of 'high' correlation for \code{remove_corr}}
 
-\item{do_gc}{Logical. Run `base::rm(list = ls)` and `base::gc()` at end of
+\item{do_gc}{Logical. Run \code{base::rm(list = ls)} and \code{base::gc()} at end of
 function? Useful when running SDMs for many, many taxa, especially if done in
 parallel.}
 
 \item{force_new}{Logical. If outputs already exist, should they be remade?}
 
-\item{use_ecdf}{Logical. If `TRUE` the density raster is converted via
-`ras_ecdf <- ecdf(values(target_density)), target_density <- terra::app(target_density, fun = \(i) ras_ecdf(i))`.
+\item{use_ecdf}{Logical. If \code{TRUE} the density raster is converted via
+\verb{ras_ecdf <- ecdf(values(target_density)), target_density <- terra::app(target_density, fun = \\(i) ras_ecdf(i))}.
 Creates wider density bands.}
 }
 \value{
-`invisible(NULL)`. `prep.rds` (a list) and log written to `out_dir`
+\code{invisible(NULL)}. \code{prep.rds} (a list) and log written to \code{out_dir}
 }
 \description{
-The background sampling includes code based on a [stackoverflow post]() by
-user [spacedman](https://stackoverflow.com/users/211116/spacedman).
+The background sampling includes code based on a
+\href{https://gis.stackexchange.com/}{Geographic Information Systems stack exchange}
+\href{https://gis.stackexchange.com/a/224347}{answer}
+by user \href{https://gis.stackexchange.com/users/865/spacedman}{Spacedman}.
 }
 \examples{
 

@@ -20,12 +20,12 @@ png_from_tif(
 
 \item{dots}{sf. Usually presences. Added as points.}
 
-\item{trim}{Logical. Run `terra::trim()` before writing to .png?}
+\item{trim}{Logical. Run \code{terra::trim()} before writing to .png?}
 
-\item{out_png}{Character. Name of .png file to save. If `NULL` will be the
-same file name as `terra::sources(x)` with the file type as .png}
+\item{out_png}{Character. Name of .png file to save. If \code{NULL} will be the
+same file name as \code{terra::sources(x)} with the file type as .png}
 
-\item{do_gc}{Logical. Run `base::rm(list = ls)` and `base::gc()` at end of
+\item{do_gc}{Logical. Run \code{base::rm(list = ls)} and \code{base::gc()} at end of
 function? Useful when running SDMs for many, many taxa, especially if done in
 parallel.}
 }

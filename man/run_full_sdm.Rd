@@ -15,33 +15,33 @@ run_full_sdm(
 )
 }
 \arguments{
-\item{this_taxa}{Character. Name of taxa. Used to name outputs. If `NULL`,
-this will be `basename(dirname(out_dir))`.}
+\item{this_taxa}{Character. Name of taxa. Used to name outputs. If \code{NULL},
+this will be \code{basename(dirname(out_dir))}.}
 
 \item{out_dir}{Character. Name of directory containing previous tunes and
 into which results will be saved.}
 
 \item{use_metric}{Character. Which metric to use to find the 'best' tune
-arguments from previous tuning results? Default is `combo`, the product of
-`auc_po`, `CBI_rescale` and `IMAE`. `use_metric` must be `combo` or have been
- used in the use_metrics argument to `tune_sdm()`.}
+arguments from previous tuning results? Default is \code{combo}, the product of
+\code{auc_po}, \code{CBI_rescale} and \code{IMAE}. \code{use_metric} must be \code{combo} or have been
+used in the use_metrics argument to \code{tune_sdm()}.}
 
 \item{force_new}{Logical. If outputs already exist, should they be remade?}
 
 \item{save_to}{Character. Name of path to save results. Defaults to
-`fs::path(out_dir, use_metric)`}
+\code{fs::path(out_dir, use_metric)}}
 
-\item{do_gc}{Logical. Run `base::rm(list = ls)` and `base::gc()` at end of
+\item{do_gc}{Logical. Run \code{base::rm(list = ls)} and \code{base::gc()} at end of
 function? Useful when running SDMs for many, many taxa, especially if done in
 parallel.}
 
-\item{...}{Passed to `tune_sdm()`}
+\item{...}{Passed to \code{tune_sdm()}}
 }
 \value{
-`invisible(NULL)`. `tune.rds` saved into `save_to` directory. log
-written. `tune.rds` is a data frame but performs poorly, due to list columns
+\code{invisible(NULL)}. \code{tune.rds} saved into \code{save_to} directory. log
+written. \code{tune.rds} is a data frame but performs poorly, due to list columns
 , if not imported as a tibble (e.g. via
-`rio::import(tune.rds, setclass = "tibble"))`)
+\verb{rio::import(tune.rds, setclass = "tibble"))})
 }
 \description{
 Run an SDM using no cross validation and previously established tune arguments
