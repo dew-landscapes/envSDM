@@ -31,7 +31,8 @@
 
   ## predict -------
   purrr::pwalk(list(data$out_dir)
-               , \(a) predict_sdm(in_dir = fs::path(a, "combo")
+               , \(a) predict_sdm(prep_dir = a
+                                  , tune_dir = fs::path(a, "combo")
                                   , predictors = env_dat
                                   , is_env_pred = FALSE
                                   , limit_to_mcp = TRUE
@@ -45,7 +46,7 @@
                , \(x, y) png_from_preds(pred_dir = x
                                         , tune_dir = y
                                         , trim = FALSE
-                                        , force_new = TRUE
+                                        #, force_new = TRUE
                                         , recurse = 1
                                         )
                )
@@ -80,7 +81,8 @@
 
   ## predict -------
   purrr::pwalk(list(data$out_dir)
-               , \(a) predict_sdm(in_dir = fs::path(a, "auc_po")
+               , \(a) predict_sdm(prep_dir = a
+                                  , tune_dir = fs::path(a, "auc_po")
                                   , predictors = env_dat
                                   , is_env_pred = FALSE
                                   , limit_to_mcp = TRUE
