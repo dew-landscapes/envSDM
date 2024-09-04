@@ -220,7 +220,7 @@
         if(!is.null(p$error)) {
 
           pred_timer <- envFunc::timer("full"
-                                       , notes = p$error
+                                       , notes = as.character(p$error)
                                        , time_df = pred_timer
                                        , write_log = TRUE
                                        )
