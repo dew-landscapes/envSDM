@@ -48,7 +48,8 @@ Imports:
     sf,
     terra,
     dplyr,
-    magrittr
+    magrittr,
+    gdalcubes
 Remotes:
     github::acanthiza/envFunc,
     github::acanthiza/envRaster,
