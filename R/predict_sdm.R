@@ -219,9 +219,11 @@
 
         if(!is.null(p$error)) {
 
-          readr::write_lines(p$error
-                             , file = gsub("tif$", "log", pred_file)
-                             )
+          pred_timer <- envFunc::timer("full"
+                                       , notes = p$error
+                                       , time_df = pred_timer
+                                       , write_log = TRUE
+                                       )
 
         }
 
