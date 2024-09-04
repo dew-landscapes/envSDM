@@ -57,7 +57,7 @@
                           , ...
                           ) {
 
-    this_taxa <- basename(dirname(prep_dir))
+    this_taxa <- basename(prep_dir)
 
     if(is.null(tune_dir)) tune_dir <- prep_dir
     if(is.null(out_dir)) out_dir <- tune_dir
@@ -65,8 +65,8 @@
 
     # files -----
     ## existing
-    prep_file <- fs::path(dirname(prep_dir), "prep.rds")
-    prep_log <- fs::path(dirname(prep_dir), "prep.log")
+    prep_file <- fs::path(prep_dir, "prep.rds")
+    prep_log <- fs::path(prep_dir, "prep.log")
     tune_file <- fs::path(tune_dir, "tune.rds")
 
     ## new
