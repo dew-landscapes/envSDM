@@ -198,9 +198,9 @@
                           , filename = pred_file
                           , overwrite = TRUE
                           , wopt = list(datatype = "INT2S"
-                                        , scale = 0.00001525925
-                                        , offset = 0.5
-                                        , NAflag = -32768
+                                        , scale = gdalcubes::pack_minmax(min = 0, max = 1)$scale
+                                        , offset = gdalcubes::pack_minmax(min = 0, max = 1)$offset
+                                        , NAflag = gdalcubes::pack_minmax(min = 0, max = 1)$nodata
                                         )
                           )
 
@@ -238,9 +238,9 @@
                     , filename = mask_file
                     , overwrite = TRUE
                     , wopt = list(datatype = "INT2S"
-                                  , scale = 0.00001525925
-                                  , offset = 0.5
-                                  , NAflag = -32768
+                                  , scale = gdalcubes::pack_minmax(min = 0, max = 1)$scale
+                                  , offset = gdalcubes::pack_minmax(min = 0, max = 1)$offset
+                                  , NAflag = gdalcubes::pack_minmax(min = 0, max = 1)$nodata
                                   )
                     )
 
