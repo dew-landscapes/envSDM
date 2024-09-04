@@ -1,11 +1,11 @@
 acaule
-prep start: 2024-08-09 11:12:51.626093. 1082 original records.
-raster presence: 00:00:00.173051. 128 raster presences.
-predict boundary: 00:00:00.419127.
-density: 00:00:02.063952.
-background points: 00:00:48.571384. 10000 background points attempted. 8485 achieved.
-env data: 00:00:20.799065.
-warning: 2024-08-09 11:14:15.153236. 3 out of 5 blocks failed to reach 8 presences. These were lumped until every block reached 8 presences.
-folds: 00:00:11.580481. spatial folds = TRUE. Folds = 2.
-correlation: 00:00:04.146176.
-prep end. total prep elapsed time: 00:01:27.79034.
+prep start: 2024-08-28 11:39:00.805591. 1082 original records.
+raster presence: 00:00:00.117493. 128 raster presences.
+predict boundary: 00:00:00.172963.
+density: 00:00:02.927861.
+background points: 00:00:00.161905. 10000 background points attempted. 3497 achieved.
+env data: 00:00:09.387631.
+warning: 2024-08-28 11:39:18.309778. 2 out of 5 blocks failed to reach 8 presences. These were lumped until every block reached 8 presences.
+folds: 00:00:04.803834. spatial folds = TRUE. Folds = 3.
+correlation: 00:00:03.581501.
+prep end. total prep elapsed time: 00:00:21.177724.

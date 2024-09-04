@@ -13,26 +13,41 @@
                                                           )
                                           )
                   , out_dir = fs::path(out_dir, taxa)
+                  , out_mcp = fs::path(out_dir, "mcp.parquet")
                   )
 
   env_dat <- system.file("ex/bio.tif", package = "predicts")
 
+
+  # mcps --------
+
+  purrr::pwalk(list(data$presence
+                   , data$out_mcp
+                   )
+              , \(x, y) make_mcp(x, y, pres_x = "lon")
+              )
+
+
+  # prep -----------
+  # use the just created mcps (this allows using, say, a different spatial reliability threshold for the mcps)
+
   purrr::pwalk(list(data$taxa
                     , data$out_dir
                     , data$presence
+                    , data$out_mcp
                     )
-               , function(a, b, c) prep_sdm(this_taxa = a
-                                            , out_dir = b
-                                            , presence = c
-                                            , pres_x = "lon"
-                                            , pres_y = "lat"
-                                            , predictors = env_dat
-                                            , is_env_pred = FALSE
-                                            , pred_limit = TRUE
-                                            , limit_buffer = 10000
-                                            , dens_res = 1000 # ignored as decimal degrees preds
-                                            , use_ecdf = FALSE
-                                            )
+               , function(a, b, c, d) prep_sdm(this_taxa = a
+                                               , out_dir = b
+                                               , presence = c
+                                               , pres_x = "lon"
+                                               , pres_y = "lat"
+                                               , predictors = env_dat
+                                               , is_env_pred = FALSE
+                                               , pred_limit = d
+                                               , limit_buffer = 10000
+                                               , dens_res = 1000 # ignored as decimal degrees preds
+                                               , force_new = TRUE
+                                               )
                )
 
   prep_ex <- rio::import(fs::path(data$out_dir[[2]], "prep.rds"))

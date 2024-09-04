@@ -13,7 +13,9 @@
 #' and `long` (longitude) both in decimal degrees.
 #' @param pres_crs Anything that will return a legitimate crs when passed to the
 #' crs attribute of st_transform or st_as_sf
-#' @param pred_limit Logical. area of interest limits (i.e. MCP around points).
+#' @param pres_x,pres_y Character. Name of the columns in `presence` that have
+#' the x and y coordinates
+#' @param pred_limit Limit the background points and predictions?
 #' Can be `TRUE` (use points to generate a minimum convex polygon to use as a
 #' limit), `FALSE` (do not limit) or path to existing sf to use.
 #' @param limit_buffer Numeric. Apply this buffer to `pred_limit` (in metres).
@@ -26,9 +28,6 @@
 #' @param num_bg Numeric. How many background points?
 #' @param prop_abs Character. Is `num_bg` a proportion (`prop`) of the number of
 #'  records in `presence` or an absolute (`abs`) number?
-#' @param use_ecdf Logical. If `TRUE` the density raster is converted via
-#' `ras_ecdf <- ecdf(values(target_density)), target_density <- terra::app(target_density, fun = \(i) ras_ecdf(i))`.
-#' Creates wider density bands.
 #' @param many_p_prop Numeric. Ensure the number of background points is at
 #' least `many_p_prop * number of presences`. e.g. If there are more than 5000
 #' presences and num_bg is set at `10000` and `many_p_prop` is `2`, then num_bg
@@ -41,9 +40,6 @@
 #' @param min_fold_n Numeric. Sets both minimum number of presences, and,
 #' by default, the minimum number of presences required for a model.
 #' @param stretch_value Numeric. Stretch the density raster to this value.
-#' @param min_dens Numeric. Usually a little above 0. Sets the minimum density
-#' for background points. If zero, large areas of no background points can cause
-#' trouble with model predictions into these areas.
 #' @param dens_res `NULL` or numeric. Resolution (in metres) of density raster.
 #' Set to `NULL` to use the same resolution as the predictors.
 #' @param save_pngs Logical. Save out a .png of the density raster and spatial
@@ -79,7 +75,6 @@
                        , spatial_folds = TRUE
                        , min_fold_n = 8
                        , stretch_value = 10
-                       , min_dens = 0.1
                        , dens_res = 1000
                        , save_pngs = TRUE
                        , remove_corr = TRUE
@@ -179,6 +174,7 @@
 
             prep$predict_boundary <- sfarrow::st_read_parquet(pred_limit) %>%
               sf::st_transform(crs = sf::st_crs(predictors[[1]])) %>%
+              sf::st_buffer(limit_buffer) %>%
               sf::st_make_valid()
 
           } else {
@@ -193,7 +189,7 @@
               sf::st_union() %>%
               sf::st_convex_hull() %>%
               sf::st_as_sf() %>%
-              {if(limit_buffer > 0) (.) %>% sf::st_buffer(limit_buffer) else (.)} %>%
+              sf::st_buffer(limit_buffer) %>%
               sf::st_make_valid()
 
           }
@@ -205,7 +201,7 @@
 
           prep$predict_boundary <- sf::st_bbox(predictors) %>%
             sf::st_as_sfc() %>%
-            sf::st_as_sf() %>%
+            sf::st_as_sf()  %>%
             sf::st_make_valid()
 
         }
