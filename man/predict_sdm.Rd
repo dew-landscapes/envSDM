@@ -6,7 +6,8 @@
 \usage{
 predict_sdm(
   this_taxa = NULL,
-  in_dir,
+  prep_dir,
+  tune_dir = NULL,
   out_dir = NULL,
   predictors = NULL,
   is_env_pred = TRUE,
@@ -24,13 +25,15 @@ predict_sdm(
 \item{this_taxa}{Character. Name of taxa. Used to name outputs. If \code{NULL},
 this will be \code{basename(dirname(out_dir))}.}
 
-\item{in_dir}{Character. Name of directory containing: \code{prep.rds} (created
-with \code{envSDM::prep_sdm()}); and model to predict from (\code{tune.rds}, created
-with \code{envSDM::tune_sdm()}). Note that any \code{tune.rds} can be used but only the
+\item{prep_dir}{Character. Name of directory containing: \code{prep.rds} (created
+with \code{envSDM::prep_sdm()})}
+
+\item{tune_dir}{Character. Name of directory containing \code{tune.rds}, created
+with \code{envSDM::tune_sdm()}. Note that any \code{tune.rds} can be used but only the
 model in the first row will be used, thus more usually this \code{tune.rds} will
 have been created directly by \code{envSDM::run_full_sdm()}}
 
-\item{out_dir}{Character. Name of directory into which results will be saved.
+\item{out_dir}{Character. Name of directory into which \code{.tif}s will be saved.
 Will be created if it does not exist.}
 
 \item{predictors}{Character. Vector of paths to predictor \code{.tif} files.}
@@ -107,7 +110,8 @@ Predict from  SDM
 
   ## predict -------
   purrr::pwalk(list(data$out_dir)
-               , \(a) predict_sdm(in_dir = fs::path(a, "combo")
+               , \(a) predict_sdm(prep_dir = a
+                                  , tune_dir = fs::path(a, "combo")
                                   , predictors = env_dat
                                   , is_env_pred = FALSE
                                   , limit_to_mcp = TRUE
@@ -121,7 +125,7 @@ Predict from  SDM
                , \(x, y) png_from_preds(pred_dir = x
                                         , tune_dir = y
                                         , trim = FALSE
-                                        , force_new = TRUE
+                                        #, force_new = TRUE
                                         , recurse = 1
                                         )
                )
@@ -156,7 +160,8 @@ Predict from  SDM
 
   ## predict -------
   purrr::pwalk(list(data$out_dir)
-               , \(a) predict_sdm(in_dir = fs::path(a, "auc_po")
+               , \(a) predict_sdm(prep_dir = a
+                                  , tune_dir = fs::path(a, "auc_po")
                                   , predictors = env_dat
                                   , is_env_pred = FALSE
                                   , limit_to_mcp = TRUE

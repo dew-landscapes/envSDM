@@ -1,0 +1,2 @@
+algo,tune_args,tunes,fc,rm,combo,best,auc_po,ODP,CBI_rescale,IMAE,auc_po_flexsdm,CBI,n_p_test,n_p_train,n_a_train,max_kappa,max_spec_sens,no_omission,equal_prevalence,equal_sens_spec
+maxnet,fc: lqhp. rm: 1,1,lqhp,1,0.81120628576332,TRUE,0.939268161640361,0.932702418506835,0.979362411613355,0.881857218721353,0.939268161640361,0.95872482322671,128,128,1774,0.67475935,0.1887033,0.00097322,0.06718532,0.32880549

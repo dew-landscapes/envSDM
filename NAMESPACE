@@ -3,6 +3,7 @@
 export("%>%")
 export(density_sample)
 export(evaluate_sdm)
+export(make_mcp)
 export(png_from_preds)
 export(png_from_tif)
 export(predict_sdm)

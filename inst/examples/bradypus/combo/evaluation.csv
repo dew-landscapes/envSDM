@@ -1,0 +1,2 @@
+algo,tune_args,tunes,trees,nodesize,combo,best,auc_po,ODP,CBI_rescale,IMAE,auc_po_flexsdm,CBI,n_p_test,n_p_train,n_a_train,mtry,max_kappa,max_spec_sens,no_omission,equal_prevalence,equal_sens_spec
+rf,tr: 500. mt: 2. ns: 1,1,500,1,0.685688929299156,TRUE,0.975192842887429,0.970393700787402,0.999991450068399,0.703137637795276,0.975192842887429,0.999982900136799,94,94,3081,2,0.73438,0.6719,0.6719,0.0299,0.69382

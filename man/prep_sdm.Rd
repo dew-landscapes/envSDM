@@ -24,7 +24,6 @@ prep_sdm(
   spatial_folds = TRUE,
   min_fold_n = 8,
   stretch_value = 10,
-  min_dens = 0.1,
   dens_res = 1000,
   save_pngs = TRUE,
   remove_corr = TRUE,
@@ -45,7 +44,10 @@ and \code{long} (longitude) both in decimal degrees.}
 \item{pres_crs}{Anything that will return a legitimate crs when passed to the
 crs attribute of st_transform or st_as_sf}
 
-\item{pred_limit}{Logical. area of interest limits (i.e. MCP around points).
+\item{pres_x, pres_y}{Character. Name of the columns in \code{presence} that have
+the x and y coordinates}
+
+\item{pred_limit}{Limit the background points and predictions?
 Can be \code{TRUE} (use points to generate a minimum convex polygon to use as a
 limit), \code{FALSE} (do not limit) or path to existing sf to use.}
 
@@ -83,10 +85,6 @@ by default, the minimum number of presences required for a model.}
 
 \item{stretch_value}{Numeric. Stretch the density raster to this value.}
 
-\item{min_dens}{Numeric. Usually a little above 0. Sets the minimum density
-for background points. If zero, large areas of no background points can cause
-trouble with model predictions into these areas.}
-
 \item{dens_res}{\code{NULL} or numeric. Resolution (in metres) of density raster.
 Set to \code{NULL} to use the same resolution as the predictors.}
 
@@ -103,10 +101,6 @@ function? Useful when running SDMs for many, many taxa, especially if done in
 parallel.}
 
 \item{force_new}{Logical. If outputs already exist, should they be remade?}
-
-\item{use_ecdf}{Logical. If \code{TRUE} the density raster is converted via
-\verb{ras_ecdf <- ecdf(values(target_density)), target_density <- terra::app(target_density, fun = \\(i) ras_ecdf(i))}.
-Creates wider density bands.}
 }
 \value{
 \code{invisible(NULL)}. \code{prep.rds} (a list) and log written to \code{out_dir}
@@ -133,26 +127,41 @@ by user \href{https://gis.stackexchange.com/users/865/spacedman}{Spacedman}.
                                                           )
                                           )
                   , out_dir = fs::path(out_dir, taxa)
+                  , out_mcp = fs::path(out_dir, "mcp.parquet")
                   )
 
   env_dat <- system.file("ex/bio.tif", package = "predicts")
 
+
+  # mcps --------
+
+  purrr::pwalk(list(data$presence
+                   , data$out_mcp
+                   )
+              , \(x, y) make_mcp(x, y, pres_x = "lon")
+              )
+
+
+  # prep -----------
+  # use the just created mcps (this allows using, say, a different spatial reliability threshold for the mcps)
+
   purrr::pwalk(list(data$taxa
                     , data$out_dir
                     , data$presence
+                    , data$out_mcp
                     )
-               , function(a, b, c) prep_sdm(this_taxa = a
-                                            , out_dir = b
-                                            , presence = c
-                                            , pres_x = "lon"
-                                            , pres_y = "lat"
-                                            , predictors = env_dat
-                                            , is_env_pred = FALSE
-                                            , pred_limit = TRUE
-                                            , limit_buffer = 10000
-                                            , dens_res = 1000 # ignored as decimal degrees preds
-                                            , use_ecdf = FALSE
-                                            )
+               , function(a, b, c, d) prep_sdm(this_taxa = a
+                                               , out_dir = b
+                                               , presence = c
+                                               , pres_x = "lon"
+                                               , pres_y = "lat"
+                                               , predictors = env_dat
+                                               , is_env_pred = FALSE
+                                               , pred_limit = d
+                                               , limit_buffer = 10000
+                                               , dens_res = 1000 # ignored as decimal degrees preds
+                                               , force_new = TRUE
+                                               )
                )
 
   prep_ex <- rio::import(fs::path(data$out_dir[[2]], "prep.rds"))
@@ -160,27 +169,42 @@ by user \href{https://gis.stackexchange.com/users/865/spacedman}{Spacedman}.
   names(prep_ex)
 
   # Density raster
-  land <- !is.na(terra::rast(env_dat)[[1]])
-  dens_ras <- terra::rast(fs::path(data$out_dir[[2]], "density.tif")) * land \%>\%
-    terra::trim()
+  land <- terra::as.polygons(terra::rast(env_dat)[[1]] > -Inf) \%>\%
+    sf::st_as_sf()
+
+  dens_ras <- terra::rast(fs::path(data$out_dir[[2]], "density.tif")) \%>\%
+    terra::mask(land) \%>\%
+    terra::classify(matrix(c(0, NA), ncol = 2))
 
   if(require("tmap")) {
 
-    m <- tm_shape(land) +
-      tm_raster() +
+    m <-
+      tm_shape(land) +
+      tm_borders() +
       tm_shape(dens_ras) +
-      tm_raster(title = "Presence density"
+      tm_raster(title = "Background point density"
+                , breaks = c(0, 2, 4, 6, 8, 10)
                 , drop.levels = TRUE
+                , colorNA = NULL
                 ) +
       tm_legend(outside = TRUE) +
       tm_compass() +
       tm_scale_bar() +
-      tm_layout(main.title = paste0("Prep for ",  prep_ex$inputs$this_taxa))
+      tm_layout(main.title = paste0("Background point density for ",  prep_ex$inputs$this_taxa))
 
     m
 
-    # Spatial blocks
-    head(prep_ex$blocks)
+    presences <- blocks \%>\%
+      dplyr::filter(pa == 1)
+
+    m +
+      tm_shape(presences) +
+        tm_dots(col = "blue")
+
+  }
+
+  # Background points
+  if(require("tmap")) {
 
     blocks <- prep_ex$blocks \%>\%
       dplyr::mutate(blocks = factor(block)) \%>\% # for map
@@ -188,17 +212,18 @@ by user \href{https://gis.stackexchange.com/users/865/spacedman}{Spacedman}.
                    , crs = sf::st_crs(terra::rast(env_dat[[1]]))
                    )
 
-    presences <- blocks \%>\%
-      dplyr::filter(pa == 1)
 
-    m +
+    tm_shape(land) +
+      tm_borders() +
       tm_shape(blocks) +
-        tm_dots(col = "block"
-                , palette = "viridis"
-                , title = "Blocks"
-                ) +
-      tm_shape(presences) +
-        tm_dots(col = "red")
+      tm_dots(title = "Background points, coloured by block"
+              , col = "block"
+              ) +
+      tm_legend(outside = TRUE) +
+      tm_compass() +
+      tm_scale_bar() +
+      tm_layout(main.title = paste0("Background points for ",  prep_ex$inputs$this_taxa))
+
 
   }
 }

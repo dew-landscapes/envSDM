@@ -1,6 +1,6 @@
-tune start: 2024-08-09 11:33:39.876525.
-maxnet: 00:04:11.283941.
-envelope: 00:00:01.966196.
-rf: 00:00:25.428614.
-tune end. total tune elapsed time: 00:04:41.088575.
-find best: 00:00:00.694985.
+tune start: 2024-09-06 09:15:31.304285.
+maxnet: 00:06:58.554852.
+envelope: 00:00:03.530469.
+rf: 00:00:47.462909.
+tune end. total tune elapsed time: 00:07:51.546017.
+find best: 00:00:00.694745.

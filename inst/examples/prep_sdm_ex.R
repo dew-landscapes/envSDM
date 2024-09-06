@@ -55,27 +55,42 @@
   names(prep_ex)
 
   # Density raster
-  land <- !is.na(terra::rast(env_dat)[[1]])
-  dens_ras <- terra::rast(fs::path(data$out_dir[[2]], "density.tif")) * land %>%
-    terra::trim()
+  land <- terra::as.polygons(terra::rast(env_dat)[[1]] > -Inf) %>%
+    sf::st_as_sf()
+
+  dens_ras <- terra::rast(fs::path(data$out_dir[[2]], "density.tif")) %>%
+    terra::mask(land) %>%
+    terra::classify(matrix(c(0, NA), ncol = 2))
 
   if(require("tmap")) {
 
-    m <- tm_shape(land) +
-      tm_raster() +
+    m <-
+      tm_shape(land) +
+      tm_borders() +
       tm_shape(dens_ras) +
-      tm_raster(title = "Presence density"
+      tm_raster(title = "Background point density"
+                , breaks = c(0, 2, 4, 6, 8, 10)
                 , drop.levels = TRUE
+                , colorNA = NULL
                 ) +
       tm_legend(outside = TRUE) +
       tm_compass() +
       tm_scale_bar() +
-      tm_layout(main.title = paste0("Prep for ",  prep_ex$inputs$this_taxa))
+      tm_layout(main.title = paste0("Background point density for ",  prep_ex$inputs$this_taxa))
 
     m
 
-    # Spatial blocks
-    head(prep_ex$blocks)
+    presences <- blocks %>%
+      dplyr::filter(pa == 1)
+
+    m +
+      tm_shape(presences) +
+        tm_dots(col = "blue")
+
+  }
+
+  # Background points
+  if(require("tmap")) {
 
     blocks <- prep_ex$blocks %>%
       dplyr::mutate(blocks = factor(block)) %>% # for map
@@ -83,16 +98,17 @@
                    , crs = sf::st_crs(terra::rast(env_dat[[1]]))
                    )
 
-    presences <- blocks %>%
-      dplyr::filter(pa == 1)
 
-    m +
+    tm_shape(land) +
+      tm_borders() +
       tm_shape(blocks) +
-        tm_dots(col = "block"
-                , palette = "viridis"
-                , title = "Blocks"
-                ) +
-      tm_shape(presences) +
-        tm_dots(col = "red")
+      tm_dots(title = "Background points, coloured by block"
+              , col = "block"
+              ) +
+      tm_legend(outside = TRUE) +
+      tm_compass() +
+      tm_scale_bar() +
+      tm_layout(main.title = paste0("Background points for ",  prep_ex$inputs$this_taxa))
+
 
   }

@@ -170,7 +170,7 @@
         if(!isFALSE(pred_limit)) {
 
           if(is.character(pred_limit)) {
-            # use exsiting MCP polygon file for the predict boundary
+            # use existing MCP polygon file for the predict boundary
 
             prep$predict_boundary <- sfarrow::st_read_parquet(pred_limit) %>%
               sf::st_transform(crs = sf::st_crs(predictors[[1]])) %>%
