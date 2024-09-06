@@ -201,7 +201,22 @@
 
 
         # full -----
-        message("full predict for ", this_taxa)
+        m <- paste0("full predict for "
+                    , this_taxa
+                    , " from '"
+                    , envFunc::vec_to_sentence(class(mod$m[[1]]))
+                    , "' ("
+                    , algo
+                    , ") model"
+                    )
+
+        message(m)
+
+        pred_timer <- envFunc::timer("message"
+                                     , notes = m
+                                     , time_df = pred_timer
+                                     , write_log = TRUE
+                                     )
 
         p <- safe_predict(object = x
                           , model = mod$m[[1]]
@@ -217,7 +232,7 @@
 
         if(!is.null(p$error)) {
 
-          pred_timer <- envFunc::timer("full"
+          pred_timer <- envFunc::timer("error"
                                        , notes = as.character(p$error)
                                        , time_df = pred_timer
                                        , write_log = TRUE
