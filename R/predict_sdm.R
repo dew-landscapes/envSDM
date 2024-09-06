@@ -33,7 +33,7 @@
 #' @param check_tifs Logical. Check if any output `.tif` files error on
 #' `terra::rast()` and delete them if they do. Useful after a crash during
 #' predict.
-#' @param ... Not used.
+#' @param ... Passed to terra::predict. e.g. use for wopt = list()
 #'
 #' @return `invisible(NULL)`. Output .tif, .log, and optional .png, written to
 #' `out_dir`
@@ -210,11 +210,7 @@
                           , names = this_taxa
                           , filename = pred_file
                           , overwrite = TRUE
-                          , wopt = list(datatype = "INT2S"
-                                        , scale = gdalcubes::pack_minmax(min = 0, max = 1)$scale
-                                        , offset = gdalcubes::pack_minmax(min = 0, max = 1)$offset
-                                        , NAflag = gdalcubes::pack_minmax(min = 0, max = 1)$nodata
-                                        )
+                          , ...
                           )
 
         if(!is.null(p$error)) {
