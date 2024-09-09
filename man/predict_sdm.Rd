@@ -6,8 +6,7 @@
 \usage{
 predict_sdm(
   this_taxa = NULL,
-  prep_dir,
-  tune_dir = NULL,
+  in_dir,
   out_dir = NULL,
   predictors = NULL,
   is_env_pred = TRUE,
@@ -25,15 +24,13 @@ predict_sdm(
 \item{this_taxa}{Character. Name of taxa. Used to name outputs. If \code{NULL},
 this will be \code{basename(dirname(out_dir))}.}
 
-\item{prep_dir}{Character. Name of directory containing: \code{prep.rds} (created
-with \code{envSDM::prep_sdm()})}
-
-\item{tune_dir}{Character. Name of directory containing \code{tune.rds}, created
-with \code{envSDM::tune_sdm()}. Note that any \code{tune.rds} can be used but only the
+\item{in_dir}{Character. Name of directory containing: \code{prep.rds} (created
+with \code{envSDM::prep_sdm()}); and model to predict from (\code{tune.rds}, created
+with \code{envSDM::tune_sdm()}). Note that any \code{tune.rds} can be used but only the
 model in the first row will be used, thus more usually this \code{tune.rds} will
 have been created directly by \code{envSDM::run_full_sdm()}}
 
-\item{out_dir}{Character. Name of directory into which \code{.tif}s will be saved.
+\item{out_dir}{Character. Name of directory into which results will be saved.
 Will be created if it does not exist.}
 
 \item{predictors}{Character. Vector of paths to predictor \code{.tif} files.}
@@ -67,9 +64,7 @@ especially if done in parallel.}
 \code{terra::rast()} and delete them if they do. Useful after a crash during
 predict.}
 
-\item{...}{Passed to \code{terra::predict()}. e.g. use for wopt = list(). Also
-used when masking the full raster back to the mcp (e.g. also passed to
-\code{terra::mask()})}
+\item{...}{Not used.}
 }
 \value{
 \code{invisible(NULL)}. Output .tif, .log, and optional .png, written to
