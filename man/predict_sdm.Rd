@@ -67,7 +67,9 @@ especially if done in parallel.}
 \code{terra::rast()} and delete them if they do. Useful after a crash during
 predict.}
 
-\item{...}{Not used.}
+\item{...}{Passed to \code{terra::predict()}. e.g. use for wopt = list(). Also
+used when masking the full raster back to the mcp (e.g. also passed to
+\code{terra::mask()})}
 }
 \value{
 \code{invisible(NULL)}. Output .tif, .log, and optional .png, written to
@@ -116,6 +118,7 @@ Predict from  SDM
                                   , is_env_pred = FALSE
                                   , limit_to_mcp = TRUE
                                   , check_tifs = TRUE
+                                  , force_new = TRUE
                                   )
                )
 

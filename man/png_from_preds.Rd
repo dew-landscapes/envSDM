@@ -79,6 +79,7 @@ presence points.
                                   , is_env_pred = FALSE
                                   , limit_to_mcp = TRUE
                                   , check_tifs = TRUE
+                                  , force_new = TRUE
                                   )
                )
 

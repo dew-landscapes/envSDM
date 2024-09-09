@@ -1,5 +1,5 @@
-predict start: 2024-09-06 09:39:16.304347.
-full: 00:00:01.688564.
-mask: 00:00:00.129523.
-threshold: 00:00:00.167427.
-predict end. total predict elapsed time: 00:00:01.986735.
+predict start: 2024-09-06 17:50:20.262128.
+full: 00:00:00.923736.
+mask: 00:00:00.168415.
+threshold: 00:00:00.123824.
+predict end. total predict elapsed time: 00:00:01.217366.
