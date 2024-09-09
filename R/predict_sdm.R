@@ -308,7 +308,9 @@
                      , \(i) i > thresh
                      , filename = thresh_file
                      , overwrite = TRUE
-                     , wopt = list(datatype = "INT1U")
+                     , wopt = list(datatype = "INT1U"
+                                   , names = this_taxa
+                                   )
                      )
 
           pred_timer <- envFunc::timer("threshold"
