@@ -3,12 +3,13 @@
 #'
 #' @param this_taxa Character. Name of taxa. Used to name outputs. If `NULL`,
 #' this will be `basename(dirname(out_dir))`.
-#' @param in_dir Character. Name of directory containing: `prep.rds` (created
-#' with `envSDM::prep_sdm()`); and model to predict from (`tune.rds`, created
-#' with `envSDM::tune_sdm()`). Note that any `tune.rds` can be used but only the
+#' @param prep_dir Character. Name of directory containing: `prep.rds` (created
+#' with `envSDM::prep_sdm()`)
+#' @param tune_dir Character. Name of directory containing `tune.rds`, created
+#' with `envSDM::tune_sdm()`. Note that any `tune.rds` can be used but only the
 #' model in the first row will be used, thus more usually this `tune.rds` will
 #' have been created directly by `envSDM::run_full_sdm()`
-#' @param out_dir Character. Name of directory into which results will be saved.
+#' @param out_dir Character. Name of directory into which `.tif`s will be saved.
 #' Will be created if it does not exist.
 #' @param predictors Character. Vector of paths to predictor `.tif` files.
 #' @param is_env_pred Logical. Does the naming of the directory and files in
@@ -32,7 +33,9 @@
 #' @param check_tifs Logical. Check if any output `.tif` files error on
 #' `terra::rast()` and delete them if they do. Useful after a crash during
 #' predict.
-#' @param ... Not used.
+#' @param ... Passed to `terra::predict()`. e.g. use for wopt = list(). Also
+#' used when masking the full raster back to the mcp (e.g. also passed to
+#' `terra::mask()`)
 #'
 #' @return `invisible(NULL)`. Output .tif, .log, and optional .png, written to
 #' `out_dir`
@@ -41,7 +44,8 @@
 #' @example inst/examples/predict_sdm_ex.R
 #'
   predict_sdm <- function(this_taxa = NULL
-                          , in_dir
+                          , prep_dir
+                          , tune_dir = NULL
                           , out_dir = NULL
                           , predictors = NULL
                           , is_env_pred = TRUE
@@ -55,14 +59,17 @@
                           , ...
                           ) {
 
-    this_taxa <- basename(dirname(in_dir))
-    if(is.null(out_dir)) out_dir <- in_dir
+    this_taxa <- basename(prep_dir)
+
+    if(is.null(tune_dir)) tune_dir <- prep_dir
+    if(is.null(out_dir)) out_dir <- tune_dir
+
 
     # files -----
     ## existing
-    prep_file <- fs::path(dirname(in_dir), "prep.rds")
-    tune_file <- fs::path(in_dir, "tune.rds")
-    prep_log <- fs::path(dirname(in_dir), "prep.log")
+    prep_file <- fs::path(prep_dir, "prep.rds")
+    prep_log <- fs::path(prep_dir, "prep.log")
+    tune_file <- fs::path(tune_dir, "tune.rds")
 
     ## new
     pred_file <- fs::path(out_dir, "full.tif")
@@ -127,9 +134,17 @@
                                    , write_log = TRUE
                                    )
 
-      mod <- rio::import(fs::path(in_dir, "tune.rds")
+      mod <- rio::import(fs::path(tune_dir, "tune.rds")
                          , setclass = "tibble"
                          )
+
+      if(nrow(mod) > 1) {
+
+        warning(nrow(mod)
+                , " tunes present. Using the tune from the first row."
+                )
+
+      }
 
       ## limit -----
       if(!exists("predict_boundary", where = prep)) {
@@ -186,7 +201,22 @@
 
 
         # full -----
-        message("full predict for ", this_taxa)
+        m <- paste0("full predict for "
+                    , this_taxa
+                    , " from '"
+                    , envFunc::vec_to_sentence(class(mod$m[[1]]))
+                    , "' ("
+                    , algo
+                    , ") model"
+                    )
+
+        message(m)
+
+        pred_timer <- envFunc::timer("message"
+                                     , notes = m
+                                     , time_df = pred_timer
+                                     , write_log = TRUE
+                                     )
 
         p <- safe_predict(object = x
                           , model = mod$m[[1]]
@@ -197,18 +227,16 @@
                           , names = this_taxa
                           , filename = pred_file
                           , overwrite = TRUE
-                          , wopt = list(datatype = "INT2S"
-                                        , scale = 0.00001525925
-                                        , offset = 0.5
-                                        , NAflag = -32768
-                                        )
+                          , ...
                           )
 
         if(!is.null(p$error)) {
 
-          readr::write_lines(as.character(p$error)
-                             , file = gsub("tif$", "log", pred_file)
-                             )
+          pred_timer <- envFunc::timer("error"
+                                       , notes = as.character(p$error)
+                                       , time_df = pred_timer
+                                       , write_log = TRUE
+                                       )
 
         }
 
@@ -237,11 +265,7 @@
                     , terra::vect(prep$predict_boundary)
                     , filename = mask_file
                     , overwrite = TRUE
-                    , wopt = list(datatype = "INT2S"
-                                  , scale = 0.00001525925
-                                  , offset = 0.5
-                                  , NAflag = -32768
-                                  )
+                    , ...
                     )
 
         pred_timer <- envFunc::timer("mask"
@@ -284,7 +308,9 @@
                      , \(i) i > thresh
                      , filename = thresh_file
                      , overwrite = TRUE
-                     , wopt = list(datatype = "INT1U")
+                     , wopt = list(datatype = "INT1U"
+                                   , names = this_taxa
+                                   )
                      )
 
           pred_timer <- envFunc::timer("threshold"
