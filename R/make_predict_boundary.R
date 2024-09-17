@@ -49,6 +49,8 @@ make_predict_boundary <- function(poly_list
                           , \(x) sfarrow::st_read_parquet(x)
                           )
 
+      polys <- polys[purrr::map_lgl(polys, \(x) nrow(x) > 0)]
+
     } else {
 
       polys <- poly_list
@@ -57,35 +59,31 @@ make_predict_boundary <- function(poly_list
 
     if(length(polys)) {
 
-      if(isTRUE(nrow(polys) > 0)) {
+      fs::dir_create(dirname(out_file))
 
-        fs::dir_create(dirname(out_file))
+      mcp <- polys %>%
+        purrr::map(\(x) sf::st_geometry(x) %>%
+                     sf::st_as_sf() %>%
+                     sf::st_transform(crs = out_crs)
+                   ) %>%
+        dplyr::bind_rows() %>%
+        sf::st_cast("MULTIPOINT") %>%
+        dplyr::summarise() %>%
+        sf::st_convex_hull() %>%
+        sf::st_buffer(buffer_metres) %>%
+        dplyr::mutate(!!rlang::ensym(col_name) := col_name_val)
 
-        mcp <- polys %>%
-          purrr::map(\(x) sf::st_geometry(x) %>%
-                       sf::st_as_sf() %>%
-                       sf::st_transform(crs = out_crs)
-                     ) %>%
-          dplyr::bind_rows() %>%
-          sf::st_cast("MULTIPOINT") %>%
-          dplyr::summarise() %>%
-          sf::st_convex_hull() %>%
-          sf::st_buffer(buffer_metres) %>%
-          dplyr::mutate(!!rlang::ensym(col_name) := col_name_val)
+      if(!is.null(clip)) {
 
-        if(!is.null(clip)) {
+        clip <- clip %>%
+          sf::st_transform(crs = out_crs)
 
-          clip <- clip %>%
-            sf::st_transform(crs = out_crs)
+        mcp <- sf::st_intersection(mcp, clip)
 
-          mcp <- sf::st_intersection(mcp, clip)
-
-
-        }
-
-        sfarrow::st_write_parquet(mcp, out_file)
 
       }
+
+      sfarrow::st_write_parquet(mcp, out_file)
 
     } else poly <- NA
 
