@@ -224,6 +224,17 @@
                             , write_log = TRUE
                             )
 
+        # prep$presence clip to predict_boundary ---------
+        # catch some cases where there are presence records on the predictors
+        # but outside the predict boundary (so there are no background points
+        # around those presences).
+        prep$presence <- prep$presence %>%
+          sf::st_as_sf(coords = c("x", "y")) %>%
+          sf::st_transform(crs = sf::st_crs(prep$predict_boundary)) %>%
+          sf::st_intersection() %>%
+          sf::st_set_geometry(NULL)
+
+
         # folds adj -------
 
         # aiming for at least 'min_fold_n' presences in each fold
