@@ -2,7 +2,7 @@
 % Please edit documentation in R/predict_sdm.R
 \name{predict_sdm}
 \alias{predict_sdm}
-\title{Predict from  SDM}
+\title{Predict from SDM}
 \usage{
 predict_sdm(
   this_taxa = NULL,
@@ -41,7 +41,8 @@ Will be created if it does not exist.}
 \item{is_env_pred}{Logical. Does the naming of the directory and files in
 \code{predictors} follow the pattern required by \code{envRaster::parse_env_tif()}?}
 
-\item{terra_options}{Passed to \code{terra::terraOptions()}. e.g. list(memfrac = 0.6)}
+\item{terra_options}{Passed to \code{terra::terraOptions()}. e.g. list(memfrac =
+0.6)}
 
 \item{doClamp}{Passed to \code{terra::predict()} (which then passes as \code{...} to
 \code{fun}). Possibly orphaned from older envSDM?}
@@ -55,9 +56,12 @@ limiting the predictions for a taxa to its predict boundary can then be done
 via \code{terra::trim(mask.tif)}.}
 
 \item{apply_thresh}{Logical. If \code{TRUE}, an output raster \code{thresh.tif} will be
-created using the threshold \code{mod$e[[1]]@thresholds$max_spec_sens}}
+created using the maximum of specificity + sensitivity. The threshold value
+can be accessed within \code{tune.rds} as, say, \code{mod <- rio::import("tune.rds")}
+and then \code{mod$e[[1]]@thresholds$max_spec_sens}}
 
-\item{force_new}{Logical. If outputs already exist, should they be remade?}
+\item{force_new}{Logical. If output files already exist, should they be
+remade?}
 
 \item{do_gc}{Logical. Run \code{base::rm(list = ls)} and \code{base::gc()} at end of
 function? Useful to keep RAM use down when running SDMs for many, many taxa,
@@ -76,7 +80,13 @@ used when masking the full raster back to the mcp (e.g. also passed to
 \code{out_dir}
 }
 \description{
-Predict from  SDM
+When running predict_sdm, the first predict, saved as 'full.tif' is always to
+the full extent of the environmental variables even when they extend beyond
+the predict boundary (this ensures all result can be stacked). The second
+predict, saved as 'mask.tif' is masked to the same boundary as provided: to
+the \code{pred_limit} argument of prep_sdm; or generated in prep_sdm from the
+\code{pred_limit}, \code{limit_buffer} and \code{pred_clip} arguments. A threshold raster
+can also be saved (saved as 'thresh.tif') - see \code{apply_thresh} argument.
 }
 \examples{
 

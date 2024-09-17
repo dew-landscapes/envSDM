@@ -62,16 +62,15 @@
 </nav><div class="container template-home">
 <div class="row">
   <main id="main" class="col-md-9"><p>The goal of <code>envSDM</code> is to help automate the preparation, tuning and prediction of species distribution models. <code>envSDM</code> attempts to make decisions at each of these steps that are robust(ish) for running SDMs for many, many taxa.</p>
-<p><code>envSDM</code> assumes that your are trying to run many, many taxa, thus there is currently no option to run a single taxa in parallel. The functions are all designed around the potential to run many taxa in parallel (assuming each taxa is run on a single core).</p>
+<p><code>envSDM</code> assumes that your are trying to run many, many taxa, thus there is no option to run a single taxa in parallel. The functions are all designed around the potential to run many taxa in parallel (assuming each taxa is run on a single core).</p>
 <p>Preparation includes generating:</p>
 <ul>
 <li>optional generation of a (possibly buffered) minimum convex polygon around presences to limit the rest of the process</li>
 <li>density raster of presences</li>
 <li>spatially thickened background points against density raster</li>
 <li>balanced spatial folds from the presences and background points</li>
-<li>environmental data for presences and background points (byo environmental rasters)</li>
-<li>environmental layers that are correlated <em>at presences</em>
-</li>
+<li>environmental data for presences and background points</li>
+<li>ensuring the environmental variables used are not correlated beyond a threshold, per taxa</li>
 </ul>
 <p>Tuning includes:</p>
 <ul>
@@ -88,11 +87,19 @@
 </li>
 <li>ability to use multiple metrics for choosing a ‘best’ tune</li>
 </ul>
-<p>Prediction includes choice of prediction to any combination of:</p>
+<p>Prediction includes:</p>
 <ul>
-<li>full extent of environmental layers</li>
-<li>only within the minimum convex polygon around the presences</li>
-<li>only within another specified area of interest</li>
+<li>always predicting to the full extent of environmental layers
+<ul>
+<li>often this will include some rubbish prediction outside the predict boundary, but enables stacking the results later</li>
+</ul>
+</li>
+<li>mask to the predict boundary (usually based on a, possibly buffered, minimum convex polygon around presences)
+<ul>
+<li>masking back from the same full extent enables stacking the results for each taxa</li>
+</ul>
+</li>
+<li>threshold to maximum of specificity + sensitivity</li>
 </ul>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>

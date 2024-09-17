@@ -33,7 +33,8 @@ the x and y coordinates}
 \item{out_crs}{epsg code for coordinates in output mcp. Usually the same as
 predictors}
 
-\item{buf}{Distance in metres to buffer the mcp}
+\item{buf}{Distance to buffer the mcp. Passed to the \code{dist} argument of
+\code{sf:st_buffer()} so units should follow that guidance.}
 
 \item{clip}{sf to clip the mcp}
 }
@@ -41,5 +42,34 @@ predictors}
 sf. \code{out_file} saved.
 }
 \description{
-Usually used as predict boundary for a taxa.
+For use as predict boundary for a taxa, but also see
+\code{make_predict_boundary()}
+}
+\examples{
+
+out_dir <- file.path(system.file(package = "envSDM"), "examples")
+
+data <- file.path(system.file(package = "predicts"), "ex") |>
+  fs::dir_ls(regexp = "\\\\.csv$") |>
+  tibble::enframe(name = NULL, value = "path") |>
+  dplyr::mutate(taxa = gsub("\\\\.csv", "", basename(path))
+                , presence = purrr::map(path, rio::import, setclass = "tibble")
+                , presence = purrr::map(presence
+                                        , \(x) x |>
+                                          dplyr::filter(!is.na(lat)
+                                                        , !is.na(lon)
+                                          )
+                )
+                , out_dir = fs::path(out_dir, taxa)
+                , out_mcp = fs::path(out_dir, "mcp.parquet")
+  )
+
+
+# mcps --------
+
+purrr::pwalk(list(data$presence
+                  , data$out_mcp
+)
+, \(x, y) make_mcp(x, y, pres_x = "lon")
+)
 }

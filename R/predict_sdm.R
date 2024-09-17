@@ -1,5 +1,13 @@
 
-#' Predict from  SDM
+#' Predict from SDM
+#'
+#' When running predict_sdm, the first predict, saved as 'full.tif' is always to
+#' the full extent of the environmental variables even when they extend beyond
+#' the predict boundary (this ensures all result can be stacked). The second
+#' predict, saved as 'mask.tif' is masked to the same boundary as provided: to
+#' the `pred_limit` argument of prep_sdm; or generated in prep_sdm from the
+#' `pred_limit`, `limit_buffer` and `pred_clip` arguments. A threshold raster
+#' can also be saved (saved as 'thresh.tif') - see `apply_thresh` argument.
 #'
 #' @param this_taxa Character. Name of taxa. Used to name outputs. If `NULL`,
 #' this will be `basename(dirname(out_dir))`.
@@ -14,7 +22,8 @@
 #' @param predictors Character. Vector of paths to predictor `.tif` files.
 #' @param is_env_pred Logical. Does the naming of the directory and files in
 #' `predictors` follow the pattern required by `envRaster::parse_env_tif()`?
-#' @param terra_options Passed to `terra::terraOptions()`. e.g. list(memfrac = 0.6)
+#' @param terra_options Passed to `terra::terraOptions()`. e.g. list(memfrac =
+#' 0.6)
 #' @param doClamp Passed to `terra::predict()` (which then passes as `...` to
 #' `fun`). Possibly orphaned from older envSDM?
 #' @param limit_to_mcp Logical. If `predict_boundary` exists within `prep` and
@@ -25,8 +34,11 @@
 #' limiting the predictions for a taxa to its predict boundary can then be done
 #' via `terra::trim(mask.tif)`.
 #' @param apply_thresh Logical. If `TRUE`, an output raster `thresh.tif` will be
-#' created using the threshold `mod$e[[1]]@thresholds$max_spec_sens`
-#' @param force_new Logical. If outputs already exist, should they be remade?
+#' created using the maximum of specificity + sensitivity. The threshold value
+#' can be accessed within `tune.rds` as, say, `mod <- rio::import("tune.rds")`
+#' and then `mod$e[[1]]@thresholds$max_spec_sens`
+#' @param force_new Logical. If output files already exist, should they be
+#' remade?
 #' @param do_gc Logical. Run `base::rm(list = ls)` and `base::gc()` at end of
 #' function? Useful to keep RAM use down when running SDMs for many, many taxa,
 #' especially if done in parallel.

@@ -2,10 +2,10 @@ The goal of `envSDM` is to help automate the preparation, tuning and prediction
 of species distribution models. `envSDM` attempts to make decisions at each of
 these steps that are robust(ish) for running SDMs for many, many taxa.
 
-`envSDM` assumes that your are trying to run many, many taxa, thus there is
-currently no option to run a single taxa in parallel. The functions are all
-designed around the potential to run many taxa in parallel (assuming each taxa
-is run on a single core).
+`envSDM` assumes that your are trying to run many, many taxa, thus there is no
+option to run a single taxa in parallel. The functions are all designed around
+the potential to run many taxa in parallel (assuming each taxa is run on a
+single core).
 
 Preparation includes generating:
 
@@ -14,9 +14,9 @@ presences to limit the rest of the process
 * density raster of presences
 * spatially thickened background points against density raster
 * balanced spatial folds from the presences and background points
-* environmental data for presences and background points (byo environmental
-rasters)
-* environmental layers that are correlated _at presences_
+* environmental data for presences and background points
+* ensuring the environmental variables used are not correlated beyond a
+threshold, per taxa
 
 Tuning includes:
 
@@ -28,11 +28,16 @@ Tuning includes:
     + predicts::envelope()
 * ability to use multiple metrics for choosing a 'best' tune
 
-Prediction includes choice of prediction to any combination of:
+Prediction includes:
 
-* full extent of environmental layers
-* only within the minimum convex polygon around the presences
-* only within another specified area of interest
+* always predicting to the full extent of environmental layers
+    + often this will include some rubbish prediction outside the predict
+    boundary, but enables stacking the results later
+* mask to the predict boundary (usually based on a, possibly buffered, minimum
+convex polygon around presences)
+    + masking back from the same full extent enables stacking the results for
+    each taxa
+* threshold to maximum of specificity + sensitivity
 
 ## Installation
 

@@ -18,7 +18,8 @@
 #' @param pred_limit Limit the background points and predictions?
 #' Can be `TRUE` (use points to generate a minimum convex polygon to use as a
 #' limit), `FALSE` (do not limit) or path to existing sf to use.
-#' @param limit_buffer Numeric. Apply this buffer to `pred_limit` (in metres).
+#' @param limit_buffer Numeric. Apply this buffer to `pred_limit`. This value
+#' is passed to the `dist` argument of `sf::st_buffer()`.
 #' @param pred_clip sf. Optional sf to clip the pred_limit back to (e.g. to
 #' prevent prediction into ocean)
 #' @param predictors Character. Vector of paths to predictor `.tif` files.

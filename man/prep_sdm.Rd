@@ -51,7 +51,8 @@ the x and y coordinates}
 Can be \code{TRUE} (use points to generate a minimum convex polygon to use as a
 limit), \code{FALSE} (do not limit) or path to existing sf to use.}
 
-\item{limit_buffer}{Numeric. Apply this buffer to \code{pred_limit} (in metres).}
+\item{limit_buffer}{Numeric. Apply this buffer to \code{pred_limit}. This value
+is passed to the \code{dist} argument of \code{sf::st_buffer()}.}
 
 \item{pred_clip}{sf. Optional sf to clip the pred_limit back to (e.g. to
 prevent prediction into ocean)}

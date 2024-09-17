@@ -29,6 +29,10 @@ same file name as \code{terra::sources(x)} with the file type as .png}
 function? Useful when running SDMs for many, many taxa, especially if done in
 parallel.}
 }
-\description{
-Create a .png from a .tif
+\value{
+\code{invisible(NULL)}. \code{out_png} written.
 }
+\description{
+Used within prep_sdm to save png of density raster with presences
+}
+\keyword{internal}

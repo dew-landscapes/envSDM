@@ -1,7 +1,7 @@
 
 #' Create a .png from a .tif
 #'
-#'
+#' Used within prep_sdm to save png of density raster with presences
 #'
 #' @param x spatRaster or path to .tif
 #' @param title Character. Title to add to the .png
@@ -13,8 +13,10 @@
 #' function? Useful when running SDMs for many, many taxa, especially if done in
 #' parallel.
 #'
-#' @return
+#' @return `invisible(NULL)`. `out_png` written.
 #' @export
+#'
+#' @keywords internal
 #'
 #' @examples
   png_from_tif <- function(x
