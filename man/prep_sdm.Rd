@@ -92,8 +92,8 @@ Set to \code{NULL} to use the same resolution as the predictors.}
 \item{save_pngs}{Logical. Save out a .png of the density raster and spatial
 blocks}
 
-\item{remove_corr}{Logical. If TRUE, predictors with high correlation
-\emph{at presences} are removed.}
+\item{remove_corr}{Logical. If TRUE, predictors with high correlation are
+removed.}
 
 \item{corr_thresh}{Numeric. Definition of 'high' correlation for \code{remove_corr}}
 

@@ -45,8 +45,8 @@
 #' Set to `NULL` to use the same resolution as the predictors.
 #' @param save_pngs Logical. Save out a .png of the density raster and spatial
 #' blocks
-#' @param remove_corr Logical. If TRUE, predictors with high correlation
-#' _at presences_ are removed.
+#' @param remove_corr Logical. If TRUE, predictors with high correlation are
+#' removed.
 #' @param corr_thresh Numeric. Definition of 'high' correlation for `remove_corr`
 #' @param do_gc Logical. Run `base::rm(list = ls)` and `base::gc()` at end of
 #' function? Useful when running SDMs for many, many taxa, especially if done in
