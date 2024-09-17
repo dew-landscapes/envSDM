@@ -1,34 +1,28 @@
 
-# prep -------
-use_crs = 8059
-latlong_crs = 4326
-
-use_clip <- sa_vect |>
-  terra::unwrap() |>
-  sf::st_as_sf() |>
-  dplyr::summarise() |>
-  sf::st_transform(crs = use_crs) |>
-  sf::st_make_valid()
-
 out_dir <- file.path(system.file(package = "envSDM"), "examples")
 
-# mcp -------
+data <- file.path(system.file(package = "predicts"), "ex") |>
+  fs::dir_ls(regexp = "\\.csv$") |>
+  tibble::enframe(name = NULL, value = "path") |>
+  dplyr::mutate(taxa = gsub("\\.csv", "", basename(path))
+                , presence = purrr::map(path, rio::import, setclass = "tibble")
+                , presence = purrr::map(presence
+                                        , \(x) x |>
+                                          dplyr::filter(!is.na(lat)
+                                                        , !is.na(lon)
+                                          )
+                )
+                , out_dir = fs::path(out_dir, taxa)
+                , out_mcp = fs::path(out_dir, "mcp.parquet")
+  )
 
-mcp_prep <- clean_end |>
-  dplyr::distinct(long, lat, taxa) |>
-  tidyr::nest(data = -c(taxa)) |>
-  dplyr::filter(purrr::map_lgl(data, \(x) nrow(x) > 2)) |>
-  dplyr::mutate(out_file = fs::path(out_dir, taxa, "mcp.parquet"))
+env_dat <- system.file("ex/bio.tif", package = "predicts")
 
 
-purrr::walk2(mcp_prep$data
-             , mcp_prep$out_file
-             , \(x, y) make_mcp(presence = x
-                                , out_file = y
-                                , force_new = FALSE
-                                , in_crs = latlong_crs
-                                , out_crs = use_crs
-                                , buf = 0
-                                , clip = use_clip
-             )
+# mcps --------
+
+purrr::pwalk(list(data$presence
+                  , data$out_mcp
+)
+, \(x, y) make_mcp(x, y, pres_x = "lon")
 )
