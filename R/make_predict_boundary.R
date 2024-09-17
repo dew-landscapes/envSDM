@@ -45,8 +45,14 @@ make_predict_boundary <- function(poly_list
       poly_list <- stats::na.omit(unlist(poly_list))
       poly_list <- poly_list[base::file.exists(poly_list)]
 
+      safe_read_parquet <- purrr::safely(sfarrow::st_read_parquet)
+
       polys <- purrr::map(poly_list
-                          , \(x) sfarrow::st_read_parquet(x)
+                          , \(x) safe_read_parquet(x)
+                          )
+
+      polys <- purrr::map(polys
+                          , \(x) if(is.null(x$error)) x$result else tibble::tibble()
                           )
 
       polys <- polys[purrr::map_lgl(polys, \(x) nrow(x) > 0)]
