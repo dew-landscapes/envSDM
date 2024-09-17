@@ -765,8 +765,7 @@
 
         if(run) {
 
-          prep$correlated <- envModel::make_env_corr(prep$blocks %>%
-                                                       dplyr::filter(pa == 1)
+          prep$correlated <- envModel::make_env_corr(prep$blocks
                                                      , env_cols = names(predictors)
                                                      , remove = TRUE
                                                      , thresh = corr_thresh
