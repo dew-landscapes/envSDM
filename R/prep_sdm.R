@@ -235,9 +235,9 @@
           sf::st_filter(prep$predict_boundary %>%
                           sf::st_transform(crs = sf::st_crs(predictors))
                         ) %>%
-          sf::st_coordinates()
-
-        base::colnames(prep$presence) <- c("x", "y")
+          sf::st_coordinates() %>%
+          tibble::as_tibble() %>%
+          purrr::set_names(c("x", "y"))
 
 
         # folds adj -------
@@ -496,7 +496,9 @@
           png_from_tif(target_density
                        , title = this_taxa
                        , dots = prep$presence %>%
-                         sf::st_as_sf(coords = c("x", "y"), crs = sf::st_crs(target_density))
+                         sf::st_as_sf(coords = c("x", "y")
+                                      , crs = sf::st_crs(target_density)
+                                      )
                        , trim = TRUE
                        , out_png = dens_png
                        )
@@ -513,7 +515,7 @@
       if(run) {
 
         spp_pa <- dplyr::bind_rows(prep$presence %>%
-                                     dplyr::select(x, y) %>%
+                                     tibble::as_tibble() %>%
                                      sf::st_as_sf(coords = c("x", "y")
                                                   , crs = sf::st_crs(predictors[[1]])
                                                   ) %>%
