@@ -291,8 +291,8 @@
                                     , vals = 1
                                     )
 
-            bw <- MASS::kde2d(as.matrix(p[,1])
-                              , as.matrix(p[,2])
+            bw <- MASS::kde2d(as.matrix(prep$presence[,1])
+                              , as.matrix(prep$presence[,2])
                               , n = c(nrow(temp_ras), ncol(temp_ras))
                               , lims = terra::ext(temp_ras) %>% as.vector()
                               )
@@ -319,11 +319,10 @@
                                     , vals = 1
                                     )
 
-            pres_ras <- terra::rasterize(prep$original %>%
-                                           sf::st_as_sf(coords = c(pres_x, pres_y)
-                                                        , crs = pres_crs
-                                                        ) %>%
-                                           sf::st_transform(sf::st_crs(predictors[[1]]))
+            pres_ras <- terra::rasterize(prep$presence %>%
+                                           sf::st_as_sf(coords = c(x, y)
+                                                        , crs = sf::st_crs(predictors[[1]])
+                                                        )
                                          , y = temp_ras
                                          , fun = length
                                          , touches = TRUE
@@ -490,7 +489,7 @@
                                      dplyr::mutate(pa = 0) %>%
                                      dplyr::select(pa)
                                    ) %>%
-          sf::st_buffer(0.01)
+          sf::st_buffer(terra::res(predictors)[[1]] / 100)
 
         prep$spp_pa_env <- exactextractr::exact_extract(predictors
                                                    , y = spp_pa
@@ -578,7 +577,7 @@
 
             blocks <- safe_cv_spatial(x
                                       , column = "pa"
-                                      , r = predictors[[1]]
+                                      #, r = predictors[[1]] # hashed out 2024-09-17
                                       , k = k_folds
                                       , size = block_dist
                                       , iteration = 200
