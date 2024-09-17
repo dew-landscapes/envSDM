@@ -1,7 +1,8 @@
 
 #' Minimum convex polygon around records
 #'
-#' Usually used as predict boundary for a taxa.
+#' For use as predict boundary for a taxa, but also see
+#' `make_predict_boundary()`
 #'
 #' @param presence Cleaned and filtered dataframe of presences
 #' @param out_file Character. Path for the mcp to be saved. Will be saved by
@@ -13,7 +14,8 @@
 #' @param in_crs epsg code for coordinates in `presence`
 #' @param out_crs epsg code for coordinates in output mcp. Usually the same as
 #' predictors
-#' @param buf Distance in metres to buffer the mcp
+#' @param buf Distance to buffer the mcp. Passed to the `dist` argument of
+#' `sf:st_buffer()` so units should follow that guidance.
 #' @param clip sf to clip the mcp
 #'
 #' @return sf. `out_file` saved.
