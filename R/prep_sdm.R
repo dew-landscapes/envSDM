@@ -176,7 +176,8 @@
             prep$predict_boundary <- sfarrow::st_read_parquet(pred_limit) %>%
               sf::st_transform(crs = sf::st_crs(predictors[[1]])) %>%
               sf::st_buffer(limit_buffer) %>%
-              sf::st_make_valid()
+              sf::st_make_valid() %>%
+              sf::st_sf()
 
           } else {
             # create new MCP polygon around the presences for the predict boundary
@@ -189,7 +190,7 @@
               sf::st_transform(crs = sf::st_crs(predictors[[1]])) %>%
               sf::st_union() %>%
               sf::st_convex_hull() %>%
-              sf::st_as_sf() %>%
+              sf::st_sf() %>%
               sf::st_buffer(limit_buffer) %>%
               sf::st_make_valid()
 
@@ -202,7 +203,7 @@
 
           prep$predict_boundary <- sf::st_bbox(predictors) %>%
             sf::st_as_sfc() %>%
-            sf::st_as_sf()  %>%
+            sf::st_sf()  %>%
             sf::st_make_valid()
 
         }
@@ -560,6 +561,7 @@
             safe_cv_spatial <- purrr::safely(blockCV::cv_spatial)
 
             x <- prep$spp_pa_env %>%
+              na.omit() %>%
               dplyr::select(x, y, pa) %>%
               sf::st_as_sf(coords = c("x", "y")
                            , crs = sf::st_crs(predictors[[1]])
@@ -695,9 +697,9 @@
 
           prep$blocks <- prep$spp_pa_env %>%
             dplyr::mutate(block = blocks$fold_ids) %>%
-            dplyr::filter(dplyr::if_all(.cols = names(predictors)
-                                 , .fns = ~ !is.na(.x) & !is.infinite(.x)
-                                 )
+            dplyr::filter(dplyr::if_any(.cols = names(predictors)
+                                        , .fns = \(x) !is.na(x) & !is.infinite(x)
+                                        )
                           )
 
           prep$spatial_folds_used <- spatial_folds
