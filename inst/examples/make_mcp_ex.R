@@ -16,8 +16,6 @@ data <- file.path(system.file(package = "predicts"), "ex") |>
                 , out_mcp = fs::path(out_dir, "mcp.parquet")
   )
 
-env_dat <- system.file("ex/bio.tif", package = "predicts")
-
 
 # mcps --------
 
