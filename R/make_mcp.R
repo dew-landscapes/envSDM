@@ -49,8 +49,8 @@
         sf::st_transform(crs = out_crs) %>%
         sf::st_union() %>%
         sf::st_convex_hull() %>%
-        sf::st_buffer(buf) %>%
-        sf::st_as_sf()
+        sf::st_sf() %>%
+        sf::st_buffer(buf)
 
       if(!is.null(clip)) {
 
@@ -62,7 +62,7 @@
 
       }
 
-      sfarrow::st_write_parquet(res, out_file)
+      if(isTRUE(nrow(res)>0)) sfarrow::st_write_parquet(res, out_file) else res <- NA
 
     } else {
 
