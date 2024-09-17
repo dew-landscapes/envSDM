@@ -229,10 +229,15 @@
         # but outside the predict boundary (so there are no background points
         # around those presences).
         prep$presence <- prep$presence %>%
-          sf::st_as_sf(coords = c("x", "y")) %>%
-          sf::st_transform(crs = sf::st_crs(prep$predict_boundary)) %>%
-          sf::st_intersection() %>%
-          sf::st_set_geometry(NULL)
+          sf::st_as_sf(coords = c("x", "y")
+                       , crs = sf::st_crs(predictors)
+                       ) %>%
+          sf::st_filter(prep$predict_boundary %>%
+                          sf::st_transform(crs = sf::st_crs(predictors))
+                        ) %>%
+          sf::st_coordinates()
+
+        base::colnames(prep$presence) <- c("x", "y")
 
 
         # folds adj -------
@@ -395,7 +400,23 @@
             terra::stretch(1, stretch_value) %>%
             terra::subst(NA,0)
 
-          if(FALSE) terra::plot(target_density)
+          if(FALSE) {
+
+            terra::plot(predictors[[1]])
+            terra::plot(target_density, add = TRUE)
+
+            ps <- prep$presence %>%
+              tibble::as_tibble() %>%
+              sf::st_as_sf(coords = c("x", "y"), crs = sf::st_crs(predictors)) %>%
+              terra::vect()
+
+            terra::plot(ps, add = TRUE)
+
+            terra::plot(prep$predict_boundary %>% terra::vect()
+                        , add = TRUE
+                        )
+
+          }
 
           terra::writeRaster(target_density
                              , density_file
