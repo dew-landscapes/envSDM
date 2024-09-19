@@ -158,87 +158,91 @@
         stats::na.omit() %>%
         tibble::as_tibble()
 
-      prep$timer <- envFunc::timer("raster presence"
-                          , notes = paste0(nrow(prep$presence), " raster presences")
+
+      # predict limits -------
+
+      if(!isFALSE(pred_limit)) {
+
+        if(is.character(pred_limit)) {
+          # use existing MCP polygon file for the predict boundary
+
+          prep$predict_boundary <- sfarrow::st_read_parquet(pred_limit) %>%
+            sf::st_geometry() %>%
+            sf::st_sf() %>%
+            sf::st_transform(crs = sf::st_crs(predictors[[1]])) %>%
+            sf::st_convex_hull() %>%
+            sf::st_buffer(limit_buffer) %>%
+            sf::st_make_valid()
+
+
+        } else {
+          # create new MCP polygon around the presences for the predict boundary
+
+          prep$predict_boundary <- presence %>%
+            dplyr::distinct(!!rlang::ensym(pres_x), !!rlang::ensym(pres_y)) %>%
+            sf::st_as_sf(coords = c(pres_x, pres_y)
+                         , crs = pres_crs
+                         ) %>%
+            sf::st_transform(crs = sf::st_crs(predictors[[1]])) %>%
+            sf::st_union() %>%
+            sf::st_convex_hull() %>%
+            sf::st_sf() %>%
+            sf::st_buffer(limit_buffer) %>%
+            sf::st_make_valid()
+
+        }
+
+        pred_limit <- TRUE
+
+      } else {
+        # use the full extent of the predictors for the predict boundary
+        # No point buffering here
+
+        prep$predict_boundary <- sf::st_bbox(predictors) %>%
+          sf::st_as_sfc() %>%
+          sf::st_sf()  %>%
+          sf::st_make_valid()
+
+      }
+
+      if(!is.null(pred_clip)) {
+
+        prep$predict_boundary <- prep$predict_boundary %>%
+          sf::st_intersection(pred_clip %>%
+                                sf::st_transform(crs = sf::st_crs(prep$predict_boundary))
+                              ) %>%
+          sf::st_make_valid()
+
+
+      }
+
+      prep$timer <- envFunc::timer("predict boundary"
                           , time_df = prep$timer
                           , write_log = TRUE
                           )
 
+      # prep$presence clip to predict_boundary ---------
+      # catch some cases where there are presence records on the predictors
+      # but outside the predict boundary (so there are no background points
+      # around those presences).
+      prep$presence <- prep$presence %>%
+        sf::st_as_sf(coords = c("x", "y")
+                     , crs = sf::st_crs(predictors)
+                     ) %>%
+        sf::st_filter(prep$predict_boundary %>%
+                        sf::st_transform(crs = sf::st_crs(predictors))
+                      ) %>%
+        sf::st_coordinates() %>%
+        tibble::as_tibble() %>%
+        purrr::set_names(c("x", "y"))
+
+      prep$timer <- envFunc::timer("presences"
+                        , notes = paste0(nrow(prep$presence), " in predict_boundary and on env rasters")
+                        , time_df = prep$timer
+                        , write_log = TRUE
+                        )
+
       if(nrow(prep$presence) > min_fold_n) {
-
-        # predict limits -------
-
-        if(!isFALSE(pred_limit)) {
-
-          if(is.character(pred_limit)) {
-            # use existing MCP polygon file for the predict boundary
-
-            prep$predict_boundary <- sfarrow::st_read_parquet(pred_limit) %>%
-              sf::st_transform(crs = sf::st_crs(predictors[[1]])) %>%
-              sf::st_buffer(limit_buffer) %>%
-              sf::st_make_valid() %>%
-              sf::st_sf()
-
-          } else {
-            # create new MCP polygon around the presences for the predict boundary
-
-            prep$predict_boundary <- presence %>%
-              dplyr::distinct(!!rlang::ensym(pres_x), !!rlang::ensym(pres_y)) %>%
-              sf::st_as_sf(coords = c(pres_x, pres_y)
-                           , crs = pres_crs
-                           ) %>%
-              sf::st_transform(crs = sf::st_crs(predictors[[1]])) %>%
-              sf::st_union() %>%
-              sf::st_convex_hull() %>%
-              sf::st_sf() %>%
-              sf::st_buffer(limit_buffer) %>%
-              sf::st_make_valid()
-
-          }
-
-          pred_limit <- TRUE
-
-        } else {
-          # use the full extent of the predictors for the predict boundary
-
-          prep$predict_boundary <- sf::st_bbox(predictors) %>%
-            sf::st_as_sfc() %>%
-            sf::st_sf()  %>%
-            sf::st_make_valid()
-
-        }
-
-        if(!is.null(pred_clip)) {
-
-          prep$predict_boundary <- prep$predict_boundary %>%
-            sf::st_intersection(pred_clip %>%
-                                  sf::st_transform(crs = sf::st_crs(prep$predict_boundary))
-                                ) %>%
-            sf::st_make_valid()
-
-
-        }
-
-        prep$timer <- envFunc::timer("predict boundary"
-                            , time_df = prep$timer
-                            , write_log = TRUE
-                            )
-
-        # prep$presence clip to predict_boundary ---------
-        # catch some cases where there are presence records on the predictors
-        # but outside the predict boundary (so there are no background points
-        # around those presences).
-        prep$presence <- prep$presence %>%
-          sf::st_as_sf(coords = c("x", "y")
-                       , crs = sf::st_crs(predictors)
-                       ) %>%
-          sf::st_filter(prep$predict_boundary %>%
-                          sf::st_transform(crs = sf::st_crs(predictors))
-                        ) %>%
-          sf::st_coordinates() %>%
-          tibble::as_tibble() %>%
-          purrr::set_names(c("x", "y"))
-
 
         # folds adj -------
 
@@ -497,8 +501,9 @@
                        , title = this_taxa
                        , dots = prep$presence %>%
                          sf::st_as_sf(coords = c("x", "y")
-                                      , crs = sf::st_crs(target_density)
-                                      )
+                                      , crs = sf::st_crs(predictors)
+                                      ) %>%
+                         sf::st_transform(crs = sf::st_crs(target_density))
                        , trim = TRUE
                        , out_png = dens_png
                        )
@@ -838,7 +843,7 @@
       } else {
 
         prep$timer <- envFunc::timer("warning"
-                            , notes = paste0("only ", nrow(prep$presence), " (raster) presence points. SDM abandoned")
+                            , notes = paste0("only ", nrow(prep$presence), " useable presence points. SDM abandoned")
                             , time_df = prep$timer
                             )
 
