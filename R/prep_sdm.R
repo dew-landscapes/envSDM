@@ -223,8 +223,7 @@
 
       # prep$presence clip to predict_boundary ---------
       # catch some cases where there are presence records on the predictors
-      # but outside the predict boundary (so there are no background points
-      # around those presences).
+      # but outside the predict boundary.
       prep$presence <- prep$presence %>%
         sf::st_as_sf(coords = c("x", "y")
                      , crs = sf::st_crs(predictors)
@@ -232,9 +231,7 @@
         sf::st_filter(prep$predict_boundary %>%
                         sf::st_transform(crs = sf::st_crs(predictors))
                       ) %>%
-        sf::st_coordinates() %>%
-        tibble::as_tibble() %>%
-        purrr::set_names(c("x", "y"))
+        sf::st_coordinates()
 
       prep$timer <- envFunc::timer("presences"
                         , notes = paste0(nrow(prep$presence), " in predict_boundary and on env rasters")
@@ -243,6 +240,11 @@
                         )
 
       if(nrow(prep$presence) > min_fold_n) {
+
+        prep$presence <- prep$presence %>%
+          tibble::as_tibble() %>%
+          purrr::set_names(c("x", "y"))
+
 
         # folds adj -------
 
