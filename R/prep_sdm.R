@@ -17,9 +17,10 @@
 #' the x and y coordinates
 #' @param pred_limit Limit the background points and predictions?
 #' Can be `TRUE` (use points to generate a minimum convex polygon to use as a
-#' limit), `FALSE` (do not limit) or path to existing sf to use.
-#' @param limit_buffer Numeric. Apply this buffer to `pred_limit`. This value
-#' is passed to the `dist` argument of `sf::st_buffer()`.
+#' limit), `FALSE` (the full extent of the predictors will be used) or path to
+#' existing .parquet to use.
+#' @param limit_buffer Numeric. Apply this buffer to `pred_limit`. Only used if
+#' `pred_limit` is `TRUE`. Passed to the `dist` argument of `sf::st_buffer()`.
 #' @param pred_clip sf. Optional sf to clip the pred_limit back to (e.g. to
 #' prevent prediction into ocean)
 #' @param predictors Character. Vector of paths to predictor `.tif` files.
@@ -163,15 +164,13 @@
 
       if(!isFALSE(pred_limit)) {
 
-        if(is.character(pred_limit)) {
+        if(file.exists(pred_limit)) {
           # use existing MCP polygon file for the predict boundary
 
           prep$predict_boundary <- sfarrow::st_read_parquet(pred_limit) %>%
             sf::st_geometry() %>%
             sf::st_sf() %>%
             sf::st_transform(crs = sf::st_crs(predictors[[1]])) %>%
-            sf::st_convex_hull() %>%
-            sf::st_buffer(limit_buffer) %>%
             sf::st_make_valid()
 
 
@@ -281,6 +280,9 @@
           spatial_folds <- FALSE
 
         }
+
+        k_folds_adj <- k_folds
+        # use k_folds_adj if need to revert to non-spatial cv later (see folds/non-spatial)
 
         # num_bg adj------
 
@@ -721,15 +723,15 @@
 
             ## non-spatial -------
 
-            blocks <- tibble::tibble(fold_ids = c(sample(1:k_folds
+            blocks <- tibble::tibble(fold_ids = c(sample(1:k_folds_adj
                                                          , sum(prep$spp_pa_env$pa == 1)
                                                          , replace = TRUE
-                                                         , prob = rep(1 / k_folds, k_folds)
+                                                         , prob = rep(1 / k_folds_adj, k_folds_adj)
                                                          )
-                                                  , sample(1:k_folds
+                                                  , sample(1:k_folds_adj
                                                            , sum(prep$spp_pa_env$pa == 0)
                                                            , replace = TRUE
-                                                           , prob = rep(1 / k_folds, k_folds)
+                                                           , prob = rep(1 / k_folds_adj, k_folds_adj)
                                                            )
                                                   )
                                      )
