@@ -49,8 +49,8 @@
 #' used when masking the full raster back to the mcp (e.g. also passed to
 #' `terra::mask()`)
 #'
-#' @return `invisible(NULL)`. Output .tif, .log, and optional .png, written to
-#' `out_dir`
+#' @return Character vector of created .tif files. Output .tif(s), .log, and
+#' optional .png, written to `out_dir`
 #' @export
 #'
 #' @example inst/examples/predict_sdm_ex.R
@@ -345,7 +345,24 @@
 
     }
 
-    return(invisible(NULL))
+    if(do_gc) {
+
+        stuff <- ls()
+
+        delete_stuff <- stuff[! stuff %in% c("pred_file", "mask_file", "thresh_file")]
+
+        rm(list = delete_stuff)
+
+        gc()
+
+      }
+
+    res <- c(if(file.exists(pred_file)) pred_file
+             , if(file.exists(mask_file)) mask_file
+             , if(file.exists(thresh_file)) thresh_file
+             )
+
+    return(res)
 
   }
 

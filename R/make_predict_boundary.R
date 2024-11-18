@@ -91,7 +91,11 @@ make_predict_boundary <- function(poly_list
 
       sfarrow::st_write_parquet(mcp, out_file)
 
-    } else poly <- NA
+    } else {
+
+      mcp <- NULL
+
+    }
 
   } else {
 

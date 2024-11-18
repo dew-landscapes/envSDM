@@ -46,7 +46,10 @@
 #' the `thresholds` element of the `pa_ModelEvaluation` object returned by
 #' `predicts::pa_evaluate()` will be limited to the values in `tr`).
 #'
-#' @return `invisible(NULL)`. `tune.rds` and log written in `save_to`
+#' @return Character path to output .rds file. `tune.rds` saved into `save_to`
+#' directory. log written. `tune.rds` is a data frame but performs poorly, due
+#' to list columns, if not imported as a tibble (e.g. via
+#' `rio::import("tune.rds", setclass = "tibble"))`)
 #' @export
 #'
 #' @example inst/examples/tune_sdm_ex.R
@@ -642,7 +645,11 @@
 
       if(do_gc) {
 
-        rm(list = ls())
+        stuff <- ls()
+
+        delete_stuff <- stuff[stuff != "tune_file"]
+
+        rm(list = delete_stuff)
 
         gc()
 
@@ -650,7 +657,9 @@
 
     }
 
-  return(invisible(NULL))
+    res <- if(file.exists(tune_file)) tune_file else NULL
+
+    return(res)
 
   }
 

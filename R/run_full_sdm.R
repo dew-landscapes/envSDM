@@ -17,10 +17,10 @@
 #' `fs::path(out_dir, use_metric)`
 #' @param ... Passed to `tune_sdm()`
 #'
-#' @return `invisible(NULL)`. `tune.rds` saved into `save_to` directory. log
-#' written. `tune.rds` is a data frame but performs poorly, due to list columns
-#' , if not imported as a tibble (e.g. via
-#' `rio::import(tune.rds, setclass = "tibble"))`)
+#' @return Character path to output .rds file. `tune.rds` saved into `save_to`
+#' directory. log written. `tune.rds` is a data frame but performs poorly, due
+#' to list columns, if not imported as a tibble (e.g. via
+#' `rio::import("tune.rds", setclass = "tibble"))`)
 #' @export
 #'
 #' @examples inst/examples/predict_sdm_ex.R
@@ -103,7 +103,11 @@
 
           if(do_gc) {
 
-            rm(list = ls())
+            stuff <- ls()
+
+            delete_stuff <- stuff[stuff != "tune_file"]
+
+            rm(list = delete_stuff)
 
             gc()
 
@@ -126,7 +130,9 @@
 
     }
 
-    return(invisible(NULL))
+    res <- if(file.exists(tune_file)) tune_file else NULL
+
+    return(res)
 
   }
 

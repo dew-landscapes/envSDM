@@ -54,7 +54,8 @@
 #' parallel.
 #' @param force_new Logical. If outputs already exist, should they be remade?
 #'
-#' @return `invisible(NULL)`. `prep.rds` (a list) and log written to `out_dir`
+#' @return Character path to output .rds file. `prep.rds` (a list) and log
+#' written to `out_dir`.
 #' @export
 #'
 #' @example inst/examples/prep_sdm_ex.R
@@ -130,7 +131,7 @@
       if(is_env_pred) {
 
         pred_names <- envRaster::name_env_tif(tibble::tibble(path = predictors), parse = TRUE) %>%
-          dplyr::mutate(name = paste0(start_date,"__", layer)) %>%
+          dplyr::mutate(name = paste0(layer,"__", start_date)) %>%
           dplyr::pull(name)
 
         predictors <- terra::rast(predictors)
@@ -863,7 +864,11 @@
 
       if(do_gc) {
 
-        rm(list = ls())
+        stuff <- ls()
+
+        delete_stuff <- stuff[stuff != "prep_file"]
+
+        rm(list = delete_stuff)
 
         gc()
 
@@ -871,7 +876,7 @@
 
     }
 
-    return(invisible(NULL))
+    return(prep_file)
 
   }
 
