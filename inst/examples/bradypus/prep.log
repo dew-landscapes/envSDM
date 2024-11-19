@@ -1,12 +1,12 @@
 bradypus
 
-prep start: 2024-11-19 09:13:51.566346. 116 original records.
-predict boundary: 00:00:00.187629.
-presences: 00:00:00.170264. 92 in predict_boundary and on env rasters.
-density: 00:00:00.650146.
-background points: 00:00:00.204112. 10000 background points attempted. 3228 achieved.
-env data: 00:00:09.762024.
-folds: 00:00:07.897935. spatial folds = TRUE. Folds = 5.
-correlation: 00:00:01.206271.
-prep end. total prep elapsed time: 00:00:20.17106
+prep start: 2024-11-19 17:03:04.271421. 116 original records.
+predict boundary: 00:00:00.162784.
+presences: 00:00:00.154178. 92 in predict_boundary and on env rasters.
+density: 00:00:00.610402.
+background points: 00:00:00.187247. 10000 background points attempted. 3219 achieved.
+env data: 00:00:09.849686.
+folds: 00:00:08.816494. spatial folds = TRUE. Folds = 5.
+correlation: 00:00:01.877690.
+prep end. total prep elapsed time: 00:00:21.932122
 .
