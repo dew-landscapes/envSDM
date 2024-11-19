@@ -76,8 +76,8 @@ used when masking the full raster back to the mcp (e.g. also passed to
 \code{terra::mask()})}
 }
 \value{
-\code{invisible(NULL)}. Output .tif, .log, and optional .png, written to
-\code{out_dir}
+Character vector of created .tif files. Output .tif(s), .log, and
+optional .png, written to \code{out_dir}
 }
 \description{
 When running predict_sdm, the first predict, saved as 'full.tif' is always to
@@ -128,7 +128,6 @@ can also be saved (saved as 'thresh.tif') - see \code{apply_thresh} argument.
                                   , is_env_pred = FALSE
                                   , limit_to_mcp = TRUE
                                   , check_tifs = TRUE
-                                  , force_new = TRUE
                                   )
                )
 
@@ -138,7 +137,6 @@ can also be saved (saved as 'thresh.tif') - see \code{apply_thresh} argument.
                , \(x, y) png_from_preds(pred_dir = x
                                         , tune_dir = y
                                         , trim = FALSE
-                                        #, force_new = TRUE
                                         , recurse = 1
                                         )
                )

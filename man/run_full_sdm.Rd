@@ -38,10 +38,10 @@ parallel.}
 \item{...}{Passed to \code{tune_sdm()}}
 }
 \value{
-\code{invisible(NULL)}. \code{tune.rds} saved into \code{save_to} directory. log
-written. \code{tune.rds} is a data frame but performs poorly, due to list columns
-, if not imported as a tibble (e.g. via
-\verb{rio::import(tune.rds, setclass = "tibble"))})
+Character path to output .rds file. \code{tune.rds} saved into \code{save_to}
+directory. log written. \code{tune.rds} is a data frame but performs poorly, due
+to list columns, if not imported as a tibble (e.g. via
+\verb{rio::import("tune.rds", setclass = "tibble"))})
 }
 \description{
 Run an SDM using no cross validation and previously established tune arguments

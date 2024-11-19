@@ -87,7 +87,10 @@ the \code{thresholds} element of the \code{pa_ModelEvaluation} object returned b
 \code{predicts::pa_evaluate()} will be limited to the values in \code{tr}).}
 }
 \value{
-\code{invisible(NULL)}. \code{tune.rds} and log written in \code{save_to}
+Character path to output .rds file. \code{tune.rds} saved into \code{save_to}
+directory. log written. \code{tune.rds} is a data frame but performs poorly, due
+to list columns, if not imported as a tibble (e.g. via
+\verb{rio::import("tune.rds", setclass = "tibble"))})
 }
 \description{
 Tune, and evaluate, species distribution models
