@@ -90,6 +90,10 @@
                            , "prep.log"
                            )
 
+    prep_file <- fs::path(out_dir
+                            , "prep.rds"
+                            )
+
     run <- if(file.exists(prep_log)) {
 
       any(!grepl("prep end", paste0(readLines(prep_log), collapse = " "))
@@ -107,10 +111,6 @@
       fs::dir_create(out_dir)
 
       # setup ------
-
-      prep_file <- fs::path(out_dir
-                            , "prep.rds"
-                            )
 
       prep <- list(inputs = mget(ls(pattern = "[^predictors]"))
                    , original = presence
@@ -346,7 +346,7 @@
                                     )
 
             pres_ras <- terra::rasterize(prep$presence %>%
-                                           sf::st_as_sf(coords = c(x, y)
+                                           sf::st_as_sf(coords = c("x", "y")
                                                         , crs = sf::st_crs(predictors[[1]])
                                                         )
                                          , y = temp_ras
@@ -490,7 +490,9 @@
 
         target_density <- terra::rast(density_file)
 
-        prep <- rio::import(prep_file)
+        prep <- rio::import(prep_file
+                            , trust = TRUE
+                            )
 
       }
 
@@ -864,11 +866,7 @@
 
       if(do_gc) {
 
-        stuff <- ls()
-
-        delete_stuff <- stuff[stuff != "prep_file"]
-
-        rm(list = delete_stuff)
+        rm(list = ls(pattern = "^[^prep_file$]"))
 
         gc()
 

@@ -1,6 +1,9 @@
-predict start: 2024-09-09 15:34:53.762144.
-message: 00:00:00.624535. full predict for acaule from 'maxnet, lognet and glmnet' (maxnet) model.
-full: 00:00:00.289989.
-mask: 00:00:00.086643.
-threshold: 00:00:00.134853.
-predict end. total predict elapsed time: 00:00:01.134946.
+predict start
+
+predict start: 2024-11-19 14:12:11.241187.
+message: 00:00:01.295914. full predict for acaule from 'maxnet, lognet and glmnet' (maxnet) model.
+full: 00:00:00.300183.
+mask: 00:00:00.124783.
+threshold: 00:00:00.143467.
+predict end. total predict elapsed time: 00:00:01.858984
+.

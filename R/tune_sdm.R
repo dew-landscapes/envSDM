@@ -329,7 +329,7 @@
                                                    , a_data_test
                                                    )
                                               , \(a, b, c) evaluate_sdm(a, b, c
-                                                                        , ...
+                                                                        #, ...
                                                                         , do_gc = do_gc
                                                                         )
                                               )

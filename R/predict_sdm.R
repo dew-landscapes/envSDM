@@ -347,11 +347,7 @@
 
     if(do_gc) {
 
-        stuff <- ls()
-
-        delete_stuff <- stuff[! stuff %in% c("pred_file", "mask_file", "thresh_file")]
-
-        rm(list = delete_stuff)
+        rm(list = ls(pattern = "^(?!.*_file)"))
 
         gc()
 

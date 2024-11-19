@@ -1,6 +1,9 @@
-predict start: 2024-09-09 15:34:55.155466.
-message: 00:00:00.619514. full predict for bradypus from 'randomForest' (rf) model.
-full: 00:00:00.306748.
-mask: 00:00:00.086667.
-threshold: 00:00:00.180898.
-predict end. total predict elapsed time: 00:00:01.193605.
+predict start
+
+predict start: 2024-11-19 14:12:13.374333.
+message: 00:00:00.981456. full predict for bradypus from 'randomForest' (rf) model.
+full: 00:00:00.389239.
+mask: 00:00:00.154536.
+threshold: 00:00:00.121479.
+predict end. total predict elapsed time: 00:00:01.64209
+.

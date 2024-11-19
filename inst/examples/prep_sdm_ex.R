@@ -21,10 +21,16 @@
 
   # mcps --------
 
+  # make a clip boundary so mcps stay terrestrial
+  clip <- terra::as.polygons(terra::rast(env_dat)[[1]] > -Inf) |>
+    sf::st_as_sf()
+
   purrr::pwalk(list(data$presence
                    , data$out_mcp
                    )
-              , \(x, y) make_mcp(x, y, pres_x = "lon")
+              , \(x, y) make_mcp(x, y, pres_x = "lon"
+                                 , clip = clip
+                                 )
               )
 
 
@@ -46,26 +52,23 @@
                                                , pred_limit = d
                                                , limit_buffer = 10000
                                                , dens_res = 1000 # ignored as decimal degrees preds
-                                               , force_new = TRUE
                                                )
                )
 
-  prep_ex <- rio::import(fs::path(data$out_dir[[2]], "prep.rds"))
+  # example of 'prep'
+  prep <- rio::import(fs::path(data$out_dir[[2]], "prep.rds"))
 
-  names(prep_ex)
+  names(prep)
 
   # Density raster
-  land <- terra::as.polygons(terra::rast(env_dat)[[1]] > -Inf) %>%
-    sf::st_as_sf()
-
   dens_ras <- terra::rast(fs::path(data$out_dir[[2]], "density.tif")) %>%
-    terra::mask(land) %>%
+    terra::mask(clip) %>%
     terra::classify(matrix(c(0, NA), ncol = 2))
 
   if(require("tmap")) {
 
     m <-
-      tm_shape(land) +
+      tm_shape(clip) +
       tm_borders() +
       tm_shape(dens_ras) +
       tm_raster(title = "Background point density"
@@ -76,12 +79,15 @@
       tm_legend(outside = TRUE) +
       tm_compass() +
       tm_scale_bar() +
-      tm_layout(main.title = paste0("Background point density for ",  prep_ex$inputs$this_taxa))
+      tm_layout(main.title = paste0("Background point density for ",  prep$inputs$this_taxa))
 
     m
 
-    presences <- blocks %>%
-      dplyr::filter(pa == 1)
+    presences <- prep$blocks %>%
+      dplyr::filter(pa == 1) %>%
+      sf::st_as_sf(coords = c("x", "y")
+                   , crs = 4326
+                   )
 
     m +
       tm_shape(presences) +
@@ -92,23 +98,23 @@
   # Background points
   if(require("tmap")) {
 
-    blocks <- prep_ex$blocks %>%
+    blocks <- prep$blocks %>%
       dplyr::mutate(blocks = factor(block)) %>% # for map
       sf::st_as_sf(coords = c("x", "y")
                    , crs = sf::st_crs(terra::rast(env_dat[[1]]))
                    )
 
 
-    tm_shape(land) +
+    tm_shape(clip) +
       tm_borders() +
       tm_shape(blocks) +
-      tm_dots(title = "Background points, coloured by block"
+      tm_dots(title = "Background points\n coloured by block"
               , col = "block"
               ) +
       tm_legend(outside = TRUE) +
       tm_compass() +
       tm_scale_bar() +
-      tm_layout(main.title = paste0("Background points for ",  prep_ex$inputs$this_taxa))
+      tm_layout(main.title = paste0("Background points for ",  prep$inputs$this_taxa))
 
 
   }

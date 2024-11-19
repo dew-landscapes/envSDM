@@ -7,6 +7,7 @@
   background <- prep$blocks[prep$blocks$pa == 0 & prep$blocks$block != 1, ]
 
   evaluate_ex_dir <- fs::path(out_dir, "evaluate_example")
+  fs::dir_create(evaluate_ex_dir)
 
   tune_sdm(out_dir = out_dir
            , algo = "rf"

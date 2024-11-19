@@ -37,7 +37,6 @@
                                   , is_env_pred = FALSE
                                   , limit_to_mcp = TRUE
                                   , check_tifs = TRUE
-                                  , force_new = TRUE
                                   )
                )
 
@@ -47,7 +46,6 @@
                , \(x, y) png_from_preds(pred_dir = x
                                         , tune_dir = y
                                         , trim = FALSE
-                                        #, force_new = TRUE
                                         , recurse = 1
                                         )
                )

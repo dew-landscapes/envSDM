@@ -27,7 +27,17 @@
                            , ...
                            ) {
 
-    p_type <- if(any(class(m) %in% c("maxnet", "envelope_model"))) "cloglog" else "prob"
+    if(any(class(m) %in% c("maxnet", "envelope_model"))) {
+
+      p_type <- "cloglog"
+      index <- 1
+
+    } else {
+
+      p_type <- "prob"
+      index <- "1"
+
+    }
 
     # predict not working for envelope models. Don't think it could find the appropriate predict. no issue for rf or maxnet
     requireNamespace("predicts", quietly = TRUE)
@@ -43,8 +53,8 @@
                  , x = new_data
                  , ...
                  ) %>%
-      tibble::as_tibble() %>%
-      dplyr::select(ncol(.)) %>%
+      tibble::as_tibble(.name_repair = "minimal") %>%
+      dplyr::select(pred = tidyselect::any_of(index)) %>%
       dplyr::mutate(p = c(rep(1, nrow(p_test)), rep(0, nrow(b_test))))
 
     e <- predicts::pa_evaluate(p[p$p == 1, 1][[1]]
