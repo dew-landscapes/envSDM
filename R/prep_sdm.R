@@ -163,10 +163,10 @@
 
       # predict limits -------
 
-      if(!isFALSE(pred_limit)) {
+      # use existing MCP polygon file for the predict boundary
+      if(is.character(pred_limit)) {
 
         if(file.exists(pred_limit)) {
-          # use existing MCP polygon file for the predict boundary
 
           prep$predict_boundary <- sfarrow::st_read_parquet(pred_limit) %>%
             sf::st_geometry() %>%
@@ -174,34 +174,42 @@
             sf::st_transform(crs = sf::st_crs(predictors[[1]])) %>%
             sf::st_make_valid()
 
-
-        } else {
-          # create new MCP polygon around the presences for the predict boundary
-
-          prep$predict_boundary <- presence %>%
-            dplyr::distinct(!!rlang::ensym(pres_x), !!rlang::ensym(pres_y)) %>%
-            sf::st_as_sf(coords = c(pres_x, pres_y)
-                         , crs = pres_crs
-                         ) %>%
-            sf::st_transform(crs = sf::st_crs(predictors[[1]])) %>%
-            sf::st_union() %>%
-            sf::st_convex_hull() %>%
-            sf::st_sf() %>%
-            sf::st_buffer(limit_buffer) %>%
-            sf::st_make_valid()
+          pred_limit <- TRUE
 
         }
 
+      }
+
+      # create new MCP polygon around the presences for the predict boundary
+      if(isTRUE(pred_limit)) {
+
+        prep$predict_boundary <- presence %>%
+          dplyr::distinct(!!rlang::ensym(pres_x), !!rlang::ensym(pres_y)) %>%
+          sf::st_as_sf(coords = c(pres_x, pres_y)
+                       , crs = pres_crs
+                       ) %>%
+          sf::st_transform(crs = sf::st_crs(predictors[[1]])) %>%
+          sf::st_union() %>%
+          sf::st_convex_hull() %>%
+          sf::st_sf() %>%
+          sf::st_buffer(limit_buffer) %>%
+          sf::st_make_valid()
+
         pred_limit <- TRUE
 
-      } else {
-        # use the full extent of the predictors for the predict boundary
-        # No point buffering here
+      }
+
+      # use the full extent of the predictors for the predict boundary
+      # No point buffering here
+      # captures anything not already captured above
+      if(! "sf" %in% class(prep$predict_boundary)) {
 
         prep$predict_boundary <- sf::st_bbox(predictors) %>%
           sf::st_as_sfc() %>%
           sf::st_sf()  %>%
           sf::st_make_valid()
+
+        pred_limit <- FALSE
 
       }
 
