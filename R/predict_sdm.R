@@ -202,7 +202,6 @@
         if(is_env_pred) {
 
           pred_names <- envRaster::name_env_tif(tibble::tibble(path = predictors), parse = TRUE) %>%
-            dplyr::mutate(name = paste0(season,"__", layer)) %>%
             dplyr::pull(name)
 
           x <- terra::rast(predictors)
