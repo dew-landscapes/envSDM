@@ -1,2 +1,0 @@
-algo,tune_args,tunes,fc,rm,combo,best,auc_po,ODP,CBI_rescale,IMAE,auc_po_flexsdm,CBI,n_p_test,n_p_train,n_a_train,max_kappa,max_spec_sens,no_omission,equal_prevalence,equal_sens_spec
-maxnet,fc: l. rm: 1,2,l,1,0.503729762955708,TRUE,0.840708542935961,0.904954804503903,0.748834404823102,0.80014069993481,0.840708542935961,0.497668809646205,64,64,851.5,0.170811535,0.110000255,0.050744785,0.095064455,0.254430625

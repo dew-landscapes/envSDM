@@ -17,10 +17,10 @@
 #' @param col_name_val Value to provide in the column in the resulting mcp
 #' @param clip sf. Clip the resulting mcp back to this.
 #' @param out_crs Numeric. [epsg](https://epsg.io/) code
-#' @param return_poly Logical. Return the mcp, or alternatively `invisible(NULL)`
+#' @param return_poly Logical. Return the mcp, or alternatively `out_file`
 #' @param force_new Logical. If `out_file` exists, recreate it?
 #'
-#' @return `if(return_poly) sf else invisible(NULL)`. .parquet mcp written to
+#' @return If `return_poly`, sf, else `out_file`. .parquet mcp written to
 #' `out_file`
 #' @export
 #'
@@ -103,6 +103,6 @@ make_predict_boundary <- function(poly_list
 
   }
 
-  if(return_poly) return(mcp) else return(invisible(NULL))
+  if(return_poly) return(mcp) else return(out_file)
 
 }

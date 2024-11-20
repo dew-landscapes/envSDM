@@ -1,9 +1,14 @@
-predict start
 
-predict start: 2024-11-19 14:12:11.241187.
-message: 00:00:01.295914. full predict for acaule from 'maxnet, lognet and glmnet' (maxnet) model.
-full: 00:00:00.300183.
-mask: 00:00:00.124783.
-threshold: 00:00:00.143467.
-predict end. total predict elapsed time: 00:00:01.858984
-.
+
+acaule
+predict start at 2024-11-20 16:41:52.410518
+full predict for acaule from 'randomForest' (rf) model
+full done. elapsed time = 9.95 minutes
+full predict for acaule from 'randomForest' (rf) model
+full done in 0.13 minutes
+mask for acaule
+mask for acaule
+mask done in 0.04 minutes
+thresh for acaule
+thresh done in 0.83 minutes
+predict finished. elapsed time: 17.89 minutes

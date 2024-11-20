@@ -32,12 +32,12 @@ make_predict_boundary(
 
 \item{out_crs}{Numeric. \href{https://epsg.io/}{epsg} code}
 
-\item{return_poly}{Logical. Return the mcp, or alternatively \code{invisible(NULL)}}
+\item{return_poly}{Logical. Return the mcp, or alternatively \code{out_file}}
 
 \item{force_new}{Logical. If \code{out_file} exists, recreate it?}
 }
 \value{
-\code{if(return_poly) sf else invisible(NULL)}. .parquet mcp written to
+If \code{return_poly}, sf, else \code{out_file}. .parquet mcp written to
 \code{out_file}
 }
 \description{

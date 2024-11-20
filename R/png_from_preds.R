@@ -5,10 +5,14 @@
 #' retrieval and addition to the map of: various SDM metrics; and the original
 #' presence points.
 #'
-#' @param pred_dir Character. Name of directory containing predicted .tif(s) to
-#' save as .png
-#' @param tune_dir Character. Name of directory containing the tune results used
-#' to make the predictions in pred_dir.
+#' @param prep Character or named list. If character, the path to an existing
+#' `prep.rds`. Otherwise, the result of a call to `prep_sdm()` with return_val =
+#' "object".
+#' @param full_run Character or named list. If character, the path to an
+#' existing `full_run.rds`. Otherwise, the result of a call to `run_full_sdm`()
+#' with return_val = "object".
+#' @param out_dir Character. Name of directory into which `.pngs`s will be
+#' saved. Will be created if it does not exist.
 #' @param trim Logical. Trim NA values from outside (using `terra::trim()`)
 #' @param force_new Logical. If .png file already exists, recreate it?
 #' @param do_gc Logical. Run `base::rm(list = ls)` and `base::gc()` at end of
@@ -21,14 +25,34 @@
 #' @export
 #' @example inst/examples/predict_sdm_ex.R
 png_from_preds <- function(pred_dir
-                           , tune_dir = NULL
+                           , full_run_dir = NULL
                            , trim = TRUE
                            , force_new = FALSE
                            , do_gc = TRUE
                            , ...
                            ) {
 
-  if(is.null(tune_dir)) tune_dir = pred_dir
+  # setup -------
+  if(isFALSE(out_dir)) out_dir <- tempfile()
+
+  ## out_dir ------
+  if(is.character(out_dir)) {
+
+    fs::dir_create(out_dir)
+
+    if(!dir.exists(out_dir)) {
+
+      stop("can't create out_dir")
+
+    }
+
+  }
+
+  ## prep -------
+  if(! "list" %in% class(prep)) prep <- rio::import(prep)
+
+  ## tune ---------
+  if(! "list" %in% class(full_run)) full_run <- rio::import(full_run)
 
   if(dir.exists(pred_dir)) {
 
@@ -36,6 +60,8 @@ png_from_preds <- function(pred_dir
                        , regexp = "tif$"
                        , ...
                        )
+
+    pngs <- gsub("tif$", "png", tifs)
 
   } else {
 
@@ -50,46 +76,14 @@ png_from_preds <- function(pred_dir
 
   if(length(tifs)) {
 
-    tif_dirs <- tibble::enframe(unique(dirname(tifs))
-                                , name = NULL
-                                , value = "pred_dir"
-                                ) %>%
-      dplyr::mutate(metric = basename(pred_dir)
-                    , tune_dir = fs::path(tune_dir, metric)
-                    ) %>%
-      dplyr::filter(metric %in% c("combo", envSDM::sdm_metrics$metric)) %>%
-      dplyr::mutate(taxa = basename(dirname(pred_dir)))
+    tune <- full_run$tune_mean
 
-    pred_tifs <- tif_dirs %>%
-      dplyr::filter(metric != "") %>%
-      dplyr::mutate(tune_dir = fs::path(tune_dir)
-                    , tune = purrr::map(tune_dir
-                                      , \(x) rio::import(fs::path(x, "tune.rds"))
-                                      )
-                    ) %>%
-      tidyr::unnest(cols = c(tune)) %>%
-      dplyr::mutate(auc = purrr::map_dbl(e, \(x) x@stats$auc_po)
-                    , CBI_r = purrr::map_dbl(e, \(x) x@stats$CBI_rescale)
-                    , IMAE = purrr::map_dbl(e, \(x) x@stats$IMAE)
-                    , combo = auc * CBI_r * IMAE
-                    , tr = purrr::map_dbl(e, \(x) x@thresholds$max_spec_sens)
-                    ) %>%
-      dplyr::mutate(tif = purrr::map(pred_dir, \(x) fs::dir_ls(x, regexp = "tif$"))) %>%
-      dplyr::select(! dplyr::where(is.list), tif) %>%
-      tidyr::unnest(cols = c(tif)) %>%
-      dplyr::mutate(png = gsub("tif$", "png", tif)
-                    , todo = any(!file.exists(png), force_new)
-                    )
+    todo <- any(!file.exists(pngs), force_new)
 
-    if(any(pred_tifs$todo)) {
+    if(todo) {
 
       pred_png <- function(tif
-                           , tune_args
-                           , auc
-                           , CBI_r
-                           , IMAE
-                           , combo
-                           , tr
+                           , tune
                            , png
                            , recs
                            ) {
@@ -98,23 +92,23 @@ png_from_preds <- function(pred_dir
                        , basename(dirname(tif))
                        , " metric:"
                         , "\n"
-                        , paste0(tune_args
+                        , paste0(tune$tune_args
                                  , ". "
                                  )
                         , paste0("auc_po: "
-                                 , round(auc, 2)
+                                 , round(tune$auc_po, 2)
                                  , "\n"
                                  )
                         , paste0("CBI_rescale: "
-                                 , round(CBI_r, 2)
+                                 , round(tune$CBI_rescale, 2)
                                  , ". "
                                  )
                         , paste0("IMAE :"
-                                 , round(IMAE, 2)
+                                 , round(tune$IMAE, 2)
                                  , ". "
                                  )
                         , paste0("Threshold: "
-                                 , round(tr, 2)
+                                 , round(tune$max_spec_sens, 2)
                                  , "."
                                  )
                         )
@@ -122,8 +116,10 @@ png_from_preds <- function(pred_dir
         ras <- if(trim) terra::trim(terra::rast(tif)) else terra::rast(tif)
         title <- basename(dirname(dirname(terra::sources(ras))))
 
+        classes <- if(grepl("thresh", tif)) 1 else 10
+
         m <- tmap::tm_shape(ras) +
-          tmap::tm_raster() +
+          tmap::tm_raster(n = classes) +
           tmap::tm_shape(recs) +
           tmap::tm_dots(alpha = 0.5) +
           tmap::tm_credits(text = text
@@ -142,22 +138,19 @@ png_from_preds <- function(pred_dir
 
       }
 
-      recs <- rio::import(fs::path(tune_dir, "prep.rds"))$presence %>%
+      recs <- prep$presence %>%
         sf::st_as_sf(coords = c("x", "y")
                      , crs = terra::crs(terra::rast(tifs[[1]]))
                      )
 
-      purrr::pwalk(list(tif = pred_tifs$tif[pred_tifs$todo]
-                        , tune_args = pred_tifs$tune_args[pred_tifs$todo]
-                        , auc = pred_tifs$auc[pred_tifs$todo]
-                        , CBI_r = pred_tifs$CBI_r[pred_tifs$todo]
-                        , IMAE = pred_tifs$IMAE[pred_tifs$todo]
-                        , combo = pred_tifs$combo[pred_tifs$todo]
-                        , tr = pred_tifs$tr[pred_tifs$todo]
-                        , png = pred_tifs$png[pred_tifs$todo]
+      purrr::pwalk(list(tifs
+                        , pngs
                         )
-                   , pred_png
-                   , recs = recs
+                   , \(x, y) pred_png(tif = x
+                                      , tune = tune
+                                      , png = y
+                                      , recs = recs
+                                      )
                    )
 
     }

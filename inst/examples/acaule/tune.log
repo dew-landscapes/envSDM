@@ -1,9 +1,9 @@
-tune start
 
-tune start: 2024-11-19 13:42:38.199383.
-maxnet: 00:03:38.676185.
-envelope: 00:00:01.975012.
-rf: 00:00:28.167307.
-tune end. total tune elapsed time: 00:04:10.851525
-.
-find best: 00:00:00.757391.
+
+acaule
+best_run = FALSE
+tune start 2024-11-20 16:09:49.121656
+4 out of 9 variables will be used
+maxnet tune finished in: 0.14 minutes
+envelope tune finished in: 0.07 minutes
+rf tune finished in: 0.07 minutes

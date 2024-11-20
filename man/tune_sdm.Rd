@@ -5,8 +5,9 @@
 \title{Tune, and evaluate, species distribution models}
 \usage{
 tune_sdm(
-  this_taxa = NULL,
+  prep,
   out_dir,
+  return_val = "path",
   algo = c("all", "maxnet", "bioclim", "envelope", "rf"),
   fc = "auto_feature",
   limit_p = FALSE,
@@ -20,15 +21,21 @@ tune_sdm(
   use_metrics = c("auc_po", "CBI_rescale", "IMAE"),
   do_gc = TRUE,
   force_new = FALSE,
-  save_to = out_dir,
   ...
 )
 }
 \arguments{
-\item{this_taxa}{Character. Name of taxa. Used to name outputs. If \code{NULL},
-this will be \code{basename(dirname(out_dir))}.}
+\item{prep}{Character or named list. If character, the path to an existing
+\code{prep.rds}. Otherwise, the result of a call to prep_sdm with return_val =
+"object"}
 
-\item{out_dir}{Character. Name of directory into which results will be saved.}
+\item{out_dir}{FALSE or character. If FALSE the result of tune_sdm will be
+saved to a temporary folder. If character, a file 'tune.rds' will be created
+at the path defined by out_dir.}
+
+\item{return_val}{Character: "object" or "path". Both return a named list. In
+the case of "path" the named list is simply list(tune = out_dir). Will be set
+to "object" if \code{out_dir} is FALSE.}
 
 \item{algo}{Character. Name of algorithm to use.}
 
@@ -77,20 +84,17 @@ parallel.}
 
 \item{force_new}{Logical. If outputs already exist, should they be remade?}
 
-\item{save_to}{Character. Name of path to save results. Defaults to out_dir
-which works if not \code{best_run}. For a best run from \code{run_full_sdm()}, this
-will default to \code{fs::path(out_dir, "best")}. Otherwise set as anything.}
-
 \item{...}{Passed to \code{evaluate_sdm()}. e.g. thresholds for use in
 \code{predicts::pa_evaluate()} (as \code{tr} argument, although if used, the values of
 the \code{thresholds} element of the \code{pa_ModelEvaluation} object returned by
 \code{predicts::pa_evaluate()} will be limited to the values in \code{tr}).}
 }
 \value{
-Character path to output .rds file. \code{tune.rds} saved into \code{save_to}
-directory. log written. \code{tune.rds} is a data frame but performs poorly, due
-to list columns, if not imported as a tibble (e.g. via
-\verb{rio::import("tune.rds", setclass = "tibble"))})
+If \code{return_val} is "object" a named list. If \code{return_val} is "path"
+a named list \code{list(prep = out_dir)}. If \code{out_dir} is a valid path, the 'full
+result' (irrespective of \code{return_val}) is also saved to
+\code{fs::path(out_dir, "prep.rds")}. The 'full result' is a named list with
+elements:
 }
 \description{
 Tune, and evaluate, species distribution models
@@ -99,41 +103,46 @@ Tune, and evaluate, species distribution models
 
   out_dir <- file.path(system.file(package = "envSDM"), "examples")
 
-  data <- file.path(system.file(package = "predicts"), "ex") |>
-    fs::dir_ls(regexp = "\\\\.csv$") |>
-    tibble::enframe(name = NULL, value = "path") |>
-    dplyr::mutate(taxa = gsub("\\\\.csv", "", basename(path))
-                  , presence = purrr::map(path, rio::import, setclass = "tibble")
-                  , presence = purrr::map(presence
-                                          , \(x) x |>
-                                            dplyr::filter(!is.na(lat)
-                                                          , !is.na(lon)
-                                                          )
-                                          )
+  data <- fs::path(system.file(package = "envSDM"), "examples") |>
+    fs::dir_ls(regexp = "prep\\\\.rds$"
+               , recurse = TRUE
+               ) |>
+    tibble::enframe(name = NULL, value = "prep") |>
+    dplyr::mutate(taxa = gsub("\\\\.rds", "", basename(dirname(prep)))
                   , out_dir = fs::path(out_dir, taxa)
                   )
 
-  purrr::walk(data$out_dir
-              , \(x) tune_sdm(out_dir = x)
+  purrr::map(data$out_dir
+              , \(x) tune_sdm(prep = fs::path(x, "prep.rds")
+                              , out_dir = x
+                              , fc = "l"
+                              , rm = 1
+                              , trees = 500
+                              , mtry = 1
+                              , nodesize = 2
+                              , force_new = TRUE
+                              )
               )
 
   # which tune args were best for each taxa using 'combo'?
   data \%>\%
-    dplyr::mutate(eval_file = fs::path(out_dir, "evaluation.csv")
-                  , eval = purrr::map(eval_file, rio::import, setclass = "tibble")
+    dplyr::mutate(tune = fs::path(out_dir, "tune.rds")
+                  , tune = purrr::map(tune, rio::import)
+                  , tune_mean = purrr::map(tune, "tune_mean")
                   ) \%>\%
-    tidyr::unnest(cols = c(eval)) \%>\%
-    dplyr::filter(best) \%>\%
+    tidyr::unnest(cols = c(tune_mean)) \%>\%
+    dplyr::filter(best) \%>\% # used 'combo' to determine 'best' as default in tune_sdm
     dplyr::select(taxa, algo, tune_args, combo, auc_po, IMAE, CBI, max_spec_sens)
 
   # or best tune args choosing on just auc_po?
   data \%>\%
-    dplyr::mutate(eval_file = fs::path(out_dir, "evaluation.csv")
-                  , eval = purrr::map(eval_file, rio::import, setclass = "tibble")
+    dplyr::mutate(tune = fs::path(out_dir, "tune.rds")
+                  , tune = purrr::map(tune, rio::import)
+                  , all = purrr::map(tune, "tune_mean")
                   ) \%>\%
-    tidyr::unnest(cols = c(eval)) \%>\%
+    tidyr::unnest(cols = c(all)) \%>\%
     dplyr::group_by(taxa) \%>\%
     dplyr::filter(auc_po == max(auc_po)) \%>\%
     dplyr::ungroup() \%>\%
-    dplyr::select(taxa, algo, tune_args, combo, auc_po, IMAE, CBI, max_spec_sens)
+    dplyr::select(taxa, algo, tune_args, auc_po, IMAE, CBI, max_spec_sens)
 }

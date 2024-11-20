@@ -6,13 +6,17 @@
 #' [answer](https://gis.stackexchange.com/a/224347)
 #' by user [Spacedman](https://gis.stackexchange.com/users/865/spacedman).
 #'
-#' @param this_taxa Character. Name of taxa. Used to name outputs. If `NULL`,
-#' this will be `basename(dirname(out_dir))`.
-#' @param out_dir Character. Name of directory into which results will be saved.
-#' @param presence Dataframe of presences. Needs columns called `lat` (latitude)
-#' and `long` (longitude) both in decimal degrees.
+#' @param this_taxa Character. Name of taxa. Only used to print some messages.
+#' Ignored if NULL
+#' @param out_dir FALSE or character. If FALSE the result of prep_sdm will be
+#' saved to a temporary folder. If character, a file 'prep.rds' will be created
+#' at the path defined by out_dir.
+#' @param return_val Character: "object" or "path". Both return a named list. In
+#' the case of "path" the named list is simply list(prep = out_dir). Will be set
+#' to "object" if `out_dir` is FALSE.
+#' @param presence Dataframe of presences with columns `pres_x` and `pres_y`.
 #' @param pres_crs Anything that will return a legitimate crs when passed to the
-#' crs attribute of st_transform or st_as_sf
+#' crs attribute of `sf::st_transform()` or `sf::st_as_sf()`.
 #' @param pres_x,pres_y Character. Name of the columns in `presence` that have
 #' the x and y coordinates
 #' @param pred_limit Limit the background points and predictions?
@@ -22,7 +26,7 @@
 #' @param limit_buffer Numeric. Apply this buffer to `pred_limit`. Only used if
 #' `pred_limit` is `TRUE`. Passed to the `dist` argument of `sf::st_buffer()`.
 #' @param pred_clip sf. Optional sf to clip the pred_limit back to (e.g. to
-#' prevent prediction into ocean)
+#' prevent prediction into ocean). Ignored if pred_limit is not TRUE.
 #' @param predictors Character. Vector of paths to predictor `.tif` files.
 #' @param is_env_pred Logical. Does the naming of the directory and files in
 #' `predictors` follow the pattern required by `envRaster::parse_env_tif()`?
@@ -54,13 +58,46 @@
 #' parallel.
 #' @param force_new Logical. If outputs already exist, should they be remade?
 #'
-#' @return Character path to output .rds file. `prep.rds` (a list) and log
-#' written to `out_dir`.
+#' @return If `return_val` is "object" a named list. If `return_val` is "path"
+#' a named list `list(prep = out_dir)`. If `out_dir` is a valid path, the 'full
+#' result' (irrespective of `return_val`) is also saved to
+#' `fs::path(out_dir, "prep.rds")`. The 'full result' is a named list with
+#' elements:
+#' * log:
+#'     + a log of (rough) timings and other information from the process
+#' * abandoned:
+#'     + Logical indicating if the sdm was abandoned. If abandoned is TRUE, some
+#'     list elements may not be present
+#' * presence_ras:
+#'     + tibble with two columns ('x' and 'y') representing unique cell
+#'     centroids on the predictors at presences supplied in argument `presence`
+#' * predict_boundary:
+#'     + sf used to limit the background points and used by `predict_sdm()` to
+#'     generate the 'mask'ed output
+#' * bg_points:
+#'    + sf of cell centroids representing unique cell centroids for background
+#'    points
+#' * blocks
+#'     + data.frame with columns:
+#'       + `pa`: presence (1) or absence/background (0)
+#'       + `x` and `y`: cell centroids for each presence and absence
+#'       + `block`: the spatial block to which the row belongs
+#'       +  a column with values for each of `predictors` at `x` and `y`
+#' * spatial_folds_used:
+#'     + logical indicating if spatial folds were used. This may differ from
+#'     the `spatial_folds` argument provided to `prep_sdm()` if an attempt to
+#'     use spatial folds failed to meet desired `folds` and `min_fold_n`
+#' * correlated:
+#'     + list with elements as per `envModel::make_env_corr()`, or, if
+#'     `remove_corr` is `FALSE`, a list with elements `remove_env` which is
+#'     empty, and `env_var`, containing the names of all predictors.
+#'
 #' @export
 #'
 #' @example inst/examples/prep_sdm_ex.R
   prep_sdm <- function(this_taxa = NULL
-                       , out_dir
+                       , out_dir = NULL
+                       , return_val = "path"
                        , presence
                        , pres_crs = 4326
                        , pres_x = "long"
@@ -79,53 +116,71 @@
                        , min_fold_n = 8
                        , stretch_value = 10
                        , dens_res = 1000
-                       , save_pngs = TRUE
+                       , save_pngs = FALSE
                        , remove_corr = TRUE
                        , corr_thresh = 0.9
                        , do_gc = FALSE
                        , force_new = FALSE
                        ) {
 
-    prep_log <- fs::path(out_dir
-                           , "prep.log"
-                           )
+    # setup -------
+    return_val <- if(any(isFALSE(out_dir), return_val == "object")) "prep" else "prep_file"
 
-    prep_file <- fs::path(out_dir
-                            , "prep.rds"
-                            )
+    if(isFALSE(out_dir)) out_dir <- tempfile()
 
-    run <- if(file.exists(prep_log)) {
+    log_file <- fs::path(out_dir, "prep.log")
 
-      any(!grepl("prep end", paste0(readLines(prep_log), collapse = " "))
-          , force_new
-          )
+    if(is.character(out_dir)) {
 
-    } else TRUE
+      fs::dir_create(out_dir)
+
+      if(dir.exists(out_dir)) {
+
+        prep_file <- fs::path(out_dir
+                              , "prep.rds"
+                              )
+
+        if(file.exists(prep_file)) {
+
+          prep <- rio::import(prep_file)
+
+        }
+
+      } else stop("can't create out_dir")
+
+    }
+
+    if(!exists("prep", inherits = FALSE)) prep <- list(abandoned = FALSE, finished = FALSE)
+
+    run <- if(any(prep$abandoned, prep$finished)) force_new else TRUE
 
     if(run) {
 
       if(is.null(this_taxa)) this_taxa <- basename(out_dir)
 
-      message(paste0("prep for ", this_taxa))
+      prep$this_taxa <- this_taxa
 
-      fs::dir_create(out_dir)
-
-      # setup ------
-
-      prep <- list(inputs = mget(ls(pattern = "[^predictors]"))
-                   , original = presence
-                   )
+      message(paste0("prep for "
+                     , this_taxa
+                     , "\nout_dir is "
+                     , out_dir
+                     )
+              )
 
       ## start timer -----
-      prep$timer <- envFunc::timer(process = "prep start"
-                          , notes = paste0(nrow(presence), " original record"
-                                           , if(nrow(presence) > 1) "s"
-                                           )
-                          , file = "prep"
-                          , name = this_taxa
-                          , log = prep_log
-                          , write_log = TRUE
-                          )
+      start_time <- Sys.time()
+
+      readr::write_lines(paste0("\n\n"
+                                , this_taxa
+                                , "\nprep start at "
+                                , start_time
+                                , ".\n"
+                                , nrow(presence), " original record"
+                                , if(nrow(presence) > 1) "s"
+                                )
+                         , log_file
+                         , append = TRUE
+                         )
 
       ## predictors -----
       if(is_env_pred) {
@@ -143,6 +198,13 @@
 
       }
 
+      readr::write_lines(paste0(length(names(predictors))
+                                , " predictors"
+                                )
+                         , file = log_file
+                         , append = TRUE
+                         )
+
       p <- presence %>%
         sf::st_as_sf(coords = c(pres_x, pres_y)
                      , crs = pres_crs
@@ -152,7 +214,7 @@
 
       # raster presence ------
 
-      prep$presence <- terra::cellFromXY(predictors
+      prep$presence_ras <- terra::cellFromXY(predictors
                                          , unique(p)
                                          ) %>%
         unique() %>%
@@ -162,23 +224,6 @@
 
 
       # predict limits -------
-
-      # use existing MCP polygon file for the predict boundary
-      if(is.character(pred_limit)) {
-
-        if(file.exists(pred_limit)) {
-
-          prep$predict_boundary <- sfarrow::st_read_parquet(pred_limit) %>%
-            sf::st_geometry() %>%
-            sf::st_sf() %>%
-            sf::st_transform(crs = sf::st_crs(predictors[[1]])) %>%
-            sf::st_make_valid()
-
-          pred_limit <- TRUE
-
-        }
-
-      }
 
       # create new MCP polygon around the presences for the predict boundary
       if(isTRUE(pred_limit)) {
@@ -196,6 +241,23 @@
           sf::st_make_valid()
 
         pred_limit <- TRUE
+
+      }
+
+      # use existing MCP polygon file for the predict boundary
+      if(is.character(pred_limit)) {
+
+        if(file.exists(pred_limit)) {
+
+          prep$predict_boundary <- sfarrow::st_read_parquet(pred_limit) %>%
+            sf::st_geometry() %>%
+            sf::st_sf() %>%
+            sf::st_transform(crs = sf::st_crs(predictors[[1]])) %>%
+            sf::st_make_valid()
+
+          pred_limit <- TRUE
+
+        }
 
       }
 
@@ -221,38 +283,30 @@
                               ) %>%
           sf::st_make_valid()
 
-
       }
 
-      prep$timer <- envFunc::timer("predict boundary"
-                          , time_df = prep$timer
-                          , write_log = TRUE
-                          )
-
-      # prep$presence clip to predict_boundary ---------
+      # prep$presence_ras clip to predict_boundary ---------
       # catch some cases where there are presence records on the predictors
       # but outside the predict boundary.
-      prep$presence <- prep$presence %>%
+      prep$presence_ras <- prep$presence_ras %>%
         sf::st_as_sf(coords = c("x", "y")
                      , crs = sf::st_crs(predictors)
                      ) %>%
         sf::st_filter(prep$predict_boundary %>%
                         sf::st_transform(crs = sf::st_crs(predictors))
                       ) %>%
-        sf::st_coordinates()
+        sf::st_coordinates() %>%
+        tibble::as_tibble() %>%
+        purrr::set_names(c("x", "y"))
 
-      prep$timer <- envFunc::timer("presences"
-                        , notes = paste0(nrow(prep$presence), " in predict_boundary and on env rasters")
-                        , time_df = prep$timer
-                        , write_log = TRUE
-                        )
+      readr::write_lines(paste0(nrow(prep$presence_ras)
+                                , " presences in predict_boundary and on env rasters"
+                                )
+                         , file = log_file
+                         , append = TRUE
+                         )
 
-      if(nrow(prep$presence) > min_fold_n) {
-
-        prep$presence <- prep$presence %>%
-          tibble::as_tibble() %>%
-          purrr::set_names(c("x", "y"))
-
+      if(nrow(prep$presence_ras) > min_fold_n) {
 
         # folds adj -------
 
@@ -260,7 +314,7 @@
 
         k_folds <- folds
 
-        while(nrow(prep$presence) < min_fold_n * k_folds) {
+        while(nrow(prep$presence_ras) < min_fold_n * k_folds) {
 
           k_folds <- k_folds - 1
 
@@ -270,21 +324,23 @@
 
         if(k_folds < folds) {
 
-          prep$timer <- envFunc::timer(process = "warning"
-                              , notes = paste0("too few records to support original folds (", folds, "). Folds reduced to ", k_folds)
-                              , time_df = prep$timer
-                              , write_log = TRUE
-                              )
+          readr::write_lines(paste0("warning: too few records to support original folds ("
+                                    , folds
+                                    , "). Folds reduced to "
+                                    , k_folds
+                                    )
+                             , file = log_file
+                             , append = TRUE
+                             )
 
         }
 
         if(k_folds < 2) {
 
-          prep$timer <- envFunc::timer(process = "warning"
-                              , notes = paste0("WARNING: folds = ", k_folds)
-                              , time_df = prep$timer
-                              , write_log = TRUE
-                              )
+          readr::write_lines(paste0("WARNING: folds = ", k_folds)
+                             , file = log_file
+                             , append = TRUE
+                             )
 
           spatial_folds <- FALSE
 
@@ -297,11 +353,11 @@
 
         if(prop_abs == "prop") {
 
-          num_bg <- num_bg * nrow(prep$presence)
+          num_bg <- num_bg * nrow(prep$presence_ras)
 
         }
 
-        if(num_bg < many_p_prop * nrow(prep$presence)) num_bg <- many_p_prop * nrow(prep$presence)
+        if(num_bg < many_p_prop * nrow(prep$presence_ras)) num_bg <- many_p_prop * nrow(prep$presence_ras)
 
         # density raster ------
 
@@ -325,8 +381,8 @@
                                     , vals = 1
                                     )
 
-            bw <- MASS::kde2d(as.matrix(prep$presence[,1])
-                              , as.matrix(prep$presence[,2])
+            bw <- MASS::kde2d(as.matrix(prep$presence_ras[,1])
+                              , as.matrix(prep$presence_ras[,2])
                               , n = c(nrow(temp_ras), ncol(temp_ras))
                               , lims = terra::ext(temp_ras) %>% as.vector()
                               )
@@ -353,7 +409,7 @@
                                     , vals = 1
                                     )
 
-            pres_ras <- terra::rasterize(prep$presence %>%
+            pres_ras <- terra::rasterize(prep$presence_ras %>%
                                            sf::st_as_sf(coords = c("x", "y")
                                                         , crs = sf::st_crs(predictors[[1]])
                                                         )
@@ -422,7 +478,7 @@
             terra::plot(predictors[[1]])
             terra::plot(target_density, add = TRUE)
 
-            ps <- prep$presence %>%
+            ps <- prep$presence_ras %>%
               tibble::as_tibble() %>%
               sf::st_as_sf(coords = c("x", "y"), crs = sf::st_crs(predictors)) %>%
               terra::vect()
@@ -440,10 +496,13 @@
                              , overwrite = TRUE
                              )
 
-          prep$timer <- envFunc::timer("density"
-                              , time_df = prep$timer
-                              , write_log = TRUE
-                              )
+          readr::write_lines(paste0("density raster done. elapsed time "
+                                    , round(difftime(Sys.time(), start_time, units = "mins"), 1)
+                                    , " minutes"
+                                    )
+                             , file = log_file
+                             , append = TRUE
+                             )
 
         }
 
@@ -485,22 +544,19 @@
 
           }
 
-          rio::export(prep, prep_file)
-
-          prep$timer <- envFunc::timer("background points"
-                                , notes = paste0(num_bg, " background points attempted. ", nrow(prep$bg_points), " achieved.")
-                                , time_df = prep$timer
-                                , write_log = TRUE
-                                )
+          readr::write_lines(paste0(num_bg
+                                    , " background points attempted. "
+                                    , nrow(prep$bg_points)
+                                    , " achieved."
+                                    )
+                             , file = log_file
+                             , append = TRUE
+                             )
 
 
         } else {
 
         target_density <- terra::rast(density_file)
-
-        prep <- rio::import(prep_file
-                            , trust = TRUE
-                            )
 
       }
 
@@ -514,7 +570,7 @@
 
           png_from_tif(target_density
                        , title = this_taxa
-                       , dots = prep$presence %>%
+                       , dots = prep$presence_ras %>%
                          sf::st_as_sf(coords = c("x", "y")
                                       , crs = sf::st_crs(predictors)
                                       ) %>%
@@ -534,7 +590,7 @@
 
       if(run) {
 
-        spp_pa <- dplyr::bind_rows(prep$presence %>%
+        spp_pa <- dplyr::bind_rows(prep$presence_ras %>%
                                      tibble::as_tibble() %>%
                                      sf::st_as_sf(coords = c("x", "y")
                                                   , crs = sf::st_crs(predictors[[1]])
@@ -546,7 +602,7 @@
                                    ) %>%
           sf::st_buffer(terra::res(predictors)[[1]] / 100)
 
-        prep$spp_pa_env <- exactextractr::exact_extract(predictors
+        spp_pa_env <- exactextractr::exact_extract(predictors
                                                    , y = spp_pa
                                                    , include_cols = "pa"
                                                    , include_cell = TRUE
@@ -560,45 +616,40 @@
 
         if(!is.null(cat_preds)) {
 
-          prep$spp_pa_env <- prep$spp_pa_env %>%
+          spp_pa_env <- spp_pa_env %>%
             dplyr::mutate(dplyr::across(tidyselect::any_of(cat_preds), as.factor))
 
         }
 
-        rio::export(prep
-                    , prep_file
-                    )
-
-        prep$timer <- envFunc::timer("env data"
-                            , time_df = prep$timer
-                            , write_log = TRUE
-                            )
+        readr::write_lines(paste0("env data extracted. elapsed time: "
+                                  , round(difftime(Sys.time(), start_time, units = "mins"), 1)
+                                  , " minutes"
+                                  )
+                           , file = log_file
+                           , append = TRUE
+                           )
 
       }
 
       # Abandon if too few presences with env data
-      if(nrow(prep$spp_pa_env[prep$spp_pa_env$pa == 1,]) < min_fold_n) {
+      if(nrow(spp_pa_env[spp_pa_env$pa == 1,]) < min_fold_n) {
 
-        prep$timer <- envFunc::timer("warning"
-                            , notes = paste0("Too few presences ("
-                                             , nrow(prep$spp_pa_env[prep$spp_pa_env$pa == 1,])
-                                             , ") with environmental variables. SDM abandoned"
-                                             )
-                            , time_df = prep$timer
-                            )
+        readr::write_lines(paste0("warning: too few presences ("
+                                  , nrow(spp_pa_env[spp_pa_env$pa == 1,])
+                                  , ") with environmental variables. SDM abandoned"
+                                  )
+                           , file = log_file
+                           , append = TRUE
+                           )
 
-        abandoned <- TRUE
-
-      } else {
-
-        abandoned <- FALSE
+        prep$abandoned <- TRUE
 
       }
 
 
       # folds------
 
-      if(!abandoned) {
+      if(!prep$abandoned) {
 
         run <- if(exists("blocks", prep)) force_new else TRUE
 
@@ -614,7 +665,7 @@
 
             safe_cv_spatial <- purrr::safely(blockCV::cv_spatial)
 
-            x <- prep$spp_pa_env %>%
+            x <- spp_pa_env %>%
               na.omit() %>%
               dplyr::select(x, y, pa) %>%
               sf::st_as_sf(coords = c("x", "y")
@@ -646,13 +697,13 @@
 
             if(!is.null(blocks$error)) {
 
-              prep$timer <- envFunc::timer("error"
-                                  , notes = paste0(as.character(blocks$error)
-                                                   , ". spatial_folds set to FALSE"
-                                                   )
-                                  , time_df = prep$timer
-                                  , write_log = TRUE
-                                  )
+              readr::write_lines(paste0("error: "
+                                        , as.character(blocks$error)
+                                        , ". spatial_folds set to FALSE"
+                                        )
+                                 , file = log_file
+                                 , append = FALSE
+                                 )
 
               spatial_folds <- FALSE
 
@@ -667,7 +718,7 @@
 
             if(!is.null(blocks)) {
 
-              blocks_p <- blocks[prep$spp_pa_env$pa == 1,]
+              blocks_p <- blocks[spp_pa_env$pa == 1,]
 
               if(any(c(table(blocks_p$fold_ids) < min_fold_n), length(setdiff(1:k_folds, unique(blocks_p$fold_ids))) > 0)) {
 
@@ -718,11 +769,10 @@
 
                 }
 
-                prep$timer <- envFunc::timer("warning"
-                                    , notes = note
-                                    , time_df = prep$timer
-                                    , write_log = TRUE
-                                    )
+                readr::write_lines(paste0("warning: ", note)
+                                   , file = log_file
+                                   , append = TRUE
+                                   )
 
               }
 
@@ -735,12 +785,12 @@
             ## non-spatial -------
 
             blocks <- tibble::tibble(fold_ids = c(sample(1:k_folds_adj
-                                                         , sum(prep$spp_pa_env$pa == 1)
+                                                         , sum(spp_pa_env$pa == 1)
                                                          , replace = TRUE
                                                          , prob = rep(1 / k_folds_adj, k_folds_adj)
                                                          )
                                                   , sample(1:k_folds_adj
-                                                           , sum(prep$spp_pa_env$pa == 0)
+                                                           , sum(spp_pa_env$pa == 0)
                                                            , replace = TRUE
                                                            , prob = rep(1 / k_folds_adj, k_folds_adj)
                                                            )
@@ -749,7 +799,7 @@
 
           }
 
-          prep$blocks <- prep$spp_pa_env %>%
+          prep$blocks <- spp_pa_env %>%
             dplyr::mutate(block = blocks$fold_ids) %>%
             dplyr::filter(dplyr::if_any(.cols = names(predictors)
                                         , .fns = \(x) !is.na(x) & !is.infinite(x)
@@ -758,16 +808,14 @@
 
           prep$spatial_folds_used <- spatial_folds
 
-          prep$timer <- envFunc::timer("folds"
-                              , notes = paste0("spatial folds = ", spatial_folds, ". Folds = ", length(unique(blocks$fold_ids)))
-                              , time_df = prep$timer
-                              , write_log = TRUE
-                              )
-
-          rio::export(prep
-                      , prep_file
-                      )
-
+          readr::write_lines(paste0("spatial folds = "
+                                    , spatial_folds
+                                    , ". Folds = "
+                                    , length(unique(blocks$fold_ids))
+                                    )
+                             , file = log_file
+                             , append = TRUE
+                             )
 
           ### block png -------
           if(save_pngs) {
@@ -815,7 +863,7 @@
 
       # correlated -------
 
-      if(all(remove_corr, !abandoned)) {
+      if(all(remove_corr, !prep$abandoned)) {
 
         run <- if(exists("correlated", prep)) force_new else TRUE
 
@@ -828,16 +876,19 @@
                                                      , always_remove = c(pres_x, pres_y, "x", "y", "pa", "block", "cell")
                                                      )
 
-          prep$timer <- envFunc::timer("correlation"
-                                       , time_df = prep$timer
-                                       , write_log = TRUE
-                                       )
+          readr::write_lines(paste0("correlation completed. elapsed time: "
+                                    , round(difftime(Sys.time(), start_time, units = "mins"), 1)
+                                    , " minutes"
+                                    )
+                             , file = log_file
+                             , append = TRUE
+                             )
 
         }
 
       } else {
 
-        if(!abandoned) {
+        if(!prep$abandoned) {
 
           prep$correlated$remove_env <- ""
           prep$correlated$env_cols <- names(predictors)
@@ -847,34 +898,41 @@
       }
 
         # end timer ------
-        prep$timer <- envFunc::timer(process = "prep end"
-                                     , time_df = prep$timer
-                                     )
-
-        rio::export(prep
-                  , prep_file
-                  )
+        readr::write_lines(paste0("prep completed. elapsed time: "
+                                  , round(difftime(Sys.time(), start_time, units = "mins"), 1)
+                                  , " minutes"
+                                  )
+                           , file = log_file
+                           , append = TRUE
+                           )
 
       } else {
 
-        prep$timer <- envFunc::timer("warning"
-                            , notes = paste0("only ", nrow(prep$presence), " useable presence points. SDM abandoned")
-                            , time_df = prep$timer
-                            )
+        prep$abandoned <- TRUE
 
-        prep$timer <- envFunc::timer(process = "prep end"
-                            , time_df = prep$timer
-                            )
-
-        rio::export(prep
-                    , prep_file
-                    )
+        readr::write_lines(paste0("only "
+                                  , nrow(prep$presence_ras)
+                                  , " useable presence points. SDM abandoned"
+                                  )
+                           , file = log_file
+                           , append = TRUE
+                           )
 
       }
 
+      # save -------
+      # export before gc()
+      prep$finished <- TRUE
+      rio::export(prep, prep_file)
+
+      # clean up -------
       if(do_gc) {
 
-        rm(list = ls(pattern = "^[^prep_file$]"))
+        stuff <- ls()
+
+        stuff <- stuff[! stuff %in% c(return_val, "return_val")]
+
+        rm(list = stuff)
 
         gc()
 
@@ -882,7 +940,7 @@
 
     }
 
-    return(prep_file)
+    return(get(return_val))
 
   }
 

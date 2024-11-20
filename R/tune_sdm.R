@@ -1,9 +1,15 @@
 
 #' Tune, and evaluate, species distribution models
 #'
-#' @param this_taxa Character. Name of taxa. Used to name outputs. If `NULL`,
-#' this will be `basename(dirname(out_dir))`.
-#' @param out_dir Character. Name of directory into which results will be saved.
+#' @param prep Character or named list. If character, the path to an existing
+#' `prep.rds`. Otherwise, the result of a call to prep_sdm with return_val =
+#' "object"
+#' @param out_dir FALSE or character. If FALSE the result of tune_sdm will be
+#' saved to a temporary folder. If character, a file 'tune.rds' will be created
+#' at the path defined by out_dir.
+#' @param return_val Character: "object" or "path". Both return a named list. In
+#' the case of "path" the named list is simply list(tune = out_dir). Will be set
+#' to "object" if `out_dir` is FALSE.
 #' @param algo Character. Name of algorithm to use.
 #' @param fc Character. Used to generate levels of `classes` argument to
 #' `maxnet::maxnet()` that are tuned.
@@ -38,23 +44,23 @@
 #' function? Useful when running SDMs for many, many taxa, especially if done in
 #' parallel.
 #' @param force_new Logical. If outputs already exist, should they be remade?
-#' @param save_to Character. Name of path to save results. Defaults to out_dir
-#' which works if not `best_run`. For a best run from `run_full_sdm()`, this
-#' will default to `fs::path(out_dir, "best")`. Otherwise set as anything.
 #' @param ... Passed to `evaluate_sdm()`. e.g. thresholds for use in
 #' `predicts::pa_evaluate()` (as `tr` argument, although if used, the values of
 #' the `thresholds` element of the `pa_ModelEvaluation` object returned by
 #' `predicts::pa_evaluate()` will be limited to the values in `tr`).
 #'
-#' @return Character path to output .rds file. `tune.rds` saved into `save_to`
-#' directory. log written. `tune.rds` is a data frame but performs poorly, due
-#' to list columns, if not imported as a tibble (e.g. via
-#' `rio::import("tune.rds", setclass = "tibble"))`)
+#' @return If `return_val` is "object" a named list. If `return_val` is "path"
+#' a named list `list(prep = out_dir)`. If `out_dir` is a valid path, the 'full
+#' result' (irrespective of `return_val`) is also saved to
+#' `fs::path(out_dir, "prep.rds")`. The 'full result' is a named list with
+#' elements:
+#'
 #' @export
 #'
 #' @example inst/examples/tune_sdm_ex.R
-  tune_sdm <- function(this_taxa = NULL
+  tune_sdm <- function(prep
                        , out_dir
+                       , return_val = "path"
                        , algo = c("all", "maxnet", "bioclim", "envelope", "rf") # envelope = bioclim
                        , fc = "auto_feature" # maxnet tune
                        , limit_p = FALSE # T, F or number of preds above which to limit p
@@ -68,70 +74,84 @@
                        , use_metrics = c("auc_po", "CBI_rescale", "IMAE")
                        , do_gc = TRUE
                        , force_new = FALSE
-                       , save_to = out_dir
                        , ...
                        ) {
 
-    # files-----
-    ## already done
-    prep_log <- fs::path(out_dir
-                           , "prep.log"
-                           )
+    # setup -------
+    ## return ------
+    return_val <- if(any(isFALSE(out_dir), return_val == "object")) "tune" else "tune_file"
 
-    prep_file <- fs::path(out_dir, "prep.rds")
+    if(isFALSE(out_dir)) out_dir <- tempfile()
 
-    ## new
-    tune_file <- fs::path(save_to, "tune.rds")
-
-    eval_file <- fs::path(save_to
-                          , "evaluation.csv"
-                          )
-
-    tune_log <- fs::path(save_to
-                         , "tune.log"
+    ## log file ------
+    log_file <- fs::path(out_dir
+                         , if(!best_run) "tune.log" else "full_run.log"
                          )
 
-    # run?-----
-    prep_log_text <- paste0(readLines(prep_log), collapse = " ")
+    ## out_dir ------
+    if(is.character(out_dir)) {
 
-    run <- all(file.exists(prep_file) # need prep or can't run
-               , !grepl("SDM abandoned", prep_log_text) # too few records can't run
-               , grepl("prep end", prep_log_text) # prep needs to have finished
+      fs::dir_create(out_dir)
+
+      if(dir.exists(out_dir)) {
+
+        tune_file <- fs::path(out_dir
+                              , if(!best_run) "tune.rds" else "full_run.rds"
+                              )
+
+        if(file.exists(tune_file)) {
+
+          tune <- rio::import(tune_file)
+
+        }
+
+      } else stop("can't create out_dir")
+
+    }
+
+    ## prep -------
+    if(! "list" %in% class(prep)) prep <- rio::import(prep)
+
+    ## tune ---------
+    if(!exists("tune", inherits = FALSE)) tune <- list(finished = FALSE)
+
+    # run?-----
+    run <- all(!prep$abandoned
+               , prep$finished
+               , if(tune$finished) force_new else TRUE
                )
 
     if(run) {
 
-      if(!best_run) message("tuning ", basename(out_dir))
+      this_taxa <- prep$this_taxa
 
-      run_tune <- if(file.exists(tune_file)) force_new else TRUE
-
-      run_find_best <- if(file.exists(eval_file)) force_new else TRUE
-
-      if(any(run_tune, run_find_best)) {
-
-        prep <- rio::import(prep_file)
-
-      }
+      message("tuning "
+              , this_taxa
+              , "\nout_dir is "
+              , out_dir
+              )
 
       # tune -----
-      if(run_tune) {
+      if(exists("blocks", where = prep)) {
 
-        if(exists("blocks", where = prep)) {
+        # start timer ------
+        start_time <- Sys.time()
 
-          tunes <- list()
-
-          # start timer ------
-          tune_timer <- envFunc::timer(process = "tune start"
-                              , file = if(best_run) "best" else "tune"
-                              , time_df = NULL
-                              , log = tune_log
-                              , write_log = TRUE
-                              )
+        readr::write_lines(paste0("\n\n"
+                                  , this_taxa
+                                  , "\nbest_run = "
+                                  , best_run
+                                  , "\ntune start "
+                                  , start_time
+                                  )
+                           , file = log_file
+                           , append = TRUE
+                           )
 
 
           ## setup ------
 
-          if(is.null(this_taxa)) this_taxa <- basename(dirname(prep_file))
+          if(is.null(this_taxa)) this_taxa <- basename(dirname(tune_file))
 
           nobs <- nrow(prep$blocks[prep$blocks$pa == 1,])
 
@@ -148,6 +168,15 @@
           single_block <- if(length(unique(prep$blocks[prep$blocks$pa == 1,]$block)) == 1) TRUE else FALSE
 
           preds <- prep$correlated$env_cols[!prep$correlated$env_cols %in% prep$correlated$remove_env]
+
+          readr::write_lines(paste0(length(preds)
+                                    , " out of "
+                                    , length(prep$correlated$env_cols)
+                                    , " variables will be used"
+                                    )
+                             , file = log_file
+                             , append = TRUE
+                             )
 
           p <- prep$blocks$pa
 
@@ -190,275 +219,107 @@
                           ) %>%
             dplyr::filter(n_p_test > 0)
 
-          if(nrow(start_df) < length(unique(prep$blocks$block))) {
-
-            # This should now be handled within prep, so should not be needed here
-
-            tune_timer <- envFunc::timer("warning"
-                                , notes = paste0("Some folds had zero presences. These were removed, leaving only ", nrow(start_df), " folds")
-                                , time_df = tune_timer
-                                )
-
-          }
-
           ## tune maxnet------
 
           if(any(c("all", "maxnet") %in% algo)) {
 
-            message("maxnet tune")
+            run <- if(exists("tune_maxnet", tune, inherits = FALSE)) force_new else TRUE
 
-            ### fc --------
-            # check auto_features
-            if (any(c(fc == "auto_feature", c("Q", "P", "T", "H") %in% fc))) {
+            if(run) {
 
-              if(any(grepl("auto_feature", fc))) fc <- c("L", "Q", "H", "LQ", "QH", "LQP", "QHP", "LQHP")
+              message("maxnet tune")
+              start_maxnet <- Sys.time()
 
-              # set fc based on number of obs
-              if (nobs <= 10) {
-                fc <- fc[fc %in% "L"] # only linear if less than 10 recs
-              } else if (nobs <= 15) {
-                fc <- fc[fc %in% c("L", "Q", "LQ")]
-              } else if (nobs < 80) {
-                fc <- fc[fc %in% c("L", "Q", "LQ", "LH", "QH", "LQH")]
+              ### fc --------
+              # check auto_features
+              if (any(c(fc == "auto_feature", c("Q", "P", "T", "H") %in% fc))) {
+
+                if(any(grepl("auto_feature", fc))) fc <- c("L", "Q", "H", "LQ", "QH", "LQP", "QHP", "LQHP")
+
+                # set fc based on number of obs
+                if (nobs <= 10) {
+                  fc <- fc[fc %in% "L"] # only linear if less than 10 recs
+                } else if (nobs <= 15) {
+                  fc <- fc[fc %in% c("L", "Q", "LQ")]
+                } else if (nobs < 80) {
+                  fc <- fc[fc %in% c("L", "Q", "LQ", "LH", "QH", "LQH")]
+                }
               }
-            }
 
-            # make sure any fc's requested are unique and H and T aren't both specified
-            fc <- unique(fc)
+              # make sure any fc's requested are unique and H and T aren't both specified
+              fc <- unique(fc)
 
-            # if threshold AND hinge requested, keep hinge only
-            if (all(any(grepl(pattern = "H", fc)), any(grepl(pattern = "T", fc)))) {
-              # remove T
-              fc <- unique(gsub("T", "", fc))
-              # remove any empty
-              fc <- fc[nchar(fc) > 0]
-            }
-
-            # if limit_p, ensure p not in fc
-            if(!isFALSE(limit_p)) {
-
-              # Only limit if too many preds, or limit_p is TRUE
-              if(any(length(preds) > limit_p, isTRUE(limit_p))) {
-                # remove P
-                fc <- unique(gsub("P", "", fc))
+              # if threshold AND hinge requested, keep hinge only
+              if (all(any(grepl(pattern = "H", fc)), any(grepl(pattern = "T", fc)))) {
+                # remove T
+                fc <- unique(gsub("T", "", fc))
                 # remove any empty
                 fc <- fc[nchar(fc) > 0]
               }
 
-            }
+              # if limit_p, ensure p not in fc
+              if(!isFALSE(limit_p)) {
 
-            safe_maxnet <- purrr::safely(maxnet::maxnet)
-
-            tune_maxnet <- start_df %>%
-              dplyr::cross_join(tibble::tibble(fc = tolower(fc))) %>%
-              dplyr::cross_join(tibble::tibble(rm = rm)) %>%
-              dplyr::mutate(tune_args = paste0("fc: ", fc
-                                               , ". rm: ", rm
-                                               )
-                            , m = purrr::pmap(list(pa_train
-                                                   , data_train
-                                                   , fc
-                                                   , rm
-                                                   )
-                                            , \(a, b, c, d) safe_maxnet(p = a
-                                                                        , data = b
-                                                                        , f = maxnet::maxnet.formula(p = a
-                                                                                                      , data = b
-                                                                                                      , classes = c
-                                                                                                     )
-                                                                        , regmult = d
-                                                                        )
-                                            )
-                            )
-
-            probs <- tune_maxnet %>%
-              dplyr::mutate(err = purrr::map(m, "error")) %>%
-              dplyr::filter(purrr::map_lgl(err, \(x) !is.null(x)))
-
-            if(nrow(probs)) {
-
-              purrr::map2(probs$err
-                          , probs$tune_args
-                          , \(a, b) {
-                            tune_timer <- envFunc::timer("error"
-                                                , notes = paste0("tune_args: ", b, ": ", a)
-                                                , time_df = tune_timer
-                                                , write_log = TRUE
-                                                )
-                            }
-                         )
-
-            }
-
-            tunes$tune_maxnet <- tune_maxnet %>%
-              dplyr::mutate(m = purrr::map(m, "result")) %>%
-              dplyr::filter(purrr::map_lgl(m, \(x) !is.null(x))) %>%
-              dplyr::mutate(e = purrr::pmap(list(m
-                                                 , p_data_test
-                                                 , a_data_test
-                                                 )
-                                            , \(a, b, c) evaluate_sdm(a, b, c
-                                                                      , ...
-                                                                      , do_gc = do_gc
-                                                                      )
-                                            )
-                            ) %>%
-              {if(keep_model) (.) %>% dplyr::select(! dplyr::where(is.list), m, e) else (.) %>% dplyr::select(! dplyr::where(is.list), e)}
-
-            tune_timer <- envFunc::timer("maxnet"
-                                , time_df = tune_timer
-                                , write_log = TRUE
-                                )
-
-          }
-
-
-          ## tune envelope -------
-
-          if(any(c("all", "envelope", "bioclim", "env") %in% algo)) {
-
-            message("envelope tune")
-
-            tunes$tune_env <- start_df %>%
-              dplyr::mutate(m = purrr::map(data_train
-                                           , function(x) predicts::envelope(x = x)
-                                           )
-                            , tune_args = "none"
-                            , e = purrr::pmap(list(m
-                                                   , p_data_test
-                                                   , a_data_test
-                                                   )
-                                              , \(a, b, c) evaluate_sdm(a, b, c
-                                                                        #, ...
-                                                                        , do_gc = do_gc
-                                                                        )
-                                              )
-                            ) %>%
-              {if(keep_model) (.) %>% dplyr::select(! dplyr::where(is.list), m, e) else (.) %>% dplyr::select(! dplyr::where(is.list), e)}
-
-            tune_timer <- envFunc::timer("envelope"
-                                , time_df = tune_timer
-                                , write_log = TRUE
-                                )
-
-          }
-
-          ## tune rf --------
-
-          if(any(c("all", "rf", "randomForest") %in% algo)) {
-
-            message("rf tune")
-
-            ### trees ------
-            use_trees <- if(isTRUE(trees)) {
-
-              c(500, 1000, 2000, 4000)
-
-            } else if(isFALSE(trees)) {
-
-              500 # randomForest default for classification
-
-            } else if(is.numeric(trees)) {
-
-              trees
-
-            }
-
-            ### mtry ------
-            use_mtry <- if(isTRUE(mtry)) {
-
-              if(!prep$spatial_folds_used) {
-
-                # rf default for classification
-                seq(1, floor(sqrt(length(preds))), 1)
-
-              } else {
-
-                # limit if spatial folds used
-                xm <- seq(1, floor(sqrt(length(preds))), 1)
-
-                xm <- xm[xm <= 3]
+                # Only limit if too many preds, or limit_p is TRUE
+                if(any(length(preds) > limit_p, isTRUE(limit_p))) {
+                  # remove P
+                  fc <- unique(gsub("P", "", fc))
+                  # remove any empty
+                  fc <- fc[nchar(fc) > 0]
+                }
 
               }
 
-            } else if(isFALSE(mtry)) {
+              safe_maxnet <- purrr::safely(maxnet::maxnet)
 
-              floor(sqrt(length(preds))) # randomForest default for classification
-
-            } else if(is.numeric(mtry)) {
-
-              mtry
-
-            }
-
-            ### nodesize -----
-            use_nodesize <- if(isTRUE(nodesize)) {
-
-              seq(1, min(10, ceiling(min(start_df$n_p_train) / 2)), 2)
-
-            } else if(isFALSE(nodesize)) {
-
-              1 # randomForest default for classification
-
-            } else if(is.numeric(nodesize)) {
-
-              nodesize
-
-            }
-
-            safe_rf <- purrr::safely(randomForest::randomForest)
-
-            tune_rf <- start_df %>%
-              dplyr::cross_join(tibble::tibble(trees = use_trees)) %>%
-              dplyr::cross_join(tibble::tibble(mtry = use_mtry)) %>%
-              dplyr::cross_join(tibble::tibble(nodesize = use_nodesize)) %>%
-              dplyr::mutate(tune_args = paste0("tr: ", trees
-                                               , ". mt: ", mtry
-                                               , ". ns: ", nodesize
-                                               )
-                            , pa_train = purrr::map(pa_train, \(x) as.factor(x))
-                            ) %>%
-              dplyr::mutate(m = purrr::pmap(list(pa_train
-                                                 , data_train
-                                                 , n_p_train
-                                                 , trees
-                                                 , nodesize
-                                                 , mtry
+              tune_maxnet <- start_df %>%
+                dplyr::cross_join(tibble::tibble(fc = tolower(fc))) %>%
+                dplyr::cross_join(tibble::tibble(rm = rm)) %>%
+                dplyr::mutate(tune_args = paste0("fc: ", fc
+                                                 , ". rm: ", rm
                                                  )
-                                            , \(a, b, c, d, e, f) safe_rf(x = b
-                                                                          , y = a
-                                                                          , strata = a
-                                                                          , sampsize = c(c, c)
-                                                                          , ntree = d
-                                                                          , nodesize = e
-                                                                          , mtry = f
+                              , m = purrr::pmap(list(pa_train
+                                                     , data_train
+                                                     , fc
+                                                     , rm
+                                                     )
+                                              , \(a, b, c, d) safe_maxnet(p = a
+                                                                          , data = b
+                                                                          , f = maxnet::maxnet.formula(p = a
+                                                                                                        , data = b
+                                                                                                        , classes = c
+                                                                                                       )
+                                                                          , regmult = d
                                                                           )
-                                            )
-                            )
+                                              )
+                              )
 
-            probs <- tune_rf %>%
-              dplyr::mutate(e = purrr::map(m, "error")) %>%
-              dplyr::filter(purrr::map_lgl(e, \(x) !is.null(x)))
+              probs <- tune_maxnet %>%
+                dplyr::mutate(err = purrr::map(m, "error")) %>%
+                dplyr::filter(purrr::map_lgl(err, \(x) !is.null(x)))
 
-            if(nrow(probs)) {
+              if(nrow(probs)) {
 
-              purrr::map2(probs$e
-                          , probs$tune_args
-                          , \(a, b) {
-                            tune_timer <- envFunc::timer("error"
-                                                , notes = paste0("tune_args: ", b, ": ", a)
-                                                , time_df = tune_timer
-                                                , write_log = TRUE
-                                                )
-                            }
-                         )
+                purrr::map2(probs$err
+                            , probs$tune_args
+                            , \(a, b) {
+                              readr::write_lines(paste0("error with tune_args "
+                                                        , b
+                                                        , ": "
+                                                        , as.character(a)
+                                                        )
+                                                 , file = log_file
+                                                 , append = TRUE
+                                                 )
+                              }
+                           )
 
-            }
+              }
 
-            tunes$tune_rf <- tune_rf %>%
-              dplyr::mutate(m = purrr::map(m, "result")) %>%
-              dplyr::filter(purrr::map_lgl(m, \(x) !is.null(x))) %>%
-              dplyr::mutate(e = purrr::pmap(list(m
+              tune$tune_maxnet <- tune_maxnet %>%
+                dplyr::mutate(m = purrr::map(m, "result")) %>%
+                dplyr::filter(purrr::map_lgl(m, \(x) !is.null(x))) %>%
+                dplyr::mutate(e = purrr::pmap(list(m
                                                    , p_data_test
                                                    , a_data_test
                                                    )
@@ -467,13 +328,212 @@
                                                                         , do_gc = do_gc
                                                                         )
                                               )
-                            ) %>%
-              {if(keep_model) (.) %>% dplyr::select(! dplyr::where(is.list), m, e) else (.) %>% dplyr::select(! dplyr::where(is.list), e)}
+                              ) %>%
+                {if(keep_model) (.) %>% dplyr::select(! dplyr::where(is.list), m, e) else (.) %>% dplyr::select(! dplyr::where(is.list), e)}
 
-            tune_timer <- envFunc::timer("rf"
-                                , time_df = tune_timer
-                                , write_log = TRUE
-                                )
+              readr::write_lines(paste0("maxnet tune finished in: "
+                                        , round(difftime(Sys.time(), start_maxnet, units = "mins"), 2)
+                                        , " minutes"
+                                        )
+                                 , file = log_file
+                                 , append = TRUE
+                                 )
+
+            }
+
+          }
+
+
+          ## tune envelope -------
+
+          if(any(c("all", "envelope", "bioclim", "env") %in% algo)) {
+
+            run <- if(exists("tune_envelope", tune, inherits = FALSE)) force_new else TRUE
+
+            if(run) {
+
+              message("envelope tune")
+
+              start_envelope <- Sys.time()
+
+              tune$tune_envelope <- start_df %>%
+                dplyr::mutate(m = purrr::map(data_train
+                                             , function(x) predicts::envelope(x = x)
+                                             )
+                              , tune_args = "none"
+                              , e = purrr::pmap(list(m
+                                                     , p_data_test
+                                                     , a_data_test
+                                                     )
+                                                , \(a, b, c) evaluate_sdm(a, b, c
+                                                                          , ...
+                                                                          , do_gc = do_gc
+                                                                          )
+                                                )
+                              ) %>%
+                {if(keep_model) (.) %>% dplyr::select(! dplyr::where(is.list), m, e) else (.) %>% dplyr::select(! dplyr::where(is.list), e)}
+
+              readr::write_lines(paste0("envelope tune finished in: "
+                                        , round(difftime(Sys.time(), start_envelope, units = "mins"), 2)
+                                        , " minutes"
+                                        )
+                                 , file = log_file
+                                 , append = TRUE
+                                 )
+
+            }
+
+          }
+
+          ## tune rf --------
+
+          if(any(c("all", "rf", "randomForest") %in% algo)) {
+
+            run <- if(exists("tune_rf", tune, inherits = FALSE)) force_new else TRUE
+
+            if(run) {
+
+              message("rf tune")
+
+              start_rf <- Sys.time()
+
+              ### trees ------
+              use_trees <- if(isTRUE(trees)) {
+
+                c(500, 1000, 2000, 4000)
+
+              } else if(isFALSE(trees)) {
+
+                500 # randomForest default for classification
+
+              } else if(is.numeric(trees)) {
+
+                trees
+
+              }
+
+              ### mtry ------
+              use_mtry <- if(isTRUE(mtry)) {
+
+                if(!prep$spatial_folds_used) {
+
+                  # rf default for classification
+                  seq(1, floor(sqrt(length(preds))), 1)
+
+                } else {
+
+                  # limit if spatial folds used
+                  xm <- seq(1, floor(sqrt(length(preds))), 1)
+
+                  xm <- xm[xm <= 3]
+
+                }
+
+              } else if(isFALSE(mtry)) {
+
+                floor(sqrt(length(preds))) # randomForest default for classification
+
+              } else if(is.numeric(mtry)) {
+
+                mtry
+
+              }
+
+              ### nodesize -----
+              use_nodesize <- if(isTRUE(nodesize)) {
+
+                seq(1, min(10, ceiling(min(start_df$n_p_train) / 2)), 2)
+
+              } else if(isFALSE(nodesize)) {
+
+                1 # randomForest default for classification
+
+              } else if(is.numeric(nodesize)) {
+
+                nodesize
+
+              }
+
+              safe_rf <- purrr::safely(randomForest::randomForest)
+
+              tune_rf <- start_df %>%
+                dplyr::cross_join(tibble::tibble(trees = use_trees)) %>%
+                dplyr::cross_join(tibble::tibble(mtry = use_mtry)) %>%
+                dplyr::cross_join(tibble::tibble(nodesize = use_nodesize)) %>%
+                dplyr::mutate(tune_args = paste0("tr: ", trees
+                                                 , ". mt: ", mtry
+                                                 , ". ns: ", nodesize
+                                                 )
+                              , pa_train = purrr::map(pa_train, \(x) as.factor(x))
+                              ) %>%
+                dplyr::mutate(m = purrr::pmap(list(pa_train
+                                                   , data_train
+                                                   , n_p_train
+                                                   , trees
+                                                   , nodesize
+                                                   , mtry
+                                                   )
+                                              , \(a, b, c, d, e, f) safe_rf(x = b
+                                                                            , y = a
+                                                                            , strata = a
+                                                                            , sampsize = c(c, c)
+                                                                            , ntree = d
+                                                                            , nodesize = e
+                                                                            , mtry = f
+                                                                            )
+                                              )
+                              )
+
+              probs <- tune_rf %>%
+                dplyr::mutate(e = purrr::map(m, "error")) %>%
+                dplyr::filter(purrr::map_lgl(e, \(x) !is.null(x)))
+
+              if(nrow(probs)) {
+
+                if(nrow(probs)) {
+
+                purrr::map2(probs$e
+                            , probs$tune_args
+                            , \(a, b) {
+                              readr::write_lines(paste0("error with tune_args "
+                                                        , b
+                                                        , ": "
+                                                        , as.character(a)
+                                                        )
+                                                 , file = log_file
+                                                 , append = TRUE
+                                                 )
+                              }
+                           )
+
+              }
+
+              }
+
+              tune$tune_rf <- tune_rf %>%
+                dplyr::mutate(m = purrr::map(m, "result")) %>%
+                dplyr::filter(purrr::map_lgl(m, \(x) !is.null(x))) %>%
+                dplyr::mutate(e = purrr::pmap(list(m
+                                                     , p_data_test
+                                                     , a_data_test
+                                                     )
+                                                , \(a, b, c) evaluate_sdm(a, b, c
+                                                                          , ...
+                                                                          , do_gc = do_gc
+                                                                          )
+                                                )
+                              ) %>%
+                {if(keep_model) (.) %>% dplyr::select(! dplyr::where(is.list), m, e) else (.) %>% dplyr::select(! dplyr::where(is.list), e)}
+
+              readr::write_lines(paste0("rf tune finished in: "
+                                        , round(difftime(Sys.time(), start_rf, units = "mins"), 2)
+                                        , " minutes"
+                                        )
+                                 , file = log_file
+                                 , append = TRUE
+                                 )
+
+            }
 
           }
 
@@ -483,183 +543,134 @@
 
           }
 
-          ## tunes ------
+      } else {
 
-          tunes <- tunes %>%
-            dplyr::bind_rows(.id = "algo") %>%
-            dplyr::mutate(algo = gsub("tune_", "", algo))
-
-          rio::export(tunes
-                      , tune_file
-                      )
-
-        }
-
-        # end timer ------
-        if(exists("tune_timer")) {
-
-          tune_timer <- envFunc::timer("tune end"
-                                , time_df = tune_timer
-                                )
-
-        }
-
-      }
-
-      if(run_find_best) {
-
-        # find best ------
-
-        message("find best model for "
-                , basename(out_dir)
-                , " using the product of metrics: "
-                , envFunc::vec_to_sentence(use_metrics)
-                )
-
-        run <- if(file.exists(eval_file)) force_new else TRUE
-
-        if(run) {
-
-          if(!exists("tunes", where = environment(), inherits = FALSE)) {
-
-            tunes <- rio::import(fs::path(out_dir, "tune.rds")
-                                 , setclass = "tibble"
-                                 )
-
-          }
-
-          if(is.null(metrics_df)) stop("Can't find best model without metrics_df") else {
-
-            if(nrow(tunes) > 0) {
-
-              keeps <- c("algo", "spatial", "tune_args", "tunes"
-                         , "fc", "rm", "treshold", "trees", "nodesize"
-                         )
-
-              metrics_df <- metrics_df %>%
-                dplyr::mutate(summary_mets = metric %in% use_metrics)
-
-              ## model stats-----
-              stats <- if(any(!metrics_df$is_thresh[metrics_df$summary_mets])) {
-
-                tunes %>%
-                  dplyr::mutate(stats = purrr::map(e
-                                                  , "stats"
-                                                  )
-                                ) %>%
-                  tidyr::unnest(cols = c(stats)) %>%
-                  dplyr::group_by(dplyr::across(tidyselect::any_of(keeps))) %>%
-                  dplyr::mutate(k = as.factor(k)) %>%
-                  dplyr::summarise(dplyr::across(dplyr::where(is.numeric), mean)
-                                   , tunes = dplyr::n()
-                                   ) %>%
-                  dplyr::ungroup()
-
-              } else tibble::tibble(algo = unique(tunes$algo))
-
-              ## threshold stats-----
-              tr_stats <- if(any(metrics_df$is_thresh[metrics_df$summary_mets])) {
-
-                tunes %>%
-                  dplyr::mutate(stats = purrr::map(e
-                                                  , "tr_stats"
-                                                  )
-                                ) %>%
-                  tidyr::unnest(cols = c(stats)) %>%
-                  dplyr::group_by(dplyr::across(tidyselect::any_of(keeps))) %>%
-                  dplyr::mutate(k = as.factor(k)) %>%
-                  dplyr::summarise(dplyr::across(dplyr::where(is.numeric), mean)) %>%
-                  dplyr::ungroup()
-
-              } else tibble::tibble(algo = unique(tunes$algo))
-
-
-              res_df <- tr_stats %>%
-                dplyr::left_join(stats)
-
-
-              if(nrow(res_df)) {
-
-                ## thresholds----
-                thresholds <- tunes %>%
-                  dplyr::mutate(stats = purrr::map(e
-                                                   , "thresholds"
-                                                   )
-                                ) %>%
-                  tidyr::unnest(cols = c(stats)) %>%
-                  dplyr::group_by(dplyr::across(tidyselect::any_of(keeps))) %>%
-                  dplyr::mutate(k = as.factor(k)) %>%
-                  dplyr::summarise(dplyr::across(dplyr::where(is.numeric), mean)) %>%
-                  dplyr::ungroup()
-
-                best <- res_df %>%
-                  envFunc::make_metric_df(mets_df = metrics_df
-                                          , context = keeps
-                                          , mets_col = "summary_mets"
-                                          , best_thresh = 1
-                                          ) %>%
-                  dplyr::select(tidyselect::any_of(keeps), metric, value, combo, best) %>%
-                  dplyr::distinct() %>%
-                  tidyr::pivot_wider(names_from = "metric"
-                                     , values_from = "value"
-                                     ) %>%
-                  dplyr::arrange(desc(combo)) %>%
-                  dplyr::left_join(thresholds)
-
-                best_tune <- res_df %>%
-                  dplyr::inner_join(best %>%
-                                      dplyr::select(tidyselect::any_of(keeps)
-                                                    , tidyselect::any_of(names(thresholds))
-                                                    , best
-                                                    ) %>%
-                                      dplyr::filter(best)
-                                    )
-
-                rio::export(res_df %>%
-                              dplyr::select(! dplyr::where(is.list))
-                            , fs::path(save_to
-                                       , "metrics.csv"
-                                       )
-                            )
-
-                rio::export(best
-                            , eval_file
-                            )
-
-                tune_timer <- envFunc::timer("find best"
-                                    , time_df = tune_timer
-                                    , write_log = TRUE
-                                    )
-
-              }
-
-            }
-
-          }
-
-        }
-
-      }
-
-      # clean up --------
-
-      if(do_gc) {
-
-        stuff <- ls()
-
-        delete_stuff <- stuff[stuff != "tune_file"]
-
-        rm(list = delete_stuff)
-
-        gc()
+        stop("no 'blocks' element in supplied prep")
 
       }
 
     }
 
-    res <- if(file.exists(tune_file)) tune_file else NULL
 
-    return(res)
+    # find best ------
+
+    run <- if(exists("best", where = tune, inherits = FALSE)) force_new else TRUE
+
+    if(run) {
+
+      if(is.null(metrics_df)) stop("Can't find best model without metrics_df") else {
+
+        # tunes ------
+        tunes <- tune[grepl(paste0(algo, collapse = "|"), names(tune))] %>%
+          dplyr::bind_rows(.id = "algo") %>%
+          dplyr::mutate(algo = gsub("tune_", "", algo))
+
+        if(nrow(tunes) > 0) {
+
+          keeps <- c("algo", "spatial", "tune_args", "tunes"
+                     , "fc", "rm", "treshold", "trees", "nodesize"
+                     )
+
+          metrics_df <- metrics_df %>%
+            dplyr::mutate(summary_mets = metric %in% use_metrics)
+
+          ## model stats-----
+          stats <- if(any(!metrics_df$is_thresh[metrics_df$summary_mets])) {
+
+            tunes %>%
+              dplyr::mutate(stats = purrr::map(e
+                                              , "stats"
+                                              )
+                            ) %>%
+              tidyr::unnest(cols = c(stats)) %>%
+              dplyr::group_by(dplyr::across(tidyselect::any_of(keeps))) %>%
+              dplyr::mutate(k = as.factor(k)) %>%
+              dplyr::summarise(dplyr::across(dplyr::where(is.numeric), mean)
+                               , tunes = dplyr::n()
+                               ) %>%
+              dplyr::ungroup()
+
+          } else tibble::tibble(algo = unique(tunes$algo))
+
+          ## threshold stats-----
+          tr_stats <- if(any(metrics_df$is_thresh[metrics_df$summary_mets])) {
+
+            tunes %>%
+              dplyr::mutate(stats = purrr::map(e
+                                              , "tr_stats"
+                                              )
+                            ) %>%
+              tidyr::unnest(cols = c(stats)) %>%
+              dplyr::group_by(dplyr::across(tidyselect::any_of(keeps))) %>%
+              dplyr::mutate(k = as.factor(k)) %>%
+              dplyr::summarise(dplyr::across(dplyr::where(is.numeric), mean)) %>%
+              dplyr::ungroup()
+
+          } else tibble::tibble(algo = unique(tunes$algo))
+
+
+          res_df <- tr_stats %>%
+            dplyr::left_join(stats)
+
+
+          if(nrow(res_df)) {
+
+            ## thresholds----
+            thresholds <- tunes %>%
+              dplyr::mutate(stats = purrr::map(e
+                                               , "thresholds"
+                                               )
+                            ) %>%
+              tidyr::unnest(cols = c(stats)) %>%
+              dplyr::group_by(dplyr::across(tidyselect::any_of(keeps))) %>%
+              dplyr::mutate(k = as.factor(k)) %>%
+              dplyr::summarise(dplyr::across(dplyr::where(is.numeric), mean)) %>%
+              dplyr::ungroup()
+
+            tune$tune_mean <- res_df %>%
+              envFunc::make_metric_df(mets_df = metrics_df
+                                      , context = keeps
+                                      , mets_col = "summary_mets"
+                                      , best_thresh = 1
+                                      )  %>%
+              dplyr::select(tidyselect::any_of(keeps), metric, value, combo, best) %>%
+              dplyr::distinct() %>%
+              tidyr::pivot_wider(names_from = "metric"
+                                 , values_from = "value"
+                                 ) %>%
+              dplyr::arrange(desc(combo)) %>%
+              dplyr::left_join(thresholds)
+
+          }
+
+        }
+
+      }
+
+    }
+
+    # save -------
+    # export before gc()
+    tune$finished <- TRUE
+    tune$log <- readr::read_lines(log_file)
+
+    rio::export(tune, tune_file)
+
+    # clean up --------
+
+    if(do_gc) {
+
+      stuff <- ls()
+
+      delete_stuff <- stuff[! stuff %in% c(return_val, "return_val")]
+
+      rm(list = delete_stuff)
+
+      gc()
+
+    }
+
+    return(get(return_val))
 
   }
 

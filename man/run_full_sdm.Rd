@@ -5,21 +5,32 @@
 \title{Run an SDM using no cross validation and previously established tune arguments}
 \usage{
 run_full_sdm(
-  this_taxa = NULL,
+  prep,
+  tune,
   out_dir,
+  return_val = "path",
   use_metric = "combo",
   force_new = FALSE,
-  save_to = fs::path(out_dir, use_metric),
   do_gc = FALSE,
   ...
 )
 }
 \arguments{
-\item{this_taxa}{Character. Name of taxa. Used to name outputs. If \code{NULL},
-this will be \code{basename(dirname(out_dir))}.}
+\item{prep}{Character or named list. If character, the path to an existing
+\code{prep.rds}. Otherwise, the result of a call to prep_sdm with return_val =
+"object"}
 
-\item{out_dir}{Character. Name of directory containing previous tunes and
-into which results will be saved.}
+\item{tune}{Character or named list. If character, the path to an existing
+\code{tune.rds}. Otherwise, the result of a call to tune_sdm with return_val =
+"object"}
+
+\item{out_dir}{FALSE or character. If FALSE the result of \code{run_full_sdm()}
+will be saved to a temporary folder. If character, a file 'tune.rds' will be
+created at the path defined by \code{out_dir}.}
+
+\item{return_val}{Character: "object" or "path". Both return a named list. In
+the case of "path" the named list is simply list(full_run = out_dir). Will
+be set to "object" if \code{out_dir} is FALSE.}
 
 \item{use_metric}{Character. Which metric to use to find the 'best' tune
 arguments from previous tuning results? Default is \code{combo}, the product of
@@ -28,9 +39,6 @@ used in the use_metrics argument to \code{tune_sdm()}.}
 
 \item{force_new}{Logical. If outputs already exist, should they be remade?}
 
-\item{save_to}{Character. Name of path to save results. Defaults to
-\code{fs::path(out_dir, use_metric)}}
-
 \item{do_gc}{Logical. Run \code{base::rm(list = ls)} and \code{base::gc()} at end of
 function? Useful when running SDMs for many, many taxa, especially if done in
 parallel.}
@@ -38,10 +46,11 @@ parallel.}
 \item{...}{Passed to \code{tune_sdm()}}
 }
 \value{
-Character path to output .rds file. \code{tune.rds} saved into \code{save_to}
-directory. log written. \code{tune.rds} is a data frame but performs poorly, due
-to list columns, if not imported as a tibble (e.g. via
-\verb{rio::import("tune.rds", setclass = "tibble"))})
+If \code{return_val} is "object" a named list. If \code{return_val} is "path"
+a named list \code{list(prep = out_dir)}. If \code{out_dir} is a valid path, the 'full
+result' (irrespective of \code{return_val}) is also saved to
+\code{fs::path(out_dir, "prep.rds")}. The 'full result' is a named list with
+elements:
 }
 \description{
 Run an SDM using no cross validation and previously established tune arguments

@@ -1,5 +1,11 @@
-predict start: 2024-09-06 17:50:18.82106.
-full: 00:00:01.100115.
-mask: 00:00:00.110035.
-threshold: 00:00:00.091552.
-predict end. total predict elapsed time: 00:00:01.302997.
+
+
+acaule
+predict start at 2024-11-20 17:52:13.877126
+full predict for acaule from 'randomForest' (rf) model
+full done in 0.01 minutes
+mask for acaule
+mask done in 0 minutes
+thresh for acaule
+thresh done in 0 minutes
+predict finished. elapsed time: 0.05 minutes

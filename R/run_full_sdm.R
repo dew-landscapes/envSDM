@@ -1,10 +1,18 @@
 
 #' Run an SDM using no cross validation and previously established tune arguments
 #'
-#' @param this_taxa Character. Name of taxa. Used to name outputs. If `NULL`,
-#' this will be `basename(dirname(out_dir))`.
-#' @param out_dir Character. Name of directory containing previous tunes and
-#' into which results will be saved.
+#' @param prep Character or named list. If character, the path to an existing
+#' `prep.rds`. Otherwise, the result of a call to prep_sdm with return_val =
+#' "object"
+#' @param tune Character or named list. If character, the path to an existing
+#' `tune.rds`. Otherwise, the result of a call to tune_sdm with return_val =
+#' "object"
+#' @param out_dir FALSE or character. If FALSE the result of `run_full_sdm()`
+#' will be saved to a temporary folder. If character, a file 'tune.rds' will be
+#' created at the path defined by `out_dir`.
+#' @param return_val Character: "object" or "path". Both return a named list. In
+#' the case of "path" the named list is simply list(full_run = out_dir). Will
+#' be set to "object" if `out_dir` is FALSE.
 #' @param use_metric Character. Which metric to use to find the 'best' tune
 #' arguments from previous tuning results? Default is `combo`, the product of
 #' `auc_po`, `CBI_rescale` and `IMAE`. `use_metric` must be `combo` or have been
@@ -13,126 +21,117 @@
 #' @param do_gc Logical. Run `base::rm(list = ls)` and `base::gc()` at end of
 #' function? Useful when running SDMs for many, many taxa, especially if done in
 #' parallel.
-#' @param save_to Character. Name of path to save results. Defaults to
-#' `fs::path(out_dir, use_metric)`
 #' @param ... Passed to `tune_sdm()`
 #'
-#' @return Character path to output .rds file. `tune.rds` saved into `save_to`
-#' directory. log written. `tune.rds` is a data frame but performs poorly, due
-#' to list columns, if not imported as a tibble (e.g. via
-#' `rio::import("tune.rds", setclass = "tibble"))`)
+#' @return If `return_val` is "object" a named list. If `return_val` is "path"
+#' a named list `list(prep = out_dir)`. If `out_dir` is a valid path, the 'full
+#' result' (irrespective of `return_val`) is also saved to
+#' `fs::path(out_dir, "prep.rds")`. The 'full result' is a named list with
+#' elements:
+#'
 #' @export
 #'
 #' @examples inst/examples/predict_sdm_ex.R
-  run_full_sdm <- function(this_taxa = NULL
+  run_full_sdm <- function(prep
+                           , tune
                            , out_dir
+                           , return_val = "path"
                            , use_metric = "combo"
                            , force_new = FALSE
-                           , save_to = fs::path(out_dir, use_metric)
                            , do_gc = FALSE
                            , ...
                            ) {
 
-    message(paste0("run full model for ", basename(out_dir)))
+    # setup -------
+    ## return ------
+    return_val <- if(any(isFALSE(out_dir), return_val == "object")) "full_run" else "full_run_file"
 
-    # prep -----
+    if(isFALSE(out_dir)) out_dir <- tempfile()
 
-    ## files ------
-    # existing
-    prep_file <- fs::path(out_dir, "prep.rds")
+    ## out_dir ------
+    if(is.character(out_dir)) {
 
-    prep_log <- fs::path(out_dir, "prep.log")
+      fs::dir_create(out_dir)
 
-    ## new
-    tune_file <- fs::path(save_to, "tune.rds")
-    full_sdm_log <- fs::path(save_to, "full_sdm.log")
+      if(dir.exists(out_dir)) {
+
+        full_run_file <- fs::path(out_dir
+                              , "full_run.rds"
+                              )
+
+        if(file.exists(full_run_file)) {
+
+          full_run <- rio::import(full_run_file)
+
+        }
+
+      } else stop("can't create out_dir")
+
+    }
+
+    ## prep -------
+    if(! "list" %in% class(prep)) prep <- rio::import(prep)
+
+    ## tune ---------
+    if(! "list" %in% class(tune)) tune <- rio::import(tune)
+
+    ## full_run -------
+    if(!exists("full_run", inherits = FALSE)) full_run <- list(finished = FALSE)
 
     # run?-----
-    prep_log_text <- paste0(readLines(prep_log), collapse = " ")
-
-    run <- all(file.exists(prep_file)
-               , !grepl("SDM abandoned", prep_log_text)
-               , grepl("prep end", prep_log_text)
+    run <- all(!prep$abandoned
+               , prep$finished
+               , tune$finished
+               , if(full_run$finished) force_new else TRUE
                )
 
     if(run) {
 
-      run_tune <- if(file.exists(tune_file)) force_new else TRUE
+      # tune_args------
+      tune_args <- tune$tune_mean %>%
+        dplyr::filter(!!rlang::ensym(use_metric) == max(!!rlang::ensym(use_metric), na.rm = TRUE))
 
-      if(run_tune) {
+      if(length(tune_args)) {
 
-        # to create
-        fs::dir_create(save_to)
+        # mod --------
 
-        # start timer ------
-        full_sdm_timer <- envFunc::timer(process = "full SDM start"
-                                         , file = "full"
-                                         , time_df = NULL
-                                         , log = full_sdm_log
-                                         , write_log = TRUE
-                                         )
-
-        # tune_args------
-        tune_args <- rio::import(fs::path(out_dir, "evaluation.csv")
-                                 , setclass = "tibble"
-                                 ) %>%
-          dplyr::mutate(filter_col = !!rlang::ensym(use_metric)) %>%
-          dplyr::filter(filter_col == max(filter_col))
-
-        if(length(tune_args)) {
-
-          # mod --------
-
-          tune_sdm(out_dir = out_dir
-                   , algo = tune_args$algo
-                   , fc = tune_args$fc
-                   , rm = tune_args$rm
-                   , trees = tune_args$trees
-                   , mtry = tune_args$mtry
-                   , nodesize = tune_args$nodesize
-                   , keep_model = TRUE
-                   , best_run = TRUE
-                   , do_gc = do_gc
-                   , save_to = save_to
-                   , ...
-                   )
-
-          full_sdm_timer <- envFunc::timer("full SDM end"
-                                           , time_df = full_sdm_timer
-                                           )
-
-          if(do_gc) {
-
-            stuff <- ls()
-
-            delete_stuff <- stuff[stuff != "tune_file"]
-
-            rm(list = delete_stuff)
-
-            gc()
-
-          }
-
-        } else {
-
-          full_sdm_timer <- envFunc::timer("warning"
-                                           , notes = "No tune results found"
-                                           , time_df = full_sdm_timer
-                                           )
-
-          full_sdm_timer <- envFunc::timer("full sdm end"
-                                           , timer_df = full_sdm_timer
-                                           )
-
-        }
+        full_run <- tune_sdm(prep = prep
+                             , out_dir = out_dir
+                             , return_val = "object"
+                             , algo = tune_args$algo
+                             , fc = tune_args$fc
+                             , rm = tune_args$rm
+                             , trees = tune_args$trees
+                             , mtry = tune_args$mtry
+                             , nodesize = tune_args$nodesize
+                             , keep_model = TRUE
+                             , best_run = TRUE
+                             , do_gc = do_gc
+                             , ...
+                             )
 
       }
 
     }
 
-    res <- if(file.exists(tune_file)) tune_file else NULL
+    # save -------
+    # export before gc()
+    full_run$finished <- TRUE
+    rio::export(full_run, full_run_file)
 
-    return(res)
+    if(do_gc) {
+
+      stuff <- ls()
+
+      delete_stuff <- stuff[! stuff %in% c(return_val, "return_val")]
+
+      rm(list = delete_stuff)
+
+      gc()
+
+    }
+
+    return(get(return_val))
 
   }
 

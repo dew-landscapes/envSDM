@@ -1,5 +1,11 @@
-predict start: 2024-09-06 17:50:20.262128.
-full: 00:00:00.923736.
-mask: 00:00:00.168415.
-threshold: 00:00:00.123824.
-predict end. total predict elapsed time: 00:00:01.217366.
+
+
+bradypus
+predict start at 2024-11-20 17:52:17.139247
+full predict for bradypus from 'maxnet, lognet and glmnet' (maxnet) model
+full done in 0 minutes
+mask for bradypus
+mask done in 0 minutes
+thresh for bradypus
+thresh done in 0 minutes
+predict finished. elapsed time: 0.03 minutes

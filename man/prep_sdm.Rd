@@ -6,7 +6,8 @@
 \usage{
 prep_sdm(
   this_taxa = NULL,
-  out_dir,
+  out_dir = NULL,
+  return_val = "path",
   presence,
   pres_crs = 4326,
   pres_x = "long",
@@ -25,7 +26,7 @@ prep_sdm(
   min_fold_n = 8,
   stretch_value = 10,
   dens_res = 1000,
-  save_pngs = TRUE,
+  save_pngs = FALSE,
   remove_corr = TRUE,
   corr_thresh = 0.9,
   do_gc = FALSE,
@@ -33,16 +34,21 @@ prep_sdm(
 )
 }
 \arguments{
-\item{this_taxa}{Character. Name of taxa. Used to name outputs. If \code{NULL},
-this will be \code{basename(dirname(out_dir))}.}
+\item{this_taxa}{Character. Name of taxa. Only used to print some messages.
+Ignored if NULL}
 
-\item{out_dir}{Character. Name of directory into which results will be saved.}
+\item{out_dir}{FALSE or character. If FALSE the result of prep_sdm will be
+saved to a temporary folder. If character, a file 'prep.rds' will be created
+at the path defined by out_dir.}
 
-\item{presence}{Dataframe of presences. Needs columns called \code{lat} (latitude)
-and \code{long} (longitude) both in decimal degrees.}
+\item{return_val}{Character: "object" or "path". Both return a named list. In
+the case of "path" the named list is simply list(prep = out_dir). Will be set
+to "object" if \code{out_dir} is FALSE.}
+
+\item{presence}{Dataframe of presences with columns \code{pres_x} and \code{pres_y}.}
 
 \item{pres_crs}{Anything that will return a legitimate crs when passed to the
-crs attribute of st_transform or st_as_sf}
+crs attribute of \code{sf::st_transform()} or \code{sf::st_as_sf()}.}
 
 \item{pres_x, pres_y}{Character. Name of the columns in \code{presence} that have
 the x and y coordinates}
@@ -56,7 +62,7 @@ existing .parquet to use.}
 \code{pred_limit} is \code{TRUE}. Passed to the \code{dist} argument of \code{sf::st_buffer()}.}
 
 \item{pred_clip}{sf. Optional sf to clip the pred_limit back to (e.g. to
-prevent prediction into ocean)}
+prevent prediction into ocean). Ignored if pred_limit is not TRUE.}
 
 \item{predictors}{Character. Vector of paths to predictor \code{.tif} files.}
 
@@ -105,8 +111,59 @@ parallel.}
 \item{force_new}{Logical. If outputs already exist, should they be remade?}
 }
 \value{
-Character path to output .rds file. \code{prep.rds} (a list) and log
-written to \code{out_dir}.
+If \code{return_val} is "object" a named list. If \code{return_val} is "path"
+a named list \code{list(prep = out_dir)}. If \code{out_dir} is a valid path, the 'full
+result' (irrespective of \code{return_val}) is also saved to
+\code{fs::path(out_dir, "prep.rds")}. The 'full result' is a named list with
+elements:
+\itemize{
+\item log:
+\itemize{
+\item a log of (rough) timings and other information from the process
+}
+\item abandoned:
+\itemize{
+\item Logical indicating if the sdm was abandoned. If abandoned is TRUE, some
+list elements may not be present
+}
+\item presence_ras:
+\itemize{
+\item tibble with two columns ('x' and 'y') representing unique cell
+centroids on the predictors at presences supplied in argument \code{presence}
+}
+\item predict_boundary:
+\itemize{
+\item sf used to limit the background points and used by \code{predict_sdm()} to
+generate the 'mask'ed output
+}
+\item bg_points:
+\itemize{
+\item sf of cell centroids representing unique cell centroids for background
+points
+}
+\item blocks
+\itemize{
+\item data.frame with columns:
+\itemize{
+\item \code{pa}: presence (1) or absence/background (0)
+\item \code{x} and \code{y}: cell centroids for each presence and absence
+\item \code{block}: the spatial block to which the row belongs
+\item a column with values for each of \code{predictors} at \code{x} and \code{y}
+}
+}
+\item spatial_folds_used:
+\itemize{
+\item logical indicating if spatial folds were used. This may differ from
+the \code{spatial_folds} argument provided to \code{prep_sdm()} if an attempt to
+use spatial folds failed to meet desired \code{folds} and \code{min_fold_n}
+}
+\item correlated:
+\itemize{
+\item list with elements as per \code{envModel::make_env_corr()}, or, if
+\code{remove_corr} is \code{FALSE}, a list with elements \code{remove_env} which is
+empty, and \code{env_var}, containing the names of all predictors.
+}
+}
 }
 \description{
 The background sampling includes code based on a
@@ -129,8 +186,8 @@ by user \href{https://gis.stackexchange.com/users/865/spacedman}{Spacedman}.
                                                           , !is.na(lon)
                                                           )
                                           )
-                  , out_dir = fs::path(out_dir, taxa)
-                  , out_mcp = fs::path(out_dir, "mcp.parquet")
+                  , taxa_dir = fs::path(out_dir, taxa)
+                  , out_mcp = fs::path(taxa_dir, "mcp.parquet")
                   )
 
   env_dat <- system.file("ex/bio.tif", package = "predicts")
@@ -155,7 +212,7 @@ by user \href{https://gis.stackexchange.com/users/865/spacedman}{Spacedman}.
   # use the just created mcps (this allows using, say, a different spatial reliability threshold for the mcps)
 
   purrr::pwalk(list(data$taxa
-                    , data$out_dir
+                    , data$taxa_dir
                     , data$presence
                     , data$out_mcp
                     )
@@ -173,12 +230,12 @@ by user \href{https://gis.stackexchange.com/users/865/spacedman}{Spacedman}.
                )
 
   # example of 'prep'
-  prep <- rio::import(fs::path(data$out_dir[[2]], "prep.rds"))
+  prep <- rio::import(fs::path(data$taxa_dir[[2]], "prep.rds"))
 
   names(prep)
 
   # Density raster
-  dens_ras <- terra::rast(fs::path(data$out_dir[[2]], "density.tif")) \%>\%
+  dens_ras <- terra::rast(fs::path(data$taxa_dir[[2]], "density.tif")) \%>\%
     terra::mask(clip) \%>\%
     terra::classify(matrix(c(0, NA), ncol = 2))
 
@@ -231,7 +288,7 @@ by user \href{https://gis.stackexchange.com/users/865/spacedman}{Spacedman}.
       tm_legend(outside = TRUE) +
       tm_compass() +
       tm_scale_bar() +
-      tm_layout(main.title = paste0("Background points for ",  prep$inputs$this_taxa))
+      tm_layout(main.title = paste0("Background points for ",  prep$this_taxa))
 
 
   }

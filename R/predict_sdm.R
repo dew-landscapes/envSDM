@@ -9,14 +9,12 @@
 #' `pred_limit`, `limit_buffer` and `pred_clip` arguments. A threshold raster
 #' can also be saved (saved as 'thresh.tif') - see `apply_thresh` argument.
 #'
-#' @param this_taxa Character. Name of taxa. Used to name outputs. If `NULL`,
-#' this will be `basename(dirname(out_dir))`.
-#' @param prep_dir Character. Name of directory containing: `prep.rds` (created
-#' with `envSDM::prep_sdm()`)
-#' @param tune_dir Character. Name of directory containing `tune.rds`, created
-#' with `envSDM::tune_sdm()`. Note that any `tune.rds` can be used but only the
-#' model in the first row will be used, thus more usually this `tune.rds` will
-#' have been created directly by `envSDM::run_full_sdm()`
+#' @param prep Character or named list. If character, the path to an existing
+#' `prep.rds`. Otherwise, the result of a call to `prep_sdm()` with return_val =
+#' "object".
+#' @param full_run Character or named list. If character, the path to an
+#' existing `full_run.rds`. Otherwise, the result of a call to `run_full_sdm`()
+#' with return_val = "object".
 #' @param out_dir Character. Name of directory into which `.tif`s will be saved.
 #' Will be created if it does not exist.
 #' @param predictors Character. Vector of paths to predictor `.tif` files.
@@ -26,13 +24,13 @@
 #' 0.6)
 #' @param doClamp Passed to `terra::predict()` (which then passes as `...` to
 #' `fun`). Possibly orphaned from older envSDM?
-#' @param limit_to_mcp Logical. If `predict_boundary` exists within `prep` and
-#' `limit_to_mcp == TRUE`, an output raster (`mask.tif`) will be created within
-#' `predict_boundary` using `terra::mask()`. Irrespective of `limit_to_mcp`,
-#' `full.tif` is always created at the full extent of the predictors. Thus all
-#' `mask.tif` files can be 'stacked' as they have the same extent. If needed,
-#' limiting the predictions for a taxa to its predict boundary can then be done
-#' via `terra::trim(mask.tif)`.
+#' @param limit_to_boundary Logical. If `predict_boundary` exists within `prep`
+#' and `limit_to_boundary == TRUE`, an output raster (`mask.tif`) will be
+#' created within `predict_boundary` using `terra::mask()`. Irrespective of
+#' `limit_to_boundary`, `full.tif` is always created at the full extent of the
+#' predictors. Thus all `mask.tif` files can be 'stacked' as they have the same
+#' extent. If needed, limiting the predictions for a taxa to its predict
+#' boundary can then be done via `terra::trim(mask.tif)`.
 #' @param apply_thresh Logical. If `TRUE`, an output raster `thresh.tif` will be
 #' created using the maximum of specificity + sensitivity. The threshold value
 #' can be accessed within `tune.rds` as, say, `mod <- rio::import("tune.rds")`
@@ -49,21 +47,21 @@
 #' used when masking the full raster back to the mcp (e.g. also passed to
 #' `terra::mask()`)
 #'
-#' @return Character vector of created .tif files. Output .tif(s), .log, and
-#' optional .png, written to `out_dir`
+#' @return Named list of created .tif files. Names follow the 'full', 'mask'
+#' and 'thresh' naming. Output .tif(s), .log, and optional .png, written to
+#' `out_dir`.
 #' @export
 #'
 #' @example inst/examples/predict_sdm_ex.R
 #'
-  predict_sdm <- function(this_taxa = NULL
-                          , prep_dir
-                          , tune_dir = NULL
-                          , out_dir = NULL
+  predict_sdm <- function(prep
+                          , full_run
+                          , out_dir
                           , predictors = NULL
                           , is_env_pred = TRUE
                           , terra_options = NULL
                           , doClamp = TRUE
-                          , limit_to_mcp = TRUE
+                          , limit_to_boundary = TRUE
                           , apply_thresh = TRUE
                           , force_new = FALSE
                           , do_gc = FALSE
@@ -71,23 +69,34 @@
                           , ...
                           ) {
 
-    this_taxa <- basename(prep_dir)
+    # setup -------
+    if(isFALSE(out_dir)) out_dir <- tempfile()
 
-    if(is.null(tune_dir)) tune_dir <- prep_dir
-    if(is.null(out_dir)) out_dir <- tune_dir
+    ## out_dir ------
+    if(is.character(out_dir)) {
 
+      fs::dir_create(out_dir)
+
+      if(!dir.exists(out_dir)) {
+
+        stop("can't create out_dir")
+
+      }
+
+    }
+
+    ## prep -------
+    if(! "list" %in% class(prep)) prep <- rio::import(prep)
+
+    ## tune ---------
+    if(! "list" %in% class(full_run)) full_run <- rio::import(full_run)
 
     # files -----
-    ## existing
-    prep_file <- fs::path(prep_dir, "prep.rds")
-    prep_log <- fs::path(prep_dir, "prep.log")
-    tune_file <- fs::path(tune_dir, "tune.rds")
-
     ## new
     pred_file <- fs::path(out_dir, "full.tif")
     mask_file <- fs::path(out_dir, "mask.tif")
     thresh_file <- fs::path(out_dir, "thresh.tif")
-    pred_log <- fs::path(out_dir, "pred.log")
+    log_file <- fs::path(out_dir, "pred.log")
 
 
     # test tifs ------
@@ -123,53 +132,59 @@
 
 
     # run?-----
-    log_text <- paste0(readLines(prep_log), collapse = " ")
-
-    run <- all(file.exists(prep_file) # need a prep file
-               , !grepl("SDM abandoned", log_text) # enough records
-               , grepl("prep end", log_text) # prep finished
+    run <- all(!prep$abandoned
+               , prep$finished
+               , full_run$finished
                , if(file.exists(thresh_file)) force_new else TRUE # output not already exists (unless force_new)
-               , file.exists(tune_file) # need a tune to predict from
                )
 
     if(run) {
 
       fs::dir_create(out_dir)
 
-      prep <- rio::import(prep_file)
-
       # start timer ------
-      pred_timer <- envFunc::timer(process = "predict start"
-                                   , file = "predict"
-                                   , time_df = NULL
-                                   , log = pred_log
-                                   , write_log = TRUE
-                                   )
+      start_time <- Sys.time()
 
-      mod <- rio::import(fs::path(tune_dir, "tune.rds")
-                         , setclass = "tibble"
-                         )
+      this_taxa <- prep$this_taxa
+
+      readr::write_lines(paste0("\n\n"
+                                  , this_taxa
+                                  , "\npredict start at "
+                                  , start_time
+                                  )
+                           , file = log_file
+                           , append = TRUE
+                           )
+
+      algo <- full_run$tune_mean$algo[[1]]
+
+      mod <- full_run[paste0("tune_", algo)][[1]]
 
       if(nrow(mod) > 1) {
 
-        warning(nrow(mod)
-                , " tunes present. Using the tune from the first row."
-                )
+        note <- paste0(nrow(mod)
+                       , " tunes present. Using the tune from the first row."
+                       )
+
+        warning(note)
+
+        readr::write_lines(note
+                           , file = log_file
+                           , append = TRUE
+                           )
 
       }
 
       ## limit -----
       if(!exists("predict_boundary", where = prep)) {
 
-        prep$pred_limit <- FALSE
+        pred_limit <- FALSE
 
       } else {
 
-        prep$pred_limit <- limit_to_mcp
+        pred_limit <- limit_to_boundary
 
       }
-
-      pred_limit <- prep$pred_limit
 
       # pred -------
 
@@ -178,8 +193,6 @@
       if(all(!is.null(predictors), run)) {
 
         gc()
-
-        algo <- mod$algo[[1]]
 
         if(algo == "maxnet") requireNamespace("maxnet", quietly = TRUE)
         if(algo == "rf") requireNamespace("randomForest", quietly = TRUE)
@@ -213,6 +226,8 @@
 
 
         # full -----
+        full_start <-  Sys.time()
+
         m <- paste0("full predict for "
                     , this_taxa
                     , " from '"
@@ -224,11 +239,10 @@
 
         message(m)
 
-        pred_timer <- envFunc::timer("message"
-                                     , notes = m
-                                     , time_df = pred_timer
-                                     , write_log = TRUE
-                                     )
+        readr::write_lines(m
+                           , file = log_file
+                           , append = TRUE
+                           )
 
         p <- safe_predict(object = x
                           , model = mod$m[[1]]
@@ -244,11 +258,16 @@
 
         if(!is.null(p$error)) {
 
-          pred_timer <- envFunc::timer("error"
-                                       , notes = as.character(p$error)
-                                       , time_df = pred_timer
-                                       , write_log = TRUE
-                                       )
+          m <- paste0("error: "
+                      , as.character(p$error)
+                      )
+
+          message(m)
+
+          readr::write_lines(m
+                             , file = log_file
+                             , append = TRUE
+                             )
 
         }
 
@@ -260,9 +279,13 @@
 
         }
 
-        pred_timer <- envFunc::timer("full"
-                            , time_df = pred_timer
-                            )
+        readr::write_lines(paste0("full done in "
+                                  , round(difftime(Sys.time(), full_start, units = "mins"), 2)
+                                  , " minutes"
+                                  )
+                           , file = log_file
+                           , append = TRUE
+                           )
 
       }
 
@@ -271,7 +294,16 @@
       if(all(pred_limit, run, file.exists(pred_file))) {
 
         # mask ------
-        message("mask for ", this_taxa)
+        mask_start <- Sys.time()
+
+        m <- paste0("mask for ", this_taxa)
+
+        message(m)
+
+        readr::write_lines(m
+                           , file = log_file
+                           , append = TRUE
+                           )
 
         terra::mask(terra::rast(pred_file)
                     , terra::vect(prep$predict_boundary)
@@ -280,9 +312,13 @@
                     , ...
                     )
 
-        pred_timer <- envFunc::timer("mask"
-                            , time_df = pred_timer
-                            )
+        readr::write_lines(paste0("mask done in "
+                                  , round(difftime(Sys.time(), mask_start, units = "mins"), 2)
+                                  , " minutes"
+                                  )
+                           , file = log_file
+                           , append = TRUE
+                           )
 
         if(do_gc) {
 
@@ -292,70 +328,86 @@
 
       }
 
-      # thresh------
-
       run <- if(file.exists(thresh_file)) force_new else TRUE
 
-      if(all(apply_thresh, run, file.exists(pred_file), file.exists(tune_file))) {
+      if(all(apply_thresh, run)) {
 
-        do_thresh <- if(file.exists(thresh_file)) force_new else TRUE
+        # thresh ------
+        thresh_start <- Sys.time()
 
-        if(do_thresh) {
+        m <- paste0("thresh for ", this_taxa)
 
-          thresh <- mod$e[[1]]@thresholds$max_spec_sens
+        message(m)
 
-          file_to_thresh <- if(pred_limit) {
+        readr::write_lines(m
+                           , file = log_file
+                           , append = TRUE
+                           )
 
-            mask_file
+        thresh <- mod$e[[1]]@thresholds$max_spec_sens
 
-          } else {
+        file_to_thresh <- if(pred_limit) {
 
-            pred_file
+          mask_file
 
-          }
+        } else {
 
-          message("apply threshold for ", this_taxa)
+          pred_file
 
-          terra::app(terra::rast(file_to_thresh)
-                     , \(i) i > thresh
-                     , filename = thresh_file
-                     , overwrite = TRUE
-                     , wopt = list(datatype = "INT1U"
-                                   , names = this_taxa
-                                   )
-                     )
+        }
 
-          pred_timer <- envFunc::timer("threshold"
-                              , time_df = pred_timer
-                              )
+        message(m)
 
-          if(do_gc) {
+        terra::app(terra::rast(file_to_thresh)
+                   , \(i) i > thresh
+                   , filename = thresh_file
+                   , overwrite = TRUE
+                   , wopt = list(datatype = "INT1U"
+                                 , names = this_taxa
+                                 )
+                   )
 
-            gc()
+        readr::write_lines(paste0("thresh done in "
+                                  , round(difftime(Sys.time(), thresh_start, units = "mins"), 2)
+                                  , " minutes"
+                                  )
+                           , file = log_file
+                           , append = TRUE
+                           )
 
-          }
+        if(do_gc) {
+
+          gc()
 
         }
 
       }
 
-      pred_timer <- envFunc::timer(process = "predict end"
-                          , time_df = pred_timer
-                          )
+     readr::write_lines(paste0("predict finished. elapsed time: "
+                                  , round(difftime(Sys.time(), start_time, units = "mins"), 2)
+                                  , " minutes"
+                                  )
+                           , file = log_file
+                           , append = TRUE
+                           )
 
     }
 
     if(do_gc) {
 
-        rm(list = ls(pattern = "^(?!.*_file)"))
+        stuff <- ls()
+
+        delete_stuff <- stuff[!grepl("_file$", stuff)]
+
+        rm(list = delete_stuff)
 
         gc()
 
       }
 
-    res <- c(if(file.exists(pred_file)) pred_file
-             , if(file.exists(mask_file)) mask_file
-             , if(file.exists(thresh_file)) thresh_file
+    res <- c(if(file.exists(pred_file)) list(full = pred_file)
+             , if(file.exists(mask_file)) list(mask = mask_file)
+             , if(file.exists(thresh_file)) list(thresh = thresh_file)
              )
 
     return(res)

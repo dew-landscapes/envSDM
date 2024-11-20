@@ -48,7 +48,8 @@ Imports:
     sf,
     terra,
     dplyr,
-    magrittr
+    magrittr,
+    rlang
 Remotes:
     github::acanthiza/envFunc,
     github::acanthiza/envRaster,

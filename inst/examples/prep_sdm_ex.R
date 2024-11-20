@@ -12,8 +12,8 @@
                                                           , !is.na(lon)
                                                           )
                                           )
-                  , out_dir = fs::path(out_dir, taxa)
-                  , out_mcp = fs::path(out_dir, "mcp.parquet")
+                  , taxa_dir = fs::path(out_dir, taxa)
+                  , out_mcp = fs::path(taxa_dir, "mcp.parquet")
                   )
 
   env_dat <- system.file("ex/bio.tif", package = "predicts")
@@ -38,7 +38,7 @@
   # use the just created mcps (this allows using, say, a different spatial reliability threshold for the mcps)
 
   purrr::pwalk(list(data$taxa
-                    , data$out_dir
+                    , data$taxa_dir
                     , data$presence
                     , data$out_mcp
                     )
@@ -56,12 +56,12 @@
                )
 
   # example of 'prep'
-  prep <- rio::import(fs::path(data$out_dir[[2]], "prep.rds"))
+  prep <- rio::import(fs::path(data$taxa_dir[[2]], "prep.rds"))
 
   names(prep)
 
   # Density raster
-  dens_ras <- terra::rast(fs::path(data$out_dir[[2]], "density.tif")) %>%
+  dens_ras <- terra::rast(fs::path(data$taxa_dir[[2]], "density.tif")) %>%
     terra::mask(clip) %>%
     terra::classify(matrix(c(0, NA), ncol = 2))
 
@@ -114,7 +114,7 @@
       tm_legend(outside = TRUE) +
       tm_compass() +
       tm_scale_bar() +
-      tm_layout(main.title = paste0("Background points for ",  prep$inputs$this_taxa))
+      tm_layout(main.title = paste0("Background points for ",  prep$this_taxa))
 
 
   }

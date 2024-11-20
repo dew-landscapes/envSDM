@@ -1,9 +1,9 @@
-tune start
 
-tune start: 2024-11-19 13:46:50.166555.
-maxnet: 00:12:46.038662.
-envelope: 00:00:05.340422.
-rf: 00:01:19.799830.
-tune end. total tune elapsed time: 00:14:14.495536
-.
-find best: 00:00:00.808041.
+
+bradypus
+best_run = FALSE
+tune start 2024-11-20 16:10:09.171438
+7 out of 9 variables will be used
+maxnet tune finished in: 0.15 minutes
+envelope tune finished in: 0.09 minutes
+rf tune finished in: 0.12 minutes
