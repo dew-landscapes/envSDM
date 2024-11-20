@@ -152,6 +152,8 @@
 
     if(!exists("prep", inherits = FALSE)) prep <- list(abandoned = FALSE, finished = FALSE)
 
+    if(nrow(presence) == 0) prep$abandoned <- TRUE
+
     run <- if(any(prep$abandoned, prep$finished)) force_new else TRUE
 
     if(run) {

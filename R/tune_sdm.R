@@ -549,6 +549,13 @@
 
       }
 
+    } else {
+
+      readr::write_lines("tune abandoned"
+                         , file = log_file
+                         , append = TRUE
+                         )
+
     }
 
 
@@ -652,7 +659,7 @@
     # save -------
     # export before gc()
     tune$finished <- TRUE
-    tune$log <- readr::read_lines(log_file)
+    tune$log <- if(file.exists(log_file)) readr::read_lines(log_file) else NULL
 
     rio::export(tune, tune_file)
 
