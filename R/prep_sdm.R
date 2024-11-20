@@ -924,6 +924,7 @@
       # save -------
       # export before gc()
       prep$finished <- TRUE
+      prep$log <- if(file.exists(log_file)) readr::read_lines(log_file) else NULL
       rio::export(prep, prep_file)
 
       # clean up -------
