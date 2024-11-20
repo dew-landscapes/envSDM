@@ -151,8 +151,6 @@
 
           ## setup ------
 
-          if(is.null(this_taxa)) this_taxa <- basename(dirname(tune_file))
-
           nobs <- nrow(prep$blocks[prep$blocks$pa == 1,])
 
           ## start data frame -----
