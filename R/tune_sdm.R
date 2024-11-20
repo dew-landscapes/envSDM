@@ -561,7 +561,10 @@
 
     # find best ------
 
-    run <- if(exists("best", where = tune, inherits = FALSE)) force_new else TRUE
+    run <- all(!prep$abandoned
+               , prep$finished
+               , if(exists("tune_mean", where = tune, inherits = FALSE)) force_new else TRUE
+               )
 
     if(run) {
 
