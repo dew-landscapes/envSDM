@@ -51,7 +51,6 @@
                           , is_env_pred = TRUE
                           , terra_options = NULL
                           , doClamp = TRUE
-                          , limit_to_boundary = TRUE
                           , apply_thresh = TRUE
                           , force_new = FALSE
                           , do_gc = FALSE
@@ -164,17 +163,6 @@
 
       }
 
-      ## limit -----
-      if(!exists("predict_boundary", where = prep)) {
-
-        pred_limit <- FALSE
-
-      } else {
-
-        pred_limit <- limit_to_boundary
-
-      }
-
       # pred -------
 
       run <- if(file.exists(pred_file)) force_new else TRUE
@@ -214,7 +202,7 @@
 
         used_preds <- prep$correlated$env_cols[!prep$correlated$env_cols %in% prep$correlated$remove_env]
 
-        x <- subset(x, used_preds)
+        x <- terra::subset(x, used_preds)
 
         x <- terra::crop(x = x
                          , y = terra::vect(prep$predict_boundary)
