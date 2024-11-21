@@ -120,7 +120,7 @@
                        , dens_res = 1000
                        , save_pngs = FALSE
                        , reduce_env = TRUE
-                       , corr_thresh = 0.9
+                       , thresh = 0.9
                        , do_gc = FALSE
                        , force_new = FALSE
                        ) {
@@ -864,7 +864,7 @@
       }
 
 
-      # correlated -------
+      # reduce env -------
 
       if(all(reduce_env, !prep$abandoned)) {
 
@@ -876,7 +876,8 @@
                                                   , env_cols = names(predictors)
                                                   , remove = TRUE
                                                   , thresh = thresh
-                                                  , always_remove = c(pres_x, pres_y, "x", "y", "pa", "block", "cell")
+                                                  , remove_always = c(pres_x, pres_y, "x", "y", "pa", "block", "cell")
+                                                  , y_col = "pa"
                                                   )
 
           readr::write_lines(paste0("reduce_env completed. elapsed time: "
