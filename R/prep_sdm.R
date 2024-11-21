@@ -96,7 +96,7 @@
 #'
 #' @example inst/examples/prep_sdm_ex.R
   prep_sdm <- function(this_taxa = NULL
-                       , out_dir = NULL
+                       , out_dir = FALSE
                        , return_val = "path"
                        , presence
                        , pres_crs = 4326

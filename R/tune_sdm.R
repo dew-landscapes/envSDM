@@ -59,7 +59,7 @@
 #'
 #' @example inst/examples/tune_sdm_ex.R
   tune_sdm <- function(prep
-                       , out_dir
+                       , out_dir = FALSE
                        , return_val = "path"
                        , algo = c("all", "maxnet", "bioclim", "envelope", "rf") # envelope = bioclim
                        , fc = "auto_feature" # maxnet tune
