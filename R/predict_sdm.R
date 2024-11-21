@@ -1,13 +1,12 @@
 
 #' Predict from SDM
 #'
-#' When running predict_sdm, the first predict, saved as 'full.tif' is always to
-#' the full extent of the environmental variables even when they extend beyond
-#' the predict boundary (this ensures all result can be stacked). The second
-#' predict, saved as 'mask.tif' is masked to the same boundary as provided: to
-#' the `pred_limit` argument of prep_sdm; or generated in prep_sdm from the
+#' The resulting `pred.tif` is masked to the boundary provided to the
+#' `pred_limit` argument of prep_sdm; or generated in prep_sdm from the
 #' `pred_limit`, `limit_buffer` and `pred_clip` arguments. A threshold raster
-#' can also be saved (saved as 'thresh.tif') - see `apply_thresh` argument.
+#' can also be saved (saved as 'thresh.tif') - see `apply_thresh` argument. In
+#' both cases the resulting files will have the same extent, resolution and crs
+#' as the predictors.
 #'
 #' @param prep Character or named list. If character, the path to an existing
 #' `prep.rds`. Otherwise, the result of a call to `prep_sdm()` with return_val =
@@ -24,13 +23,6 @@
 #' 0.6)
 #' @param doClamp Passed to `terra::predict()` (which then passes as `...` to
 #' `fun`). Possibly orphaned from older envSDM?
-#' @param limit_to_boundary Logical. If `predict_boundary` exists within `prep`
-#' and `limit_to_boundary == TRUE`, an output raster (`mask.tif`) will be
-#' created within `predict_boundary` using `terra::mask()`. Irrespective of
-#' `limit_to_boundary`, `full.tif` is always created at the full extent of the
-#' predictors. Thus all `mask.tif` files can be 'stacked' as they have the same
-#' extent. If needed, limiting the predictions for a taxa to its predict
-#' boundary can then be done via `terra::trim(mask.tif)`.
 #' @param apply_thresh Logical. If `TRUE`, an output raster `thresh.tif` will be
 #' created using the maximum of specificity + sensitivity. The threshold value
 #' can be accessed within `tune.rds` as, say, `mod <- rio::import("tune.rds")`
@@ -43,13 +35,11 @@
 #' @param check_tifs Logical. Check if any output `.tif` files error on
 #' `terra::rast()` and delete them if they do. Useful after a crash during
 #' predict.
-#' @param ... Passed to `terra::predict()`. e.g. use for wopt = list(). Also
-#' used when masking the full raster back to the mcp (e.g. also passed to
-#' `terra::mask()`)
+#' @param ... Passed to `terra::predict()`. e.g. use for wopt = list().
 #'
-#' @return Named list of created .tif files. Names follow the 'full', 'mask'
-#' and 'thresh' naming. Output .tif(s), .log, and optional .png, written to
-#' `out_dir`.
+#' @return Named list of created .tif files, usually 'pred.tif' and
+#' 'thresh.tif'. Output .tif(s) and .log, written to `out_dir`.
+#'
 #' @export
 #'
 #' @example inst/examples/predict_sdm_ex.R
@@ -93,8 +83,7 @@
 
     # files -----
     ## new
-    pred_file <- fs::path(out_dir, "full.tif")
-    mask_file <- fs::path(out_dir, "mask.tif")
+    pred_file <- fs::path(out_dir, "pred.tif")
     thresh_file <- fs::path(out_dir, "thresh.tif")
     log_file <- fs::path(out_dir, "pred.log")
 
@@ -198,7 +187,17 @@
         if(algo == "rf") requireNamespace("randomForest", quietly = TRUE)
         if(algo == "env") requireNamespace("predicts", quietly = TRUE)
 
-        ## predictors -----
+        ## predict_stack---------
+        predict_stack_start <- Sys.time()
+
+        m <- paste0("predict stack for ", this_taxa)
+
+        message(m)
+
+        readr::write_lines(m
+                           , file = log_file
+                           , append = TRUE
+                           )
         if(is_env_pred) {
 
           pred_names <- envRaster::name_env_tif(tibble::tibble(path = predictors), parse = TRUE) %>%
@@ -213,6 +212,26 @@
 
         }
 
+        used_preds <- prep$correlated$env_cols[!prep$correlated$env_cols %in% prep$correlated$remove_env]
+
+        x <- subset(x, used_preds)
+
+        x <- terra::crop(x = x
+                         , y = terra::vect(prep$predict_boundary)
+                         , mask = TRUE
+                         )
+
+        readr::write_lines(paste0("predict stack created in "
+                                  , round(difftime(Sys.time(), predict_stack_start, units = "mins"), 2)
+                                  , " minutes"
+                                  )
+                           , file = log_file
+                           , append = TRUE
+                           )
+
+        ## predict--------
+        pred_start <-  Sys.time()
+
         safe_predict <- purrr::safely(terra::predict)
 
         if(!is.null(terra_options)) {
@@ -223,11 +242,7 @@
 
         }
 
-
-        # full -----
-        full_start <-  Sys.time()
-
-        m <- paste0("full predict for "
+        m <- paste0("predict for "
                     , this_taxa
                     , " from '"
                     , envFunc::vec_to_sentence(class(mod$m[[1]]))
@@ -278,52 +293,13 @@
 
         }
 
-        readr::write_lines(paste0("full done in "
-                                  , round(difftime(Sys.time(), full_start, units = "mins"), 2)
+        readr::write_lines(paste0("predict finished in "
+                                  , round(difftime(Sys.time(), pred_start, units = "mins"), 2)
                                   , " minutes"
                                   )
                            , file = log_file
                            , append = TRUE
                            )
-
-      }
-
-      run <- if(file.exists(mask_file)) force_new else TRUE
-
-      if(all(pred_limit, run, file.exists(pred_file))) {
-
-        # mask ------
-        mask_start <- Sys.time()
-
-        m <- paste0("mask for ", this_taxa)
-
-        message(m)
-
-        readr::write_lines(m
-                           , file = log_file
-                           , append = TRUE
-                           )
-
-        terra::mask(terra::rast(pred_file)
-                    , terra::vect(prep$predict_boundary)
-                    , filename = mask_file
-                    , overwrite = TRUE
-                    , ...
-                    )
-
-        readr::write_lines(paste0("mask done in "
-                                  , round(difftime(Sys.time(), mask_start, units = "mins"), 2)
-                                  , " minutes"
-                                  )
-                           , file = log_file
-                           , append = TRUE
-                           )
-
-        if(do_gc) {
-
-          gc()
-
-        }
 
       }
 
@@ -331,7 +307,7 @@
 
       if(all(apply_thresh, run)) {
 
-        # thresh ------
+        ## thresh ------
         thresh_start <- Sys.time()
 
         m <- paste0("thresh for ", this_taxa)
@@ -345,19 +321,9 @@
 
         thresh <- mod$e[[1]]@thresholds$max_spec_sens
 
-        file_to_thresh <- if(pred_limit) {
-
-          mask_file
-
-        } else {
-
-          pred_file
-
-        }
-
         message(m)
 
-        terra::app(terra::rast(file_to_thresh)
+        terra::app(terra::rast(pred_file)
                    , \(i) i > thresh
                    , filename = thresh_file
                    , overwrite = TRUE
@@ -404,8 +370,7 @@
 
       }
 
-    res <- c(if(file.exists(pred_file)) list(full = pred_file)
-             , if(file.exists(mask_file)) list(mask = mask_file)
+    res <- c(if(file.exists(pred_file)) list(pred = pred_file)
              , if(file.exists(thresh_file)) list(thresh = thresh_file)
              )
 
