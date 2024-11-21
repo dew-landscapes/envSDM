@@ -1,32 +1,7 @@
 
 
 acaule
-predict start at 2024-11-20 16:41:52.410518
-full predict for acaule from 'randomForest' (rf) model
-full done. elapsed time = 9.95 minutes
-full predict for acaule from 'randomForest' (rf) model
-full done in 0.13 minutes
-mask for acaule
-mask for acaule
-mask done in 0.04 minutes
-thresh for acaule
-thresh done in 0.83 minutes
-predict finished. elapsed time: 17.89 minutes
-
-
-acaule
-predict start at 2024-11-21 18:25:17.604584
-predict stack for acaule
-
-
-acaule
-predict start at 2024-11-21 18:28:46.869507
-predict stack for acaule
-predict stack created in 0.47 minutes
-
-
-acaule
-predict start at 2024-11-21 18:30:01.277699
+predict start at 2024-11-22 07:53:06.584087
 predict stack for acaule
 predict stack created in 0 minutes
 predict for acaule from 'randomForest' (rf) model

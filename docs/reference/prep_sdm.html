@@ -49,7 +49,7 @@ by user <a href="https://gis.stackexchange.com/users/865/spacedman" class="exter
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">prep_sdm</span><span class="op">(</span></span>
 <span>  this_taxa <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  out_dir <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  out_dir <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  return_val <span class="op">=</span> <span class="st">"path"</span>,</span>
 <span>  <span class="va">presence</span>,</span>
 <span>  pres_crs <span class="op">=</span> <span class="fl">4326</span>,</span>
@@ -70,8 +70,8 @@ by user <a href="https://gis.stackexchange.com/users/865/spacedman" class="exter
 <span>  stretch_value <span class="op">=</span> <span class="fl">10</span>,</span>
 <span>  dens_res <span class="op">=</span> <span class="fl">1000</span>,</span>
 <span>  save_pngs <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  remove_corr <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  corr_thresh <span class="op">=</span> <span class="fl">0.9</span>,</span>
+<span>  reduce_env <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  thresh <span class="op">=</span> <span class="fl">0.9</span>,</span>
 <span>  do_gc <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  force_new <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -188,13 +188,15 @@ Set to <code>NULL</code> to use the same resolution as the predictors.</p></dd>
 blocks</p></dd>
 
 
-<dt id="arg-remove-corr">remove_corr<a class="anchor" aria-label="anchor" href="#arg-remove-corr"></a></dt>
-<dd><p>Logical. If TRUE, predictors with high correlation are
-removed.</p></dd>
+<dt id="arg-reduce-env">reduce_env<a class="anchor" aria-label="anchor" href="#arg-reduce-env"></a></dt>
+<dd><p>Logical. If TRUE, highly correlated and low importance
+variables will be removed. In the case of highly correlated variables, only
+one is removed.</p></dd>
 
 
-<dt id="arg-corr-thresh">corr_thresh<a class="anchor" aria-label="anchor" href="#arg-corr-thresh"></a></dt>
-<dd><p>Numeric. Definition of 'high' correlation for <code>remove_corr</code></p></dd>
+<dt id="arg-thresh">thresh<a class="anchor" aria-label="anchor" href="#arg-thresh"></a></dt>
+<dd><p>Numeric. Threshold used to flag highly correlated and low
+importance variables</p></dd>
 
 
 <dt id="arg-do-gc">do_gc<a class="anchor" aria-label="anchor" href="#arg-do-gc"></a></dt>
@@ -237,8 +239,8 @@ points</p></li>
 the <code>spatial_folds</code> argument provided to <code>prep_sdm()</code> if an attempt to
 use spatial folds failed to meet desired <code>folds</code> and <code>min_fold_n</code></p></li>
 </ul></li>
-<li><p>correlated:</p><ul><li><p>list with elements as per <code><a href="https://acanthiza.github.io/envModel/reference/make_env_corr.html" class="external-link">envModel::make_env_corr()</a></code>, or, if
-<code>remove_corr</code> is <code>FALSE</code>, a list with elements <code>remove_env</code> which is
+<li><p>correlated:</p><ul><li><p>list with elements as per <code><a href="https://acanthiza.github.io/envModel/reference/reduce_env.html" class="external-link">envModel::reduce_env()</a></code>, or, if
+<code>reduce_env</code> is <code>FALSE</code>, a list with elements <code>remove_env</code> which is
 empty, and <code>env_var</code>, containing the names of all predictors.</p></li>
 </ul></li>
 </ul></div>
@@ -309,9 +311,15 @@ empty, and <code>env_var</code>, containing the names of all predictors.</p></li
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Missing `trust` will be set to FALSE by default for RDS in 2.0.0.</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">prep</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "abandoned"          "finished"           "this_taxa"         </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [4] "presence_ras"       "predict_boundary"   "bg_points"         </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [7] "blocks"             "spatial_folds_used" "correlated"        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [1] "abandoned"          "finished"           "this_taxa"         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [4] "presence_ras"       "predict_boundary"   "bg_points"         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [7] "blocks"             "spatial_folds_used" "reduce_env"        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [10] "log"               </span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>  <span class="co"># env variables not used</span></span></span>
+<span class="r-in"><span>  <span class="va">prep</span><span class="op">$</span><span class="va">reduce_env</span><span class="op">$</span><span class="va">remove</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [1] "bio1"  "bio5"  "bio9"  "block" "cell"  "lat"   "lon"   "pa"    "x"    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [10] "y"    </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>  <span class="co"># Density raster</span></span></span>
 <span class="r-in"><span>  <span class="va">dens_ras</span> <span class="op">&lt;-</span> <span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rspatial.github.io/terra/reference/rast.html" class="external-link">rast</a></span><span class="op">(</span><span class="fu">fs</span><span class="fu">::</span><span class="fu"><a href="https://fs.r-lib.org/reference/path.html" class="external-link">path</a></span><span class="op">(</span><span class="va">data</span><span class="op">$</span><span class="va">taxa_dir</span><span class="op">[[</span><span class="fl">2</span><span class="op">]</span><span class="op">]</span>, <span class="st">"density.tif"</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>

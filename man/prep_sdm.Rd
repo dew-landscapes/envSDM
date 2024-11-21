@@ -27,8 +27,8 @@ prep_sdm(
   stretch_value = 10,
   dens_res = 1000,
   save_pngs = FALSE,
-  remove_corr = TRUE,
-  corr_thresh = 0.9,
+  reduce_env = TRUE,
+  thresh = 0.9,
   do_gc = FALSE,
   force_new = FALSE
 )
@@ -99,10 +99,12 @@ Set to \code{NULL} to use the same resolution as the predictors.}
 \item{save_pngs}{Logical. Save out a .png of the density raster and spatial
 blocks}
 
-\item{remove_corr}{Logical. If TRUE, predictors with high correlation are
-removed.}
+\item{reduce_env}{Logical. If TRUE, highly correlated and low importance
+variables will be removed. In the case of highly correlated variables, only
+one is removed.}
 
-\item{corr_thresh}{Numeric. Definition of 'high' correlation for \code{remove_corr}}
+\item{thresh}{Numeric. Threshold used to flag highly correlated and low
+importance variables}
 
 \item{do_gc}{Logical. Run \code{base::rm(list = ls)} and \code{base::gc()} at end of
 function? Useful when running SDMs for many, many taxa, especially if done in
@@ -159,8 +161,8 @@ use spatial folds failed to meet desired \code{folds} and \code{min_fold_n}
 }
 \item correlated:
 \itemize{
-\item list with elements as per \code{envModel::make_env_corr()}, or, if
-\code{remove_corr} is \code{FALSE}, a list with elements \code{remove_env} which is
+\item list with elements as per \code{envModel::reduce_env()}, or, if
+\code{reduce_env} is \code{FALSE}, a list with elements \code{remove_env} which is
 empty, and \code{env_var}, containing the names of all predictors.
 }
 }
@@ -233,6 +235,9 @@ by user \href{https://gis.stackexchange.com/users/865/spacedman}{Spacedman}.
   prep <- rio::import(fs::path(data$taxa_dir[[2]], "prep.rds"))
 
   names(prep)
+
+  # env variables not used
+  prep$reduce_env$remove
 
   # Density raster
   dens_ras <- terra::rast(fs::path(data$taxa_dir[[2]], "density.tif")) \%>\%

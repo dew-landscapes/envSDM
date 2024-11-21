@@ -60,6 +60,9 @@
 
   names(prep)
 
+  # env variables not used
+  prep$reduce_env$remove
+
   # Density raster
   dens_ras <- terra::rast(fs::path(data$taxa_dir[[2]], "density.tif")) %>%
     terra::mask(clip) %>%
