@@ -165,11 +165,11 @@
 
           single_block <- if(length(unique(prep$blocks[prep$blocks$pa == 1,]$block)) == 1) TRUE else FALSE
 
-          preds <- prep$correlated$env_cols[!prep$correlated$env_cols %in% prep$correlated$remove_env]
+          preds <- prep$reduce_env$env_cols[prep$reduce_env$env_cols %in% prep$reduce_env$keep]
 
           readr::write_lines(paste0(length(preds)
                                     , " out of "
-                                    , length(prep$correlated$env_cols)
+                                    , length(prep$reduce_env$env_cols)
                                     , " variables will be used"
                                     )
                              , file = log_file

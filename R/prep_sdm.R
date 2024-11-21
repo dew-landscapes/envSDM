@@ -50,9 +50,11 @@
 #' Set to `NULL` to use the same resolution as the predictors.
 #' @param save_pngs Logical. Save out a .png of the density raster and spatial
 #' blocks
-#' @param remove_corr Logical. If TRUE, predictors with high correlation are
-#' removed.
-#' @param corr_thresh Numeric. Definition of 'high' correlation for `remove_corr`
+#' @param reduce_env Logical. If TRUE, highly correlated and low importance
+#' variables will be removed. In the case of highly correlated variables, only
+#' one is removed.
+#' @param thresh Numeric. Threshold used to flag highly correlated and low
+#' importance variables
 #' @param do_gc Logical. Run `base::rm(list = ls)` and `base::gc()` at end of
 #' function? Useful when running SDMs for many, many taxa, especially if done in
 #' parallel.
@@ -88,8 +90,8 @@
 #'     the `spatial_folds` argument provided to `prep_sdm()` if an attempt to
 #'     use spatial folds failed to meet desired `folds` and `min_fold_n`
 #' * correlated:
-#'     + list with elements as per `envModel::make_env_corr()`, or, if
-#'     `remove_corr` is `FALSE`, a list with elements `remove_env` which is
+#'     + list with elements as per `envModel::reduce_env()`, or, if
+#'     `reduce_env` is `FALSE`, a list with elements `remove_env` which is
 #'     empty, and `env_var`, containing the names of all predictors.
 #'
 #' @export
@@ -117,7 +119,7 @@
                        , stretch_value = 10
                        , dens_res = 1000
                        , save_pngs = FALSE
-                       , remove_corr = TRUE
+                       , reduce_env = TRUE
                        , corr_thresh = 0.9
                        , do_gc = FALSE
                        , force_new = FALSE
@@ -864,20 +866,20 @@
 
       # correlated -------
 
-      if(all(remove_corr, !prep$abandoned)) {
+      if(all(reduce_env, !prep$abandoned)) {
 
-        run <- if(exists("correlated", prep)) force_new else TRUE
+        run <- if(exists("reduce_env", prep)) force_new else TRUE
 
         if(run) {
 
-          prep$correlated <- envModel::make_env_corr(prep$blocks
-                                                     , env_cols = names(predictors)
-                                                     , remove = TRUE
-                                                     , thresh = corr_thresh
-                                                     , always_remove = c(pres_x, pres_y, "x", "y", "pa", "block", "cell")
-                                                     )
+          prep$reduce_env <- envModel::reduce_env(prep$blocks
+                                                  , env_cols = names(predictors)
+                                                  , remove = TRUE
+                                                  , thresh = thresh
+                                                  , always_remove = c(pres_x, pres_y, "x", "y", "pa", "block", "cell")
+                                                  )
 
-          readr::write_lines(paste0("correlation completed. elapsed time: "
+          readr::write_lines(paste0("reduce_env completed. elapsed time: "
                                     , round(difftime(Sys.time(), start_time, units = "mins"), 1)
                                     , " minutes"
                                     )
@@ -891,8 +893,8 @@
 
         if(!prep$abandoned) {
 
-          prep$correlated$remove_env <- ""
-          prep$correlated$env_cols <- names(predictors)
+          prep$reduce_env$remove <- ""
+          prep$reduce_env$env_cols <- names(predictors)
 
         }
 

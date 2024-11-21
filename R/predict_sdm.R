@@ -200,7 +200,7 @@
 
         }
 
-        used_preds <- prep$correlated$env_cols[!prep$correlated$env_cols %in% prep$correlated$remove_env]
+        used_preds <- prep$reduce_env$env_cols[prep$reduce_env$env_cols %in% prep$reduce_env$keep]
 
         x <- terra::subset(x, used_preds)
 
