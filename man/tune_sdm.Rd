@@ -6,7 +6,7 @@
 \usage{
 tune_sdm(
   prep,
-  out_dir,
+  out_dir = FALSE,
   return_val = "path",
   algo = c("all", "maxnet", "bioclim", "envelope", "rf"),
   fc = "auto_feature",

@@ -9,3 +9,14 @@ mask done in 0 minutes
 thresh for acaule
 thresh done in 0 minutes
 predict finished. elapsed time: 0.05 minutes
+
+
+acaule
+predict start at 2024-11-21 18:33:14.431129
+predict stack for acaule
+predict stack created in 0 minutes
+predict for acaule from 'randomForest' (rf) model
+predict finished in 0 minutes
+thresh for acaule
+thresh done in 0 minutes
+predict finished. elapsed time: 0.03 minutes

@@ -42,7 +42,6 @@
                                      , out_dir = b
                                      , predictors = env_dat
                                      , is_env_pred = FALSE
-                                     , limit_to_boundary = TRUE
                                      , check_tifs = TRUE
                                      )
                )
@@ -67,7 +66,7 @@
   ## visualise-------
   ### mask -------
   purrr::walk(data$out_dir
-              , \(x) fs::path(x, "mask.tif") %>%
+              , \(x) fs::path(x, "pred.tif") %>%
                 terra::rast() %>%
                 terra::trim() %>%
                 terra::plot()
@@ -98,9 +97,7 @@
                                          # passed to tune_sdm via dots
                                          , metrics_df = envSDM::sdm_metrics
                                          )
-                                     )
-                 )
-
+              )
 
   ## predict -------
   purrr::pwalk(list(data$prep
@@ -120,7 +117,7 @@
   ## visualise-------
   ### mask -------
   purrr::walk(data$out_dir
-              , \(x) fs::path(x, "mask.tif") %>%
+              , \(x) fs::path(x, "pred.tif") %>%
                 terra::rast() %>%
                 terra::trim() %>%
                 terra::plot()

@@ -12,7 +12,6 @@ predict_sdm(
   is_env_pred = TRUE,
   terra_options = NULL,
   doClamp = TRUE,
-  limit_to_boundary = TRUE,
   apply_thresh = TRUE,
   force_new = FALSE,
   do_gc = FALSE,
@@ -43,14 +42,6 @@ Will be created if it does not exist.}
 \item{doClamp}{Passed to \code{terra::predict()} (which then passes as \code{...} to
 \code{fun}). Possibly orphaned from older envSDM?}
 
-\item{limit_to_boundary}{Logical. If \code{predict_boundary} exists within \code{prep}
-and \code{limit_to_boundary == TRUE}, an output raster (\code{mask.tif}) will be
-created within \code{predict_boundary} using \code{terra::mask()}. Irrespective of
-\code{limit_to_boundary}, \code{full.tif} is always created at the full extent of the
-predictors. Thus all \code{mask.tif} files can be 'stacked' as they have the same
-extent. If needed, limiting the predictions for a taxa to its predict
-boundary can then be done via \code{terra::trim(mask.tif)}.}
-
 \item{apply_thresh}{Logical. If \code{TRUE}, an output raster \code{thresh.tif} will be
 created using the maximum of specificity + sensitivity. The threshold value
 can be accessed within \code{tune.rds} as, say, \code{mod <- rio::import("tune.rds")}
@@ -67,23 +58,19 @@ especially if done in parallel.}
 \code{terra::rast()} and delete them if they do. Useful after a crash during
 predict.}
 
-\item{...}{Passed to \code{terra::predict()}. e.g. use for wopt = list(). Also
-used when masking the full raster back to the mcp (e.g. also passed to
-\code{terra::mask()})}
+\item{...}{Passed to \code{terra::predict()}. e.g. use for wopt = list().}
 }
 \value{
-Named list of created .tif files. Names follow the 'full', 'mask'
-and 'thresh' naming. Output .tif(s), .log, and optional .png, written to
-\code{out_dir}.
+Named list of created .tif files, usually 'pred.tif' and
+'thresh.tif'. Output .tif(s) and .log, written to \code{out_dir}.
 }
 \description{
-When running predict_sdm, the first predict, saved as 'full.tif' is always to
-the full extent of the environmental variables even when they extend beyond
-the predict boundary (this ensures all result can be stacked). The second
-predict, saved as 'mask.tif' is masked to the same boundary as provided: to
-the \code{pred_limit} argument of prep_sdm; or generated in prep_sdm from the
+The resulting \code{pred.tif} is masked to the boundary provided to the
+\code{pred_limit} argument of prep_sdm; or generated in prep_sdm from the
 \code{pred_limit}, \code{limit_buffer} and \code{pred_clip} arguments. A threshold raster
-can also be saved (saved as 'thresh.tif') - see \code{apply_thresh} argument.
+can also be saved (saved as 'thresh.tif') - see \code{apply_thresh} argument. In
+both cases the resulting files will have the same extent, resolution and crs
+as the predictors.
 }
 \examples{
 
@@ -130,7 +117,6 @@ can also be saved (saved as 'thresh.tif') - see \code{apply_thresh} argument.
                                      , out_dir = b
                                      , predictors = env_dat
                                      , is_env_pred = FALSE
-                                     , limit_to_boundary = TRUE
                                      , check_tifs = TRUE
                                      )
                )
@@ -155,7 +141,7 @@ can also be saved (saved as 'thresh.tif') - see \code{apply_thresh} argument.
   ## visualise-------
   ### mask -------
   purrr::walk(data$out_dir
-              , \(x) fs::path(x, "mask.tif") \%>\%
+              , \(x) fs::path(x, "pred.tif") \%>\%
                 terra::rast() \%>\%
                 terra::trim() \%>\%
                 terra::plot()
@@ -186,9 +172,7 @@ can also be saved (saved as 'thresh.tif') - see \code{apply_thresh} argument.
                                          # passed to tune_sdm via dots
                                          , metrics_df = envSDM::sdm_metrics
                                          )
-                                     )
-                 )
-
+              )
 
   ## predict -------
   purrr::pwalk(list(data$prep
@@ -208,7 +192,7 @@ can also be saved (saved as 'thresh.tif') - see \code{apply_thresh} argument.
   ## visualise-------
   ### mask -------
   purrr::walk(data$out_dir
-              , \(x) fs::path(x, "mask.tif") \%>\%
+              , \(x) fs::path(x, "pred.tif") \%>\%
                 terra::rast() \%>\%
                 terra::trim() \%>\%
                 terra::plot()
