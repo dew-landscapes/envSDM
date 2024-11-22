@@ -59,7 +59,8 @@
                           ) {
 
     # setup -------
-    if(isFALSE(out_dir)) out_dir <- tempfile()
+    ## start timer ------
+    start_time <- Sys.time()
 
     ## out_dir ------
     if(is.character(out_dir)) {
@@ -80,14 +81,26 @@
     ## tune ---------
     if(! "list" %in% class(full_run)) full_run <- rio::import(full_run)
 
-    # files -----
+    ## this taxa ------
+    this_taxa <- prep$this_taxa
+
+    ## files -----
     ## new
     pred_file <- fs::path(out_dir, "pred.tif")
     thresh_file <- fs::path(out_dir, "thresh.tif")
     log_file <- fs::path(out_dir, "pred.log")
 
+    ## log --------
+    readr::write_lines(paste0("\n\n"
+                              , this_taxa
+                              , "\npredict start at "
+                              , start_time
+                              )
+                       , file = log_file
+                       , append = TRUE
+                       )
 
-    # test tifs ------
+    ## test tifs ------
     # need to test before running, in case the test deletes an incomplete .tif
     if(all(check_tifs, dir.exists(out_dir))) {
 
@@ -127,22 +140,6 @@
                )
 
     if(run) {
-
-      fs::dir_create(out_dir)
-
-      # start timer ------
-      start_time <- Sys.time()
-
-      this_taxa <- prep$this_taxa
-
-      readr::write_lines(paste0("\n\n"
-                                  , this_taxa
-                                  , "\npredict start at "
-                                  , start_time
-                                  )
-                           , file = log_file
-                           , append = TRUE
-                           )
 
       algo <- full_run$tune_mean$algo[[1]]
 
@@ -336,27 +333,44 @@
 
       }
 
-     readr::write_lines(paste0("predict finished. elapsed time: "
-                                  , round(difftime(Sys.time(), start_time, units = "mins"), 2)
-                                  , " minutes"
-                                  )
-                           , file = log_file
-                           , append = TRUE
-                           )
+      # finish ----
+      readr::write_lines(paste0("predict finished. elapsed time: "
+                                , round(difftime(Sys.time(), start_time, units = "mins"), 2)
+                                , " minutes"
+                                )
+                         , file = log_file
+                         , append = TRUE
+                         )
+
+    } else {
+
+      m <- paste0("predict did not run as:\n "
+                  , if(prep$abandoned) "prep abandoned\n "
+                  , if(! prep$finished) "prep did not finish\n "
+                  , if(any(prep$abandoned, ! prep$finished)) paste0("prep log:\n  ", paste0(prep$log, collapse = "\n  "), "\n ")
+                  , if (! full_run$finished) paste0("full run did not finish\n full run log:\n  ", paste0(full_run$log, collapse = "\n  "), "\n ")
+                  , if(file.exists(thresh_file)) paste0("threshold file: ", thresh_file, " already exists and force_new was not TRUE")
+                  , "\n"
+                  )
+
+      readr::write_lines(m
+                         , file = log_file
+                         , append = TRUE
+                         )
 
     }
 
     if(do_gc) {
 
-        stuff <- ls()
+      stuff <- ls()
 
-        delete_stuff <- stuff[!grepl("_file$", stuff)]
+      delete_stuff <- stuff[!grepl("_file$", stuff)]
 
-        rm(list = delete_stuff)
+      rm(list = delete_stuff)
 
-        gc()
+      gc()
 
-      }
+    }
 
     res <- c(if(file.exists(pred_file)) list(pred = pred_file)
              , if(file.exists(thresh_file)) list(thresh = thresh_file)
