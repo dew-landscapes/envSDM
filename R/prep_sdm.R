@@ -20,9 +20,11 @@
 #' @param pres_x,pres_y Character. Name of the columns in `presence` that have
 #' the x and y coordinates
 #' @param pred_limit Limit the background points and predictions?
-#' Can be `TRUE` (use points to generate a minimum convex polygon to use as a
-#' limit), `FALSE` (the full extent of the predictors will be used) or path to
-#' existing .parquet to use.
+#' Can be `TRUE` (use `presence` to generate a minimum convex polygon to use as
+#' a limit. Not recommended as the points in `presence` have usually been
+#' filtered to very accurate spatial reliability and thus may be missing a large
+#' number of legitimate records); `FALSE` (the full extent of the predictors
+#'  will be used); path to existing .parquet to use; or sf object.
 #' @param limit_buffer Numeric. Apply this buffer to `pred_limit`. Only used if
 #' `pred_limit` is `TRUE`. Passed to the `dist` argument of `sf::st_buffer()`.
 #' @param pred_clip sf. Optional sf to clip the pred_limit back to (e.g. to
@@ -226,9 +228,10 @@
         tibble::as_tibble()
 
 
-      # predict limits -------
+      # predict_boundary -------
 
-      # create new MCP polygon around the presences for the predict boundary
+      ## TRUE ------
+      # create new mcp from points
       if(isTRUE(pred_limit)) {
 
         prep$predict_boundary <- presence %>%
@@ -243,10 +246,9 @@
           sf::st_buffer(limit_buffer) %>%
           sf::st_make_valid()
 
-        pred_limit <- TRUE
-
       }
 
+      ## file path -------
       # use existing MCP polygon file for the predict boundary
       if(is.character(pred_limit)) {
 
@@ -258,16 +260,36 @@
             sf::st_transform(crs = sf::st_crs(predictors[[1]])) %>%
             sf::st_make_valid()
 
-          pred_limit <- TRUE
-
         }
 
       }
 
-      # use the full extent of the predictors for the predict boundary
-      # No point buffering here
-      # captures anything not already captured above
-      if(! "sf" %in% class(prep$predict_boundary)) {
+      ## sf --------
+      # existing sf
+      if("sf" %in% class(pred_limit)) {
+
+        prep$predict_boundary <- pred_limit %>%
+          sf::st_transform(crs = sf::st_crs(predictors[[1]])) %>%
+          sf::st_make_valid()
+
+      }
+
+      # adjust predictors
+      if("sf" %in% class(prep$predict_boundary)) {
+
+        pred_limit <- TRUE
+
+        predictors <- terra::crop(x = predictors
+                                  , y = terra::vect(prep$predict_boundary)
+                                  , mask = FALSE
+                                  )
+
+      } else {
+
+        ## FALSE ------
+        # use the full extent of the predictors for the predict boundary
+        # No point buffering here
+        # captures anything not already captured above
 
         prep$predict_boundary <- sf::st_bbox(predictors) %>%
           sf::st_as_sfc() %>%
@@ -872,12 +894,11 @@
 
         if(run) {
 
-          prep$reduce_env <- envModel::reduce_env(prep$blocks
+          prep$reduce_env <- envModel::reduce_env(env_df = prep$blocks
                                                   , env_cols = names(predictors)
-                                                  , remove = TRUE
+                                                  , y_col = "pa"
                                                   , thresh = thresh
                                                   , remove_always = c(pres_x, pres_y, "x", "y", "pa", "block", "cell")
-                                                  , y_col = "pa"
                                                   )
 
           readr::write_lines(paste0("reduce_env completed. elapsed time: "
