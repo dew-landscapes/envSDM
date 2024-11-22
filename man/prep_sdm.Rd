@@ -54,9 +54,11 @@ crs attribute of \code{sf::st_transform()} or \code{sf::st_as_sf()}.}
 the x and y coordinates}
 
 \item{pred_limit}{Limit the background points and predictions?
-Can be \code{TRUE} (use points to generate a minimum convex polygon to use as a
-limit), \code{FALSE} (the full extent of the predictors will be used) or path to
-existing .parquet to use.}
+Can be \code{TRUE} (use \code{presence} to generate a minimum convex polygon to use as
+a limit. Not recommended as the points in \code{presence} have usually been
+filtered to very accurate spatial reliability and thus may be missing a large
+number of legitimate records); \code{FALSE} (the full extent of the predictors
+will be used); path to existing .parquet to use; or sf object.}
 
 \item{limit_buffer}{Numeric. Apply this buffer to \code{pred_limit}. Only used if
 \code{pred_limit} is \code{TRUE}. Passed to the \code{dist} argument of \code{sf::st_buffer()}.}
