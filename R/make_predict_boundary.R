@@ -29,7 +29,7 @@ make_predict_boundary <- function(poly_list
                                   , out_file
                                   , buffer_metres = 0
                                   , col_name = "taxa"
-                                  , col_name_val = basename(dirname(out_file))
+                                  , col_name_val = "boundary"
                                   , clip = NULL
                                   , out_crs
                                   , return_poly = FALSE
