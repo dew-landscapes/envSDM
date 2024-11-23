@@ -57,27 +57,35 @@
       dplyr::select(pred = tidyselect::any_of(index)) %>%
       dplyr::mutate(p = c(rep(1, nrow(p_test)), rep(0, nrow(b_test))))
 
-    e <- predicts::pa_evaluate(p[p$p == 1, 1][[1]]
-                               , p[p$p == 0, 1][[1]]
-                               , type = p_type
-                               , ...
-                               )
+    if(sum(!is.na(p$pred))) {
 
-    e_fsdm <- flexsdm::sdm_eval(p[p$p == 1, 1][[1]]
-                               , p[p$p == 0, 1][[1]]
-                               )
+      e <- predicts::pa_evaluate(p[p$p == 1, 1][[1]]
+                                 , p[p$p == 0, 1][[1]]
+                                 , type = p_type
+                                 , ...
+                                 )
 
-    e@stats$auc_po <- e@stats$auc
-    e@stats$auc_po_flexsdm <- mean(e_fsdm$AUC, na.rm = TRUE)
-    e@stats$CBI <- mean(e_fsdm$BOYCE, na.rm = TRUE)
-    e@stats$CBI_rescale <- (e@stats$CBI + 1) / 2
-    e@stats$IMAE <- mean(e_fsdm$IMAE, na.rm = TRUE)
+      e_fsdm <- flexsdm::sdm_eval(p[p$p == 1, 1][[1]]
+                                 , p[p$p == 0, 1][[1]]
+                                 )
 
-    if(do_gc) {
+      e@stats$auc_po <- e@stats$auc
+      e@stats$auc_po_flexsdm <- mean(e_fsdm$AUC, na.rm = TRUE)
+      e@stats$CBI <- mean(e_fsdm$BOYCE, na.rm = TRUE)
+      e@stats$CBI_rescale <- (e@stats$CBI + 1) / 2
+      e@stats$IMAE <- mean(e_fsdm$IMAE, na.rm = TRUE)
 
-      rm(list = ls(pattern = "^[^e$]"))
+      if(do_gc) {
 
-      gc()
+        rm(list = ls(pattern = "^[^e$]"))
+
+        gc()
+
+      }
+
+    } else {
+
+      e <- NULL
 
     }
 

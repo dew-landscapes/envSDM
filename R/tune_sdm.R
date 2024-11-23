@@ -326,7 +326,32 @@
                                                                         , do_gc = do_gc
                                                                         )
                                               )
-                              ) %>%
+                              )
+
+              null_e <- purrr::map_lgl(tune$tune_maxnet$e, \(x) is.null(x))
+
+              if(sum(null_e)) {
+
+                null_e_tune <- envFunc::vec_to_sentence(unique(tune$tune_maxnet$tune_args[null_e]))
+                blocks <- envFunc::vec_to_sentence(unique(tune$tune_maxnet$k[null_e]))
+
+                readr::write_lines(paste0("warning. tune_args: "
+                                          , null_e_tune
+                                          , " failed to predict ("
+                                          , sum(null_e)
+                                          , " out of "
+                                          , nrow(tune$tune_maxnet)
+                                          , " total tunes) in block(s) "
+                                          , blocks
+                                          )
+                                 , file = log_file
+                                 , append = TRUE
+                                 )
+
+              }
+
+              tune$tune_maxnet <- tune$tune_maxnet %>%
+                dplyr::filter(purrr::map_lgl(e, \(x) ! is.null(x))) %>%
                 {if(keep_model) (.) %>% dplyr::select(! dplyr::where(is.list), m, e) else (.) %>% dplyr::select(! dplyr::where(is.list), e)}
 
               readr::write_lines(paste0("maxnet tune finished in: "
