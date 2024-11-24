@@ -35,7 +35,9 @@
 #' @param check_tifs Logical. Check if any output `.tif` files error on
 #' `terra::rast()` and delete them if they do. Useful after a crash during
 #' predict.
-#' @param ... Passed to `terra::predict()`. e.g. use for wopt = list().
+#' @param ... Passed to `terra::predict()`. e.g. use for wopt = list(). The
+#' argument `overwrite` is already set to `TRUE` so do not provide via `...` -
+#' the `pred.tif` file will only be remade if `force_new` is `TRUE`.
 #'
 #' @return Named list of created .tif files, usually 'pred.tif' and
 #' 'thresh.tif'. Output .tif(s) and .log, written to `out_dir`.
