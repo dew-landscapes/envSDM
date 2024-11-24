@@ -134,7 +134,9 @@ predict.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
-<dd><p>Passed to <code><a href="https://rspatial.github.io/terra/reference/predict.html" class="external-link">terra::predict()</a></code>. e.g. use for wopt = list().</p></dd>
+<dd><p>Passed to <code><a href="https://rspatial.github.io/terra/reference/predict.html" class="external-link">terra::predict()</a></code>. e.g. use for wopt = list(). The
+argument <code>overwrite</code> is already set to <code>TRUE</code> so do not provide via <code>...</code> -
+the <code>pred.tif</code> file will only be remade if <code>force_new</code> is <code>TRUE</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -185,10 +187,10 @@ predict.</p></dd>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Missing `trust` will be set to FALSE by default for RDS in 2.0.0.</span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Missing `trust` will be set to FALSE by default for RDS in 2.0.0.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [[1]]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> C:/temp/nige/Rtmp8I8DCA/temp_libpath52803f501bac/envSDM/examples/acaule/combo/full_run.rds</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> C:/temp/nige/Rtmpa8z7fB/temp_libpath2d8427f37aeb/envSDM/examples/acaule/combo/full_run.rds</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [[2]]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> C:/temp/nige/Rtmp8I8DCA/temp_libpath52803f501bac/envSDM/examples/bradypus/combo/full_run.rds</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> C:/temp/nige/Rtmpa8z7fB/temp_libpath2d8427f37aeb/envSDM/examples/bradypus/combo/full_run.rds</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span></span></span>
@@ -272,10 +274,10 @@ predict.</p></dd>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Missing `trust` will be set to FALSE by default for RDS in 2.0.0.</span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Missing `trust` will be set to FALSE by default for RDS in 2.0.0.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [[1]]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> C:/temp/nige/Rtmp8I8DCA/temp_libpath52803f501bac/envSDM/examples/acaule/auc_po/full_run.rds</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> C:/temp/nige/Rtmpa8z7fB/temp_libpath2d8427f37aeb/envSDM/examples/acaule/auc_po/full_run.rds</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [[2]]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> C:/temp/nige/Rtmp8I8DCA/temp_libpath52803f501bac/envSDM/examples/bradypus/auc_po/full_run.rds</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> C:/temp/nige/Rtmpa8z7fB/temp_libpath2d8427f37aeb/envSDM/examples/bradypus/auc_po/full_run.rds</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>  <span class="co">## predict -------</span></span></span>

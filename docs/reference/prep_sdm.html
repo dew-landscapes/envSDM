@@ -114,9 +114,11 @@ the x and y coordinates</p></dd>
 
 <dt id="arg-pred-limit">pred_limit<a class="anchor" aria-label="anchor" href="#arg-pred-limit"></a></dt>
 <dd><p>Limit the background points and predictions?
-Can be <code>TRUE</code> (use points to generate a minimum convex polygon to use as a
-limit), <code>FALSE</code> (the full extent of the predictors will be used) or path to
-existing .parquet to use.</p></dd>
+Can be <code>TRUE</code> (use <code>presence</code> to generate a minimum convex polygon to use as
+a limit. Not recommended as the points in <code>presence</code> have usually been
+filtered to very accurate spatial reliability and thus may be missing a large
+number of legitimate records); <code>FALSE</code> (the full extent of the predictors
+will be used); path to existing .parquet to use; or sf object.</p></dd>
 
 
 <dt id="arg-limit-buffer">limit_buffer<a class="anchor" aria-label="anchor" href="#arg-limit-buffer"></a></dt>
