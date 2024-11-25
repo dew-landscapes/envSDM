@@ -6,6 +6,9 @@
 #' [answer](https://gis.stackexchange.com/a/224347)
 #' by user [Spacedman](https://gis.stackexchange.com/users/865/spacedman).
 #'
+#' Options for managing memory are `terra_options`, `max_cells_in_memory` and
+#' `do_gc`.
+#'
 #' @param this_taxa Character. Name of taxa. Only used to print some messages.
 #' Ignored if NULL
 #' @param out_dir FALSE or character. If FALSE the result of prep_sdm will be
@@ -33,6 +36,22 @@
 #' @param is_env_pred Logical. Does the naming of the directory and files in
 #' `predictors` follow the pattern required by `envRaster::parse_env_tif()`?
 #' @param cat_preds Character. Vector of predictor names that are character.
+#' @param max_cells_in_memory Numeric passed to `exactextractr::exactextract()`
+#' argument with the same name. `prep_sdm()` will be quicker with larger values,
+#' but if running on many cores, memory issues are likely. The default of
+#' 30000000 is the default for `exactextractr::exactextract()` at the time of
+#' writing.
+#' @param terra_options Passed to `terra::terraOptions()`. e.g. list(memfrac =
+#' 0.6)
+#' @param subset_pred_thresh Numeric. Threshold, in value of the extent of
+#' predict_boundary that overlaps the predictors, below which the predictors
+#' will be cropped and masked to the predict boundary before extraction of
+#' values to points. For predict boundaries much smaller than the predictors,
+#' subsetting before extracting data to points will be much (much)
+#' quicker. As the predict boundary approaches the same area covered by the
+#' predictors, subsetting prior to extraction becomes much (much) slower. The
+#' current default (0.5) is only a guess at where there is no time advantage to
+#' subsetting.
 #' @param num_bg Numeric. How many background points?
 #' @param prop_abs Character. Is `num_bg` a proportion (`prop`) of the number of
 #'  records in `presence` or an absolute (`abs`) number?
@@ -111,6 +130,9 @@
                        , pred_clip = NULL
                        , predictors
                        , is_env_pred = TRUE
+                       , max_cells_in_memory = 3e+07
+                       , terra_options = NULL
+                       , subset_pred_thresh = 0.5
                        , cat_preds = NULL
                        , num_bg = 10000
                        , prop_abs = "abs"
@@ -277,12 +299,49 @@
       # adjust predictors
       if("sf" %in% class(prep$predict_boundary)) {
 
+        if(!is.null(terra_options)) {
+
+          do.call(terra::terraOptions
+                  , args = terra_options
+                  )
+
+        }
+
         pred_limit <- TRUE
 
-        predictors <- terra::crop(x = predictors
-                                  , y = terra::vect(prep$predict_boundary)
-                                  , mask = FALSE
-                                  )
+        # calculate proportion overlap between prep$predict_boundary & predictors
+        boundary_intersect <- sf::st_intersection(prep$predict_boundary
+                                                  , sf::st_bbox(predictors[[1]]) %>%
+                                                    sf::st_as_sfc() %>%
+                                                    sf::st_sf()
+                                                  )
+
+        boundary_overlap <- sf::st_area(boundary_intersect) /
+         (sf::st_bbox(predictors) %>% sf::st_as_sfc() %>% sf::st_sf() %>% sf::st_area())
+
+        if(boundary_overlap <= subset_pred_thresh) {
+
+          start_subset <- Sys.time()
+
+          readr::write_lines("subsetting predictors"
+                             , file = log_file
+                             , append = TRUE
+                             )
+
+          predictors <- terra::crop(x = predictors
+                                    , y = terra::vect(prep$predict_boundary)
+                                    , mask = FALSE
+                                    )
+
+          readr::write_lines(paste0("subsetting predictors done in "
+                                    , round(difftime(Sys.time(), start_subset, units = "mins"), 2)
+                                    , " minutes"
+                                    )
+                             , file = log_file
+                             , append = TRUE
+                             )
+
+        }
 
       } else {
 
@@ -395,6 +454,8 @@
         if(run) {
 
           if(all(!is.null(dens_res), !terra::is.lonlat(predictors[[1]]))) {
+
+            start_dens_ras <- Sys.time()
 
             # resolution of density raster < pred raster
 
@@ -521,8 +582,8 @@
                              , overwrite = TRUE
                              )
 
-          readr::write_lines(paste0("density raster done. elapsed time "
-                                    , round(difftime(Sys.time(), start_time, units = "mins"), 1)
+          readr::write_lines(paste0("density raster done in "
+                                    , round(difftime(Sys.time(), start_dens_ras, units = "mins"), 2)
                                     , " minutes"
                                     )
                              , file = log_file
@@ -536,6 +597,8 @@
         run <- if(exists("bg_points", where = prep)) force_new else TRUE
 
         if(run) {
+
+          start_bg <- Sys.time()
 
           if(!exists("target_density")) target_density <- terra::rast(density_file)
 
@@ -572,7 +635,9 @@
           readr::write_lines(paste0(num_bg
                                     , " background points attempted. "
                                     , nrow(prep$bg_points)
-                                    , " achieved."
+                                    , " achieved in: "
+                                    , round(difftime(Sys.time(), start_bg, units = "mins"), 2)
+                                    , " minutes"
                                     )
                              , file = log_file
                              , append = TRUE
@@ -615,6 +680,8 @@
 
       if(run) {
 
+        start_env <- Sys.time()
+
         spp_pa <- dplyr::bind_rows(prep$presence_ras %>%
                                      tibble::as_tibble() %>%
                                      sf::st_as_sf(coords = c("x", "y")
@@ -632,7 +699,7 @@
                                                    , include_cols = "pa"
                                                    , include_cell = TRUE
                                                    , include_xy = TRUE
-                                                   , max_cells_in_memory = 40000000
+                                                   , max_cells_in_memory = max_cells_in_memory
                                                    ) %>%
           dplyr::bind_rows() %>%
           stats::na.omit() %>%
@@ -646,8 +713,8 @@
 
         }
 
-        readr::write_lines(paste0("env data extracted. elapsed time: "
-                                  , round(difftime(Sys.time(), start_time, units = "mins"), 1)
+        readr::write_lines(paste0("env data extracted in: "
+                                  , round(difftime(Sys.time(), start_bg, units = "mins"), 2)
                                   , " minutes"
                                   )
                            , file = log_file
@@ -679,6 +746,8 @@
         run <- if(exists("blocks", prep)) force_new else TRUE
 
         if(run) {
+
+          start_blocks <- Sys.time()
 
           if(!all(spatial_folds, k_folds > 1)) {
 
@@ -837,6 +906,9 @@
                                     , spatial_folds
                                     , ". Folds = "
                                     , length(unique(blocks$fold_ids))
+                                    , ". Folds done in "
+                                    , round(difftime(Sys.time(), start_blocks, units = "mins"), 2)
+                                    , " minutes"
                                     )
                              , file = log_file
                              , append = TRUE
@@ -894,6 +966,8 @@
 
         if(run) {
 
+          start_reduce_env <- Sys.time()
+
           prep$reduce_env <- envModel::reduce_env(env_df = prep$blocks
                                                   , env_cols = names(predictors)
                                                   , y_col = "pa"
@@ -901,8 +975,8 @@
                                                   , remove_always = c(pres_x, pres_y, "x", "y", "pa", "block", "cell")
                                                   )
 
-          readr::write_lines(paste0("reduce_env completed. elapsed time: "
-                                    , round(difftime(Sys.time(), start_time, units = "mins"), 1)
+          readr::write_lines(paste0("reduce_env completed in: "
+                                    , round(difftime(Sys.time(), start_reduce_env, units = "mins"), 2)
                                     , " minutes"
                                     )
                              , file = log_file
@@ -924,7 +998,7 @@
 
         # end timer ------
         readr::write_lines(paste0("prep completed. elapsed time: "
-                                  , round(difftime(Sys.time(), start_time, units = "mins"), 1)
+                                  , round(difftime(Sys.time(), start_time, units = "mins"), 2)
                                   , " minutes"
                                   )
                            , file = log_file
