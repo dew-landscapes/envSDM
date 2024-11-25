@@ -231,11 +231,12 @@
 
         m <- paste0("predict for "
                     , this_taxa
-                    , " from '"
-                    , envFunc::vec_to_sentence(class(mod$m[[1]]))
-                    , "' ("
+                    , " from "
                     , algo
-                    , ") model"
+                    , " model with arguments: "
+                    , gsub("\\.", ",", gsub(":", " =", full_run$tune_mean$tune_args))
+                    , " and threshold: "
+                    , round(full_run$tune_mean$max_spec_sens, 2)
                     )
 
         message(m)
