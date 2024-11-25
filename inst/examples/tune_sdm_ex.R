@@ -13,12 +13,12 @@
   purrr::map(data$out_dir
               , \(x) tune_sdm(prep = fs::path(x, "prep.rds")
                               , out_dir = x
-                              , fc = "l"
-                              , rm = 1
+                              , fc = "lq"
+                              , rm = c(2, 3)
                               , trees = 500
                               , mtry = 1
                               , nodesize = 2
-                              , force_new = TRUE
+                              #, force_new = TRUE
                               )
               )
 

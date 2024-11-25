@@ -17,6 +17,9 @@ prep_sdm(
   pred_clip = NULL,
   predictors,
   is_env_pred = TRUE,
+  max_cells_in_memory = 3e+07,
+  terra_options = NULL,
+  subset_pred_thresh = 0.5,
   cat_preds = NULL,
   num_bg = 10000,
   prop_abs = "abs",
@@ -70,6 +73,25 @@ prevent prediction into ocean). Ignored if pred_limit is not TRUE.}
 
 \item{is_env_pred}{Logical. Does the naming of the directory and files in
 \code{predictors} follow the pattern required by \code{envRaster::parse_env_tif()}?}
+
+\item{max_cells_in_memory}{Numeric passed to \code{exactextractr::exactextract()}
+argument with the same name. \code{prep_sdm()} will be quicker with larger values,
+but if running on many cores, memory issues are likely. The default of
+30000000 is the default for \code{exactextractr::exactextract()} at the time of
+writing.}
+
+\item{terra_options}{Passed to \code{terra::terraOptions()}. e.g. list(memfrac =
+0.6)}
+
+\item{subset_pred_thresh}{Numeric. Threshold, in value of the extent of
+predict_boundary that overlaps the predictors, below which the predictors
+will be cropped and masked to the predict boundary before extraction of
+values to points. For predict boundaries much smaller than the predictors,
+subsetting before extracting data to points will be much (much)
+quicker. As the predict boundary approaches the same area covered by the
+predictors, subsetting prior to extraction becomes much (much) slower. The
+current default (0.5) is only a guess at where there is no time advantage to
+subsetting.}
 
 \item{cat_preds}{Character. Vector of predictor names that are character.}
 
@@ -175,6 +197,10 @@ The background sampling includes code based on a
 \href{https://gis.stackexchange.com/a/224347}{answer}
 by user \href{https://gis.stackexchange.com/users/865/spacedman}{Spacedman}.
 }
+\details{
+Options for managing memory are \code{terra_options}, \code{max_cells_in_memory} and
+\code{do_gc}.
+}
 \examples{
 
   out_dir <- file.path(system.file(package = "envSDM"), "examples")
@@ -230,6 +256,7 @@ by user \href{https://gis.stackexchange.com/users/865/spacedman}{Spacedman}.
                                                , pred_limit = d
                                                , limit_buffer = 10000
                                                , dens_res = 1000 # ignored as decimal degrees preds
+                                               #, force_new = T
                                                )
                )
 
@@ -260,7 +287,7 @@ by user \href{https://gis.stackexchange.com/users/865/spacedman}{Spacedman}.
       tm_legend(outside = TRUE) +
       tm_compass() +
       tm_scale_bar() +
-      tm_layout(main.title = paste0("Background point density for ",  prep$inputs$this_taxa))
+      tm_layout(main.title = paste0("Background point density for ",  prep$this_taxa))
 
     m
 
