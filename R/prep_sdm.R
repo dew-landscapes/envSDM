@@ -310,23 +310,25 @@
         pred_limit <- TRUE
 
         # calculate proportion overlap between prep$predict_boundary & predictors
-        boundary_intersect <- sf::st_intersection(prep$predict_boundary
-                                                  , sf::st_bbox(predictors[[1]]) %>%
-                                                    sf::st_as_sfc() %>%
-                                                    sf::st_sf()
-                                                  )
+        boundary_area <- sf::st_intersection(prep$predict_boundary
+                                             , sf::st_bbox(predictors[[1]]) %>%
+                                               sf::st_as_sfc() %>%
+                                               sf::st_sf()
+                                             ) %>%
+          sf::st_area() %>%
+          units::drop_units()
 
-        boundary_overlap <- sf::st_area(boundary_intersect) /
-         (sf::st_bbox(predictors) %>% sf::st_as_sfc() %>% sf::st_sf() %>% sf::st_area())
+        predictor_area <- sf::st_bbox(predictors) %>%
+          sf::st_as_sfc() %>%
+          sf::st_sf() %>%
+          sf::st_area() %>%
+          units::drop_units()
+
+        boundary_overlap <- boundary_area / predictor_area
 
         if(boundary_overlap <= subset_pred_thresh) {
 
           start_subset <- Sys.time()
-
-          readr::write_lines("subsetting predictors"
-                             , file = log_file
-                             , append = TRUE
-                             )
 
           predictors <- terra::crop(x = predictors
                                     , y = terra::vect(prep$predict_boundary)
@@ -453,9 +455,9 @@
 
         if(run) {
 
-          if(all(!is.null(dens_res), !terra::is.lonlat(predictors[[1]]))) {
+          start_dens_ras <- Sys.time()
 
-            start_dens_ras <- Sys.time()
+          if(all(!is.null(dens_res), !terra::is.lonlat(predictors[[1]]))) {
 
             # resolution of density raster < pred raster
 
