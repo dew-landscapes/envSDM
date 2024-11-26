@@ -703,7 +703,9 @@
 
     }
 
-    return(get(return_val))
+    res <- if(return_val == "tune") get("tune") else list(tune_file = get("tune_file"))
+
+    return(res)
 
   }
 

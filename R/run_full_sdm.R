@@ -131,7 +131,9 @@
 
     }
 
-    return(get(return_val))
+    res <- if(return_val == "full_run") get("full_run") else list(full_run_file = get("full_run_file"))
+
+    return(res)
 
   }
 

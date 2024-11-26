@@ -152,7 +152,17 @@
     # setup -------
     return_val <- if(any(isFALSE(out_dir), return_val == "object")) "prep" else "prep_file"
 
-    if(isFALSE(out_dir)) out_dir <- tempfile()
+    if(isFALSE(out_dir)) {
+
+      out_dir <- tempfile()
+
+      delete_out <- TRUE
+
+    } else {
+
+      delete_out <- FALSE
+
+    }
 
     log_file <- fs::path(out_dir, "prep.log")
 
@@ -296,16 +306,8 @@
 
       }
 
-      # adjust predictors
+      ## subset predictors? ------
       if("sf" %in% class(prep$predict_boundary)) {
-
-        if(!is.null(terra_options)) {
-
-          do.call(terra::terraOptions
-                  , args = terra_options
-                  )
-
-        }
 
         pred_limit <- TRUE
 
@@ -330,10 +332,24 @@
 
           start_subset <- Sys.time()
 
+          if(!is.null(terra_options)) {
+
+            do.call(terra::terraOptions
+                    , args = terra_options
+                    )
+
+          }
+
+          subset_file <- fs::path(tempdir(), "subset_env.tif")
+
           predictors <- terra::crop(x = predictors
                                     , y = terra::vect(prep$predict_boundary)
                                     , mask = FALSE
+                                    , filename = subset_file
+                                    , overwrite = TRUE
                                     )
+
+          # NOTE. subset_file is deleted after 'env'
 
           readr::write_lines(paste0("subsetting predictors done in "
                                     , round(difftime(Sys.time(), start_subset, units = "mins"), 2)
@@ -1021,11 +1037,26 @@
 
       }
 
-      # save -------
+      # save / clean up-------
       # export before gc()
       prep$finished <- TRUE
       prep$log <- if(file.exists(log_file)) readr::read_lines(log_file) else NULL
-      rio::export(prep, prep_file)
+
+      if(exists("subset_file")) {
+
+        if(file.exists(subset_file)) fs::file_delete(subset_file)
+
+      }
+
+      if(delete_out) {
+
+        fs::file_delete(prep_file)
+
+      } else {
+
+        rio::export(prep, prep_file)
+
+      }
 
       # clean up -------
       if(do_gc) {
@@ -1042,7 +1073,9 @@
 
     }
 
-    return(get(return_val))
+    res <- if(return_val == "prep") get("prep") else list(prep_file = get("prep_file"))
+
+    return(res)
 
   }
 

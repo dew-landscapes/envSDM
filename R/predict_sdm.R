@@ -203,9 +203,12 @@
 
         x <- terra::subset(x, used_preds)
 
+        subset_file <- fs::path(tempdir(), "subset_env.tif")
+
         x <- terra::crop(x = x
                          , y = terra::vect(prep$predict_boundary)
                          , mask = TRUE
+                         , filename = subset_file
                          )
 
         readr::write_lines(paste0("predict stack created in "
@@ -309,8 +312,6 @@
 
         thresh <- mod$e[[1]]@thresholds$max_spec_sens
 
-        message(m)
-
         terra::app(terra::rast(pred_file)
                    , \(i) i > thresh
                    , filename = thresh_file
@@ -360,6 +361,12 @@
                          , file = log_file
                          , append = TRUE
                          )
+
+    }
+
+    if(exists("subset_file")) {
+
+      if(file.exists(subset_file)) fs::file_delete(subset_file)
 
     }
 
