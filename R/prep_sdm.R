@@ -208,7 +208,7 @@
       ## start timer -----
       start_time <- Sys.time()
 
-      readr::write_lines(paste0("\n\n"
+      readr::write_lines(paste0("\n"
                                 , this_taxa
                                 , "\nprep start at "
                                 , start_time
@@ -242,6 +242,10 @@
                          , append = TRUE
                          )
 
+      # presence --------
+      prep$original <- presence
+
+      ## sf ------
       p <- presence %>%
         sf::st_as_sf(coords = c(pres_x, pres_y)
                      , crs = pres_crs
@@ -249,7 +253,7 @@
         sf::st_transform(crs = sf::st_crs(predictors)) %>%
         sf::st_coordinates()
 
-      # raster presence ------
+      ## raster presence ------
 
       prep$presence_ras <- terra::cellFromXY(predictors
                                          , unique(p)
@@ -302,14 +306,44 @@
 
         prep$predict_boundary <- pred_limit %>%
           sf::st_transform(crs = sf::st_crs(predictors[[1]])) %>%
+          sf::st_make_valid() %>%
+          sf::st_intersection(sf::st_bbox(predictors) %>%
+                                sf::st_as_sfc() %>%
+                                sf::st_sf()
+                              ) %>%
           sf::st_make_valid()
 
       }
 
-      ## subset predictors? ------
-      if("sf" %in% class(prep$predict_boundary)) {
+      # recast pred_limit from here on as T/F
+      if(!isFALSE(pred_limit)) pred_limit <- TRUE
 
-        pred_limit <- TRUE
+      ## FALSE ------
+      # use the full extent of the predictors for the predict boundary
+      # No point buffering here
+      # captures anything not already captured above
+      if(isFALSE(pred_limit)) {
+
+        prep$predict_boundary <- sf::st_bbox(predictors) %>%
+          sf::st_as_sfc() %>%
+          sf::st_sf()  %>%
+          sf::st_make_valid()
+
+      }
+
+      # clip predict_boundary? -------
+      if(!is.null(pred_clip)) {
+
+        prep$predict_boundary <- prep$predict_boundary %>%
+          sf::st_intersection(pred_clip %>%
+                                sf::st_transform(crs = sf::st_crs(prep$predict_boundary))
+                              ) %>%
+          sf::st_make_valid()
+
+      }
+
+      # subset predictors? ------
+      if(pred_limit) {
 
         # calculate proportion overlap between prep$predict_boundary & predictors
         boundary_area <- sf::st_intersection(prep$predict_boundary
@@ -344,7 +378,7 @@
 
           predictors <- terra::crop(x = predictors
                                     , y = terra::vect(prep$predict_boundary)
-                                    , mask = FALSE
+                                    , mask = TRUE
                                     , filename = subset_file
                                     , overwrite = TRUE
                                     )
@@ -360,30 +394,6 @@
                              )
 
         }
-
-      } else {
-
-        ## FALSE ------
-        # use the full extent of the predictors for the predict boundary
-        # No point buffering here
-        # captures anything not already captured above
-
-        prep$predict_boundary <- sf::st_bbox(predictors) %>%
-          sf::st_as_sfc() %>%
-          sf::st_sf()  %>%
-          sf::st_make_valid()
-
-        pred_limit <- FALSE
-
-      }
-
-      if(!is.null(pred_clip)) {
-
-        prep$predict_boundary <- prep$predict_boundary %>%
-          sf::st_intersection(pred_clip %>%
-                                sf::st_transform(crs = sf::st_crs(prep$predict_boundary))
-                              ) %>%
-          sf::st_make_valid()
 
       }
 
@@ -561,12 +571,8 @@
 
           if(pred_limit) {
 
-            use_mask <- prep$predict_boundary %>%
-              sf::st_transform(crs = sf::st_crs(target_density[[1]])) %>%
-              sf::st_make_valid()
-
             target_density <- target_density %>%
-              terra::mask(terra::vect(use_mask)
+              terra::mask(terra::vect(prep$predict_boundary)
                             , touches = TRUE
                           )
 
