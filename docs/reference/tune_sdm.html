@@ -196,30 +196,18 @@ elements:</p>
 <span class="r-in"><span>                              <span class="op">)</span></span></span>
 <span class="r-in"><span>              <span class="op">)</span></span></span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Missing `trust` will be set to FALSE by default for RDS in 2.0.0.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> tuning acaule</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> out_dir is C:/temp/nige/RtmpsFIRY7/temp_libpath45c43d65bb0/envSDM/examples/acaule</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> maxnet tune</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> envelope tune</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Loading required package: terra</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> terra 1.7.83</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> rf tune</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Joining with `by = join_by(algo)`</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Joining with `by = join_by(metric)`</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Joining with `by = join_by(algo, tune_args, fc, rm, trees, nodesize)`</span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Missing `trust` will be set to FALSE by default for RDS in 2.0.0.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> tuning bradypus</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> out_dir is C:/temp/nige/RtmpsFIRY7/temp_libpath45c43d65bb0/envSDM/examples/bradypus</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> maxnet tune</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> envelope tune</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> rf tune</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Joining with `by = join_by(algo)`</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Joining with `by = join_by(metric)`</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Joining with `by = join_by(algo, tune_args, fc, rm, trees, nodesize)`</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Missing `trust` will be set to FALSE by default for RDS in 2.0.0.</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Missing `trust` will be set to FALSE by default for RDS in 2.0.0.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [[1]]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> C:/temp/nige/RtmpsFIRY7/temp_libpath45c43d65bb0/envSDM/examples/acaule/tune.rds</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [[1]]$tune_file</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> C:/temp/nige/RtmpqmJfLN/temp_libpath3ccc2e9c3afb/envSDM/examples/acaule/tune.rds</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [[2]]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> C:/temp/nige/RtmpsFIRY7/temp_libpath45c43d65bb0/envSDM/examples/bradypus/tune.rds</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [[2]]$tune_file</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> C:/temp/nige/RtmpqmJfLN/temp_libpath3ccc2e9c3afb/envSDM/examples/bradypus/tune.rds</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>  <span class="co"># which tune args were best for each taxa using 'combo'?</span></span></span>
@@ -240,8 +228,8 @@ elements:</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 2 × 8</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   taxa     algo   tune_args             combo auc_po  IMAE   CBI max_spec_sens</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                 <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> acaule   maxnet fc: lq. rm: 2         0.674  0.885 0.791 0.925         0.414</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> bradypus rf     tr: 500. mt: 1. ns: 2 0.411  0.685 0.662 0.812         0.329</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> acaule   maxnet fc: lq. rm: 2         0.671  0.874 0.830 0.848         0.269</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> bradypus rf     tr: 500. mt: 1. ns: 2 0.445  0.713 0.670 0.865         0.345</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>  <span class="co"># or best tune args choosing on just auc_po?</span></span></span>
 <span class="r-in"><span>  <span class="va">data</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
@@ -261,10 +249,10 @@ elements:</p>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">!</span> Missing `trust` will be set to FALSE by default for RDS in 2.0.0.</span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Run <a href="x-r-run:dplyr::last_dplyr_warnings()">dplyr::last_dplyr_warnings()</a> to see the 1 remaining warning.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 2 × 7</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   taxa     algo   tune_args     auc_po  IMAE   CBI max_spec_sens</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> acaule   maxnet fc: lq. rm: 2  0.885 0.791 0.925         0.414</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> bradypus maxnet fc: lq. rm: 2  0.728 0.589 0.671         0.545</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   taxa     algo   tune_args             auc_po  IMAE   CBI max_spec_sens</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> acaule   rf     tr: 500. mt: 1. ns: 2  0.881 0.802 0.765         0.338</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> bradypus maxnet fc: lq. rm: 3          0.732 0.571 0.808         0.551</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
