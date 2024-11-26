@@ -1050,7 +1050,7 @@
 
       if(delete_out) {
 
-        fs::file_delete(prep_file)
+        fs::dir_delete(out_dir)
 
       } else {
 
