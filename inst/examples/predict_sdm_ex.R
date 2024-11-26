@@ -43,6 +43,7 @@
                                      , predictors = env_dat
                                      , is_env_pred = FALSE
                                      , check_tifs = TRUE
+                                     #, force_new = TRUE
                                      )
                )
 
