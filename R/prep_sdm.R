@@ -43,18 +43,17 @@
 #' writing.
 #' @param terra_options Passed to `terra::terraOptions()`. e.g. list(memfrac =
 #' 0.6)
-#' @param subset_pred_thresh Numeric. Threshold, in value of the extent of
+#' @param subset_pred_thresh Numeric. A threshold value of the extent of
 #' predict_boundary that overlaps the predictors, below which the predictors
 #' will be cropped and masked to the predict boundary before extraction of
 #' values to points. For predict boundaries much smaller than the predictors,
 #' subsetting before extracting data to points will be much (much)
 #' quicker. As the predict boundary approaches the same area covered by the
-#' predictors, subsetting prior to extraction becomes much (much) slower. The
-#' current default (0.5) is only a guess at where there is no time advantage to
-#' subsetting.
+#' predictors, subsetting prior to extraction becomes much (much) slower. Also
+#' very expensive in terms of disc space.
 #' @param num_bg Numeric. How many background points?
 #' @param prop_abs Character. Is `num_bg` a proportion (`prop`) of the number of
-#'  records in `presence` or an absolute (`abs`) number?
+#' records in `presence` or an absolute (`abs`) number?
 #' @param many_p_prop Numeric. Ensure the number of background points is at
 #' least `many_p_prop * number of presences`. e.g. If there are more than 5000
 #' presences and num_bg is set at `10000` and `many_p_prop` is `2`, then num_bg
@@ -72,8 +71,8 @@
 #' @param save_pngs Logical. Save out a .png of the density raster and spatial
 #' blocks
 #' @param reduce_env Logical. If TRUE, highly correlated and low importance
-#' variables will be removed. In the case of highly correlated variables, only
-#' one is removed.
+#' variables will be removed. In the case of highly correlated pairs of
+#' variables, only one is removed.
 #' @param thresh Numeric. Threshold used to flag highly correlated and low
 #' importance variables
 #' @param do_gc Logical. Run `base::rm(list = ls)` and `base::gc()` at end of
@@ -132,7 +131,7 @@
                        , is_env_pred = TRUE
                        , max_cells_in_memory = 3e+07
                        , terra_options = NULL
-                       , subset_pred_thresh = 0.5
+                       , subset_pred_thresh = 0.2
                        , cat_preds = NULL
                        , num_bg = 10000
                        , prop_abs = "abs"
