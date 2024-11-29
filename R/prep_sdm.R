@@ -31,7 +31,7 @@
 #' @param limit_buffer Numeric. Apply this buffer to `pred_limit`. Only used if
 #' `pred_limit` is `TRUE`. Passed to the `dist` argument of `sf::st_buffer()`.
 #' @param pred_clip sf. Optional sf to clip the pred_limit back to (e.g. to
-#' prevent prediction into ocean). Ignored if pred_limit is not TRUE.
+#' prevent prediction into ocean).
 #' @param predictors Character. Vector of paths to predictor `.tif` files.
 #' @param is_env_pred Logical. Does the naming of the directory and files in
 #' `predictors` follow the pattern required by `envRaster::parse_env_tif()`?
@@ -373,16 +373,11 @@
 
           }
 
-          subset_file <- fs::path(tempdir(), "subset_env.tif")
-
           predictors <- terra::crop(x = predictors
                                     , y = terra::vect(prep$predict_boundary)
                                     , mask = TRUE
-                                    , filename = subset_file
                                     , overwrite = TRUE
                                     )
-
-          # NOTE. subset_file is deleted after 'env'
 
           readr::write_lines(paste0("subsetting predictors done in "
                                     , round(difftime(Sys.time(), start_subset, units = "mins"), 2)
@@ -1046,12 +1041,6 @@
       # export before gc()
       prep$finished <- TRUE
       prep$log <- if(file.exists(log_file)) readr::read_lines(log_file) else NULL
-
-      if(exists("subset_file")) {
-
-        if(file.exists(subset_file)) fs::file_delete(subset_file)
-
-      }
 
       if(delete_out) {
 
