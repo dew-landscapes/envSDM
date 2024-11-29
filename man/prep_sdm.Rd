@@ -67,7 +67,7 @@ will be used); path to existing .parquet to use; or sf object.}
 \code{pred_limit} is \code{TRUE}. Passed to the \code{dist} argument of \code{sf::st_buffer()}.}
 
 \item{pred_clip}{sf. Optional sf to clip the pred_limit back to (e.g. to
-prevent prediction into ocean). Ignored if pred_limit is not TRUE.}
+prevent prediction into ocean).}
 
 \item{predictors}{Character. Vector of paths to predictor \code{.tif} files.}
 

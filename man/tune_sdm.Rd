@@ -14,6 +14,7 @@ tune_sdm(
   rm = seq(1, 6, 0.5),
   trees = c(500, 1000, 2000),
   mtry = TRUE,
+  limit_spat_mtry = 4,
   nodesize = c(1, 2),
   keep_model = FALSE,
   best_run = FALSE,
@@ -59,6 +60,10 @@ with).}
 \code{randomForest::randomForest()} that are tuned. \code{TRUE} (tune with sensible guesses for
 \code{mtry}), \code{FALSE} (only use default \code{randomForest::randomForest()} \code{mtry}) or
 numeric (the \code{mtry} values to tune with).}
+
+\item{limit_spat_mtry}{Numeric. If \code{mtry} is \code{TRUE} and if using spatial
+cross validation, the values of \code{mtry} to tune will be limited to less than
+or equal to \code{limit_spat_mtry}.}
 
 \item{nodesize}{Used to generate the levels of \code{nodesize} argument to
 \code{randomForest::randomForest()} that are tuned. \code{TRUE} (tune with default
