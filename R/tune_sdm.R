@@ -27,6 +27,9 @@
 #' `randomForest::randomForest()` that are tuned. `TRUE` (tune with sensible guesses for
 #' `mtry`), `FALSE` (only use default `randomForest::randomForest()` `mtry`) or
 #' numeric (the `mtry` values to tune with).
+#' @param limit_spat_mtry Numeric. If `mtry` is `TRUE` and if using spatial
+#' cross validation, the values of `mtry` to tune will be limited to less than
+#' or equal to `limit_spat_mtry`.
 #' @param nodesize Used to generate the levels of `nodesize` argument to
 #' `randomForest::randomForest()` that are tuned. `TRUE` (tune with default
 #' `nodesize`), `FALSE` (only use default `randomForest::randomForest()`
@@ -67,6 +70,7 @@
                        , rm = seq(1, 6, 0.5) # maxnet tune
                        , trees = c(500, 1000, 2000) # T, F or numeric
                        , mtry = TRUE # T, F or numeric
+                       , limit_spat_mtry = 4
                        , nodesize = c(1, 2) # T, F or numeric
                        , keep_model = FALSE
                        , best_run = FALSE
@@ -448,7 +452,7 @@
                   # limit if spatial folds used
                   xm <- seq(1, floor(sqrt(length(preds))), 1)
 
-                  xm <- xm[xm <= 3]
+                  xm <- xm[xm <= limit_spat_mtry]
 
                 }
 
