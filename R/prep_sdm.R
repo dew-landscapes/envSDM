@@ -257,7 +257,6 @@
       prep$presence_ras <- terra::cellFromXY(predictors
                                          , unique(p)
                                          ) %>%
-        unique() %>%
         terra::xyFromCell(predictors, .) %>%
         stats::na.omit() %>%
         tibble::as_tibble()
