@@ -8,10 +8,12 @@ predict_sdm(
   prep,
   full_run,
   out_dir,
+  file_name = c("pred.tif", "thresh.tif"),
   predictors = NULL,
   is_env_pred = TRUE,
   terra_options = NULL,
   doClamp = TRUE,
+  pred_mult = 1,
   apply_thresh = TRUE,
   force_new = FALSE,
   do_gc = FALSE,
@@ -25,22 +27,31 @@ predict_sdm(
 "object".}
 
 \item{full_run}{Character or named list. If character, the path to an
-existing \code{full_run.rds}. Otherwise, the result of a call to \code{run_full_sdm}()
+existing \code{full_run.rds}. Otherwise, the result of a call to \code{run_full_sdm()}
 with return_val = "object".}
 
 \item{out_dir}{Character. Name of directory into which \code{.tif}s will be saved.
 Will be created if it does not exist.}
 
+\item{file_name}{Character. Name to give the output prediction .tif.
+If saving a threshold file (\code{apply_thresh} is \code{TRUE}), this must be of length
+two with the first element used for the predictions and the second for the
+threshold.}
+
 \item{predictors}{Character. Vector of paths to predictor \code{.tif} files.}
 
 \item{is_env_pred}{Logical. Does the naming of the directory and files in
-\code{predictors} follow the pattern required by \code{envRaster::parse_env_tif()}?}
+\code{predictors} follow the pattern required by \code{envRaster::parse_env_tif()}?
+Also used to decide how to name the returned .tifs.}
 
 \item{terra_options}{Passed to \code{terra::terraOptions()}. e.g. list(memfrac =
 0.6)}
 
 \item{doClamp}{Passed to \code{terra::predict()} (which then passes as \code{...} to
 \code{fun}). Possibly orphaned from older envSDM?}
+
+\item{pred_mult}{Numeric (with default 1). Multiply predictions by this
+value. Useful for saving directly to integer when pred_mult is, say, 10000.}
 
 \item{apply_thresh}{Logical. If \code{TRUE}, an output raster \code{thresh.tif} will be
 created using the maximum of specificity + sensitivity. The threshold value
@@ -60,7 +71,15 @@ predict.}
 
 \item{...}{Passed to \code{terra::predict()}. e.g. use for wopt = list(). The
 argument \code{overwrite} is already set to \code{TRUE} so do not provide via \code{...} -
-the \code{pred.tif} file will only be remade if \code{force_new} is \code{TRUE}.}
+the \code{pred.tif} file will only be remade if \code{force_new} is \code{TRUE}. If
+\code{pred_mult} is, say, 10000, or similar, suggest passing
+\verb{wopt = list(type = "list(datatype = "INT2U")}.}
+
+\item{use_env_naming}{Logical. If \code{TRUE}, and \code{is_env_pred} is \code{TRUE}, naming
+will ignore \code{file_name} and instead generate a name matching
+\code{name_env_tif()} with \code{layer} being \code{this_taxa} from \code{prep} and \code{start_date}
+being the minimum available \code{start_date} from the predictors. \code{pred} and
+\code{tresh} appear between \code{this_taxa} and \code{start_date}.}
 }
 \value{
 Named list of created .tif files, usually 'pred.tif' and
@@ -72,7 +91,8 @@ The resulting \code{pred.tif} is masked to the boundary provided to the
 \code{pred_limit}, \code{limit_buffer} and \code{pred_clip} arguments. A threshold raster
 can also be saved (saved as 'thresh.tif') - see \code{apply_thresh} argument. In
 both cases the resulting files will have the same extent, resolution and crs
-as the predictors.
+as the predictors. The default name of the files created (\code{pred.tif} and
+\code{thresh.tif}) can be changed via the file_name argument.
 }
 \examples{
 
