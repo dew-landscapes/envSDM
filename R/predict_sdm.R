@@ -22,14 +22,13 @@
 #' two with the first element used for the predictions and the second for the
 #' threshold.
 #' @param use_env_naming Logical. If `TRUE`, and `is_env_pred` is `TRUE`, naming
-#'  will ignore `file_name` and instead generate a name matching
-#'  `name_env_tif()` with `layer` being `this_taxa` from `prep` and `start_date`
-#'  being the minimum available `start_date` from the predictors. `pred` and
-#'  `tresh` appear between `this_taxa` and `start_date`.
+#' will ignore `file_name` and instead generate a name matching
+#' `name_env_tif()` with `layer` being `this_taxa` from `prep` and `start_date`
+#' being the minimum available `start_date` from the predictors. `pred` and
+#' `thresh` appear between `this_taxa` and `start_date`.
 #' @param predictors Character. Vector of paths to predictor `.tif` files.
 #' @param is_env_pred Logical. Does the naming of the directory and files in
 #' `predictors` follow the pattern required by `envRaster::parse_env_tif()`?
-#' Also used to decide how to name the returned .tifs.
 #' @param terra_options Passed to `terra::terraOptions()`. e.g. list(memfrac =
 #' 0.6)
 #' @param doClamp Passed to `terra::predict()` (which then passes as `...` to
@@ -65,8 +64,9 @@
                           , full_run
                           , out_dir
                           , file_name = c("pred.tif", "thresh.tif")
+                          , use_env_naming = FALSE
                           , predictors = NULL
-                          , is_env_pred = TRUE
+                          , is_env_pred = FALSE
                           , terra_options = NULL
                           , doClamp = TRUE
                           , pred_mult = 1
