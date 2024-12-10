@@ -84,19 +84,6 @@
     ## start timer ------
     start_time <- Sys.time()
 
-    ## out_dir ------
-    if(is.character(out_dir)) {
-
-      fs::dir_create(out_dir)
-
-      if(!dir.exists(out_dir)) {
-
-        stop("can't create out_dir")
-
-      }
-
-    }
-
     ## prep -------
     if(! "list" %in% class(prep)) prep <- rio::import(prep)
 
@@ -140,6 +127,15 @@
     pred_file <- fs::path(out_dir, file_name[1])
     if(apply_thresh) thresh_file <- fs::path(out_dir, file_name[2])
     log_file <- gsub("\\.tif", ".log", pred_file)
+
+    ### out_dir ------
+    fs::dir_create(dirname(pred_file))
+
+    if(!dir.exists(dirname(pred_file))) {
+
+      stop("can't create ", dirname(pred_file))
+
+    }
 
     ### log --------
     readr::write_lines(paste0("\n\n"
