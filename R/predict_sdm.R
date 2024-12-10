@@ -113,7 +113,7 @@
 
       pred_df <- envRaster::name_env_tif(tibble::tibble(path = predictors), parse = TRUE)
 
-      pred_name <- pred_df %>%
+      pred_names <- pred_df %>%
         dplyr::pull(name)
 
       min_date <- min(as.Date(pred_df$start_date))
