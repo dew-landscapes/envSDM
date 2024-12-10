@@ -9,8 +9,9 @@ predict_sdm(
   full_run,
   out_dir,
   file_name = c("pred.tif", "thresh.tif"),
+  use_env_naming = FALSE,
   predictors = NULL,
-  is_env_pred = TRUE,
+  is_env_pred = FALSE,
   terra_options = NULL,
   doClamp = TRUE,
   pred_mult = 1,
@@ -38,11 +39,16 @@ If saving a threshold file (\code{apply_thresh} is \code{TRUE}), this must be of
 two with the first element used for the predictions and the second for the
 threshold.}
 
+\item{use_env_naming}{Logical. If \code{TRUE}, and \code{is_env_pred} is \code{TRUE}, naming
+will ignore \code{file_name} and instead generate a name matching
+\code{name_env_tif()} with \code{layer} being \code{this_taxa} from \code{prep} and \code{start_date}
+being the minimum available \code{start_date} from the predictors. \code{pred} and
+\code{thresh} appear between \code{this_taxa} and \code{start_date}.}
+
 \item{predictors}{Character. Vector of paths to predictor \code{.tif} files.}
 
 \item{is_env_pred}{Logical. Does the naming of the directory and files in
-\code{predictors} follow the pattern required by \code{envRaster::parse_env_tif()}?
-Also used to decide how to name the returned .tifs.}
+\code{predictors} follow the pattern required by \code{envRaster::parse_env_tif()}?}
 
 \item{terra_options}{Passed to \code{terra::terraOptions()}. e.g. list(memfrac =
 0.6)}
@@ -74,12 +80,6 @@ argument \code{overwrite} is already set to \code{TRUE} so do not provide via \c
 the \code{pred.tif} file will only be remade if \code{force_new} is \code{TRUE}. If
 \code{pred_mult} is, say, 10000, or similar, suggest passing
 \verb{wopt = list(type = "list(datatype = "INT2U")}.}
-
-\item{use_env_naming}{Logical. If \code{TRUE}, and \code{is_env_pred} is \code{TRUE}, naming
-will ignore \code{file_name} and instead generate a name matching
-\code{name_env_tif()} with \code{layer} being \code{this_taxa} from \code{prep} and \code{start_date}
-being the minimum available \code{start_date} from the predictors. \code{pred} and
-\code{tresh} appear between \code{this_taxa} and \code{start_date}.}
 }
 \value{
 Named list of created .tif files, usually 'pred.tif' and
