@@ -6,23 +6,36 @@
 #' `pred_limit`, `limit_buffer` and `pred_clip` arguments. A threshold raster
 #' can also be saved (saved as 'thresh.tif') - see `apply_thresh` argument. In
 #' both cases the resulting files will have the same extent, resolution and crs
-#' as the predictors.
+#' as the predictors. The default name of the files created (`pred.tif` and
+#' `thresh.tif`) can be changed via the file_name argument.
 #'
 #' @param prep Character or named list. If character, the path to an existing
 #' `prep.rds`. Otherwise, the result of a call to `prep_sdm()` with return_val =
 #' "object".
 #' @param full_run Character or named list. If character, the path to an
-#' existing `full_run.rds`. Otherwise, the result of a call to `run_full_sdm`()
+#' existing `full_run.rds`. Otherwise, the result of a call to `run_full_sdm()`
 #' with return_val = "object".
 #' @param out_dir Character. Name of directory into which `.tif`s will be saved.
 #' Will be created if it does not exist.
+#' @param file_name Character. Name to give the output prediction .tif.
+#' If saving a threshold file (`apply_thresh` is `TRUE`), this must be of length
+#' two with the first element used for the predictions and the second for the
+#' threshold.
+#' @param use_env_naming Logical. If `TRUE`, and `is_env_pred` is `TRUE`, naming
+#'  will ignore `file_name` and instead generate a name matching
+#'  `name_env_tif()` with `layer` being `this_taxa` from `prep` and `start_date`
+#'  being the minimum available `start_date` from the predictors. `pred` and
+#'  `tresh` appear between `this_taxa` and `start_date`.
 #' @param predictors Character. Vector of paths to predictor `.tif` files.
 #' @param is_env_pred Logical. Does the naming of the directory and files in
 #' `predictors` follow the pattern required by `envRaster::parse_env_tif()`?
+#' Also used to decide how to name the returned .tifs.
 #' @param terra_options Passed to `terra::terraOptions()`. e.g. list(memfrac =
 #' 0.6)
 #' @param doClamp Passed to `terra::predict()` (which then passes as `...` to
 #' `fun`). Possibly orphaned from older envSDM?
+#' @param pred_mult Numeric (with default 1). Multiply predictions by this
+#' value. Useful for saving directly to integer when pred_mult is, say, 10000.
 #' @param apply_thresh Logical. If `TRUE`, an output raster `thresh.tif` will be
 #' created using the maximum of specificity + sensitivity. The threshold value
 #' can be accessed within `tune.rds` as, say, `mod <- rio::import("tune.rds")`
@@ -37,7 +50,9 @@
 #' predict.
 #' @param ... Passed to `terra::predict()`. e.g. use for wopt = list(). The
 #' argument `overwrite` is already set to `TRUE` so do not provide via `...` -
-#' the `pred.tif` file will only be remade if `force_new` is `TRUE`.
+#' the `pred.tif` file will only be remade if `force_new` is `TRUE`. If
+#' `pred_mult` is, say, 10000, or similar, suggest passing
+#' `wopt = list(type = "list(datatype = "INT2U")`.
 #'
 #' @return Named list of created .tif files, usually 'pred.tif' and
 #' 'thresh.tif'. Output .tif(s) and .log, written to `out_dir`.
@@ -49,16 +64,21 @@
   predict_sdm <- function(prep
                           , full_run
                           , out_dir
+                          , file_name = c("pred.tif", "thresh.tif")
                           , predictors = NULL
                           , is_env_pred = TRUE
                           , terra_options = NULL
                           , doClamp = TRUE
+                          , pred_mult = 1
                           , apply_thresh = TRUE
                           , force_new = FALSE
                           , do_gc = FALSE
                           , check_tifs = TRUE
                           , ...
                           ) {
+
+    # check pred_mult
+    stopifnot(pred_mult != 0)
 
     # setup -------
     ## start timer ------
@@ -87,12 +107,41 @@
     this_taxa <- prep$this_taxa
 
     ## files -----
-    ## new
-    pred_file <- fs::path(out_dir, "pred.tif")
-    thresh_file <- fs::path(out_dir, "thresh.tif")
-    log_file <- fs::path(out_dir, "pred.log")
 
-    ## log --------
+    ### predictors -------
+    if(is_env_pred) {
+
+      pred_df <- envRaster::name_env_tif(tibble::tibble(path = predictors), parse = TRUE)
+
+      pred_name <- pred_df %>%
+        dplyr::pull(name)
+
+      min_date <- min(as.Date(pred_df$start_date))
+
+      x <- terra::rast(predictors)
+
+      names(x) <- pred_names
+
+      if(use_env_naming) {
+
+        file_name <- fs::path(unique(pred_df$period)
+                              , paste0(this_taxa, "__", gsub("\\.tif", "", file_name), "__", min_date, ".tif")
+                              )
+
+      }
+
+    } else {
+
+      x <- terra::rast(predictors)
+
+    }
+
+    ### new -------
+    pred_file <- fs::path(out_dir, file_name[1])
+    if(apply_thresh) thresh_file <- fs::path(out_dir, file_name[2])
+    log_file <- gsub("\\.tif", ".log", pred_file)
+
+    ### log --------
     readr::write_lines(paste0("\n\n"
                               , this_taxa
                               , "\npredict start at "
@@ -110,6 +159,7 @@
 
       test_files <- fs::dir_ls(out_dir
                                , regexp = "tif$|nc$"
+                               , recurse = 1
                                )
 
       tests <- purrr::map(test_files
@@ -185,19 +235,6 @@
                            , file = log_file
                            , append = TRUE
                            )
-        if(is_env_pred) {
-
-          pred_names <- envRaster::name_env_tif(tibble::tibble(path = predictors), parse = TRUE) %>%
-            dplyr::pull(name)
-
-          x <- terra::rast(predictors)
-          names(x) <- pred_names
-
-        } else {
-
-          x <- terra::rast(predictors)
-
-        }
 
         used_preds <- prep$reduce_env$env_cols[prep$reduce_env$env_cols %in% prep$reduce_env$keep]
 
@@ -222,7 +259,14 @@
         ## predict--------
         pred_start <-  Sys.time()
 
-        safe_predict <- purrr::safely(terra::predict)
+        make_preds <- function(...) {
+
+          terra::predict(...) * 10000
+
+        }
+
+
+        safe_predict <- purrr::safely(make_preds)
 
         if(!is.null(terra_options)) {
 
@@ -313,7 +357,7 @@
         thresh <- mod$e[[1]]@thresholds$max_spec_sens
 
         terra::app(terra::rast(pred_file)
-                   , \(i) i > thresh
+                   , \(i) i / pred_mult > thresh
                    , filename = thresh_file
                    , overwrite = TRUE
                    , wopt = list(datatype = "INT1U"
