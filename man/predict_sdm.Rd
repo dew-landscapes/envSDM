@@ -14,7 +14,6 @@ predict_sdm(
   is_env_pred = FALSE,
   terra_options = NULL,
   doClamp = TRUE,
-  pred_mult = 1,
   apply_thresh = TRUE,
   force_new = FALSE,
   do_gc = FALSE,
@@ -56,9 +55,6 @@ being the minimum available \code{start_date} from the predictors. \code{pred} a
 \item{doClamp}{Passed to \code{terra::predict()} (which then passes as \code{...} to
 \code{fun}). Possibly orphaned from older envSDM?}
 
-\item{pred_mult}{Numeric (with default 1). Multiply predictions by this
-value. Useful for saving directly to integer when pred_mult is, say, 10000.}
-
 \item{apply_thresh}{Logical. If \code{TRUE}, an output raster \code{thresh.tif} will be
 created using the maximum of specificity + sensitivity. The threshold value
 can be accessed within \code{tune.rds} as, say, \code{mod <- rio::import("tune.rds")}
@@ -77,9 +73,7 @@ predict.}
 
 \item{...}{Passed to \code{terra::predict()}. e.g. use for wopt = list(). The
 argument \code{overwrite} is already set to \code{TRUE} so do not provide via \code{...} -
-the \code{pred.tif} file will only be remade if \code{force_new} is \code{TRUE}. If
-\code{pred_mult} is, say, 10000, or similar, suggest passing
-\verb{wopt = list(type = "list(datatype = "INT2U")}.}
+the \code{pred.tif} file will only be remade if \code{force_new} is \code{TRUE}.}
 }
 \value{
 Named list of created .tif files, usually 'pred.tif' and
@@ -138,7 +132,6 @@ as the predictors. The default name of the files created (\code{pred.tif} and
                                      , full_run = fs::path(b, "full_run.rds")
                                      , out_dir = b
                                      , predictors = env_dat
-                                     , is_env_pred = FALSE
                                      , check_tifs = TRUE
                                      #, force_new = TRUE
                                      )

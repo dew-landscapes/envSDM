@@ -41,7 +41,6 @@
                                      , full_run = fs::path(b, "full_run.rds")
                                      , out_dir = b
                                      , predictors = env_dat
-                                     , is_env_pred = FALSE
                                      , check_tifs = TRUE
                                      #, force_new = TRUE
                                      )

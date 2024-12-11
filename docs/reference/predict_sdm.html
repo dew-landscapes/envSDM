@@ -66,7 +66,6 @@ as the predictors. The default name of the files created (<code>pred.tif</code> 
 <span>  is_env_pred <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  terra_options <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  doClamp <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  pred_mult <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  apply_thresh <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  force_new <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  do_gc <span class="op">=</span> <span class="cn">FALSE</span>,</span>
@@ -130,11 +129,6 @@ being the minimum available <code>start_date</code> from the predictors. <code>p
 <code>fun</code>). Possibly orphaned from older envSDM?</p></dd>
 
 
-<dt id="arg-pred-mult">pred_mult<a class="anchor" aria-label="anchor" href="#arg-pred-mult"></a></dt>
-<dd><p>Numeric (with default 1). Multiply predictions by this
-value. Useful for saving directly to integer when pred_mult is, say, 10000.</p></dd>
-
-
 <dt id="arg-apply-thresh">apply_thresh<a class="anchor" aria-label="anchor" href="#arg-apply-thresh"></a></dt>
 <dd><p>Logical. If <code>TRUE</code>, an output raster <code>thresh.tif</code> will be
 created using the maximum of specificity + sensitivity. The threshold value
@@ -162,9 +156,7 @@ predict.</p></dd>
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
 <dd><p>Passed to <code><a href="https://rspatial.github.io/terra/reference/predict.html" class="external-link">terra::predict()</a></code>. e.g. use for wopt = list(). The
 argument <code>overwrite</code> is already set to <code>TRUE</code> so do not provide via <code>...</code> -
-the <code>pred.tif</code> file will only be remade if <code>force_new</code> is <code>TRUE</code>. If
-<code>pred_mult</code> is, say, 10000, or similar, suggest passing
-<code>wopt = list(type = "list(datatype = "INT2U")</code>.</p></dd>
+the <code>pred.tif</code> file will only be remade if <code>force_new</code> is <code>TRUE</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -216,12 +208,12 @@ the <code>pred.tif</code> file will only be remade if <code>force_new</code> is 
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Missing `trust` will be set to FALSE by default for RDS in 2.0.0.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [[1]]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [[1]]$full_run_file</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> C:/temp/nige/RtmpUrgssY/temp_libpathe34493a3aeb/envSDM/examples/acaule/combo/full_run.rds</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> C:/temp/nige/Rtmp2zKoms/temp_libpath3be42f275c33/envSDM/examples/acaule/combo/full_run.rds</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [[2]]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [[2]]$full_run_file</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> C:/temp/nige/RtmpUrgssY/temp_libpathe34493a3aeb/envSDM/examples/bradypus/combo/full_run.rds</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> C:/temp/nige/Rtmp2zKoms/temp_libpath3be42f275c33/envSDM/examples/bradypus/combo/full_run.rds</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span></span></span>
@@ -234,7 +226,6 @@ the <code>pred.tif</code> file will only be remade if <code>force_new</code> is 
 <span class="r-in"><span>                                     , full_run <span class="op">=</span> <span class="fu">fs</span><span class="fu">::</span><span class="fu"><a href="https://fs.r-lib.org/reference/path.html" class="external-link">path</a></span><span class="op">(</span><span class="va">b</span>, <span class="st">"full_run.rds"</span><span class="op">)</span></span></span>
 <span class="r-in"><span>                                     , out_dir <span class="op">=</span> <span class="va">b</span></span></span>
 <span class="r-in"><span>                                     , predictors <span class="op">=</span> <span class="va">env_dat</span></span></span>
-<span class="r-in"><span>                                     , is_env_pred <span class="op">=</span> <span class="cn">FALSE</span></span></span>
 <span class="r-in"><span>                                     , check_tifs <span class="op">=</span> <span class="cn">TRUE</span></span></span>
 <span class="r-in"><span>                                     <span class="co">#, force_new = TRUE</span></span></span>
 <span class="r-in"><span>                                     <span class="op">)</span></span></span>
@@ -308,12 +299,12 @@ the <code>pred.tif</code> file will only be remade if <code>force_new</code> is 
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Missing `trust` will be set to FALSE by default for RDS in 2.0.0.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [[1]]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [[1]]$full_run_file</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> C:/temp/nige/RtmpUrgssY/temp_libpathe34493a3aeb/envSDM/examples/acaule/auc_po/full_run.rds</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> C:/temp/nige/Rtmp2zKoms/temp_libpath3be42f275c33/envSDM/examples/acaule/auc_po/full_run.rds</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [[2]]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [[2]]$full_run_file</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> C:/temp/nige/RtmpUrgssY/temp_libpathe34493a3aeb/envSDM/examples/bradypus/auc_po/full_run.rds</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> C:/temp/nige/Rtmp2zKoms/temp_libpath3be42f275c33/envSDM/examples/bradypus/auc_po/full_run.rds</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span></span></span>
