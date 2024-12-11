@@ -33,8 +33,6 @@
 #' 0.6)
 #' @param doClamp Passed to `terra::predict()` (which then passes as `...` to
 #' `fun`). Possibly orphaned from older envSDM?
-#' @param pred_mult Numeric (with default 1). Multiply predictions by this
-#' value. Useful for saving directly to integer when pred_mult is, say, 10000.
 #' @param apply_thresh Logical. If `TRUE`, an output raster `thresh.tif` will be
 #' created using the maximum of specificity + sensitivity. The threshold value
 #' can be accessed within `tune.rds` as, say, `mod <- rio::import("tune.rds")`
@@ -49,9 +47,7 @@
 #' predict.
 #' @param ... Passed to `terra::predict()`. e.g. use for wopt = list(). The
 #' argument `overwrite` is already set to `TRUE` so do not provide via `...` -
-#' the `pred.tif` file will only be remade if `force_new` is `TRUE`. If
-#' `pred_mult` is, say, 10000, or similar, suggest passing
-#' `wopt = list(type = "list(datatype = "INT2U")`.
+#' the `pred.tif` file will only be remade if `force_new` is `TRUE`.
 #'
 #' @return Named list of created .tif files, usually 'pred.tif' and
 #' 'thresh.tif'. Output .tif(s) and .log, written to `out_dir`.
@@ -69,16 +65,12 @@
                           , is_env_pred = FALSE
                           , terra_options = NULL
                           , doClamp = TRUE
-                          , pred_mult = 1
                           , apply_thresh = TRUE
                           , force_new = FALSE
                           , do_gc = FALSE
                           , check_tifs = TRUE
                           , ...
                           ) {
-
-    # check pred_mult
-    stopifnot(pred_mult != 0)
 
     # setup -------
     ## start timer ------
@@ -126,7 +118,8 @@
     ### new -------
     pred_file <- fs::path(out_dir, file_name[1])
     if(apply_thresh) thresh_file <- fs::path(out_dir, file_name[2])
-    log_file <- gsub("\\.tif", ".log", pred_file)
+    log_file <- gsub("tif$", "log", pred_file) %>%
+      gsub("__pred__", "__log__", .)
 
     ### out_dir ------
     fs::dir_create(dirname(pred_file))
@@ -236,12 +229,9 @@
 
         x <- terra::subset(x, used_preds)
 
-        subset_file <- fs::path(tempdir(), "subset_env.tif")
-
         x <- terra::crop(x = x
                          , y = terra::vect(prep$predict_boundary)
                          , mask = TRUE
-                         , filename = subset_file
                          )
 
         readr::write_lines(paste0("predict stack created in "
@@ -255,14 +245,7 @@
         ## predict--------
         pred_start <-  Sys.time()
 
-        make_preds <- function(...) {
-
-          terra::predict(...) * 10000
-
-        }
-
-
-        safe_predict <- purrr::safely(make_preds)
+        safe_predict <- purrr::safely(terra::predict)
 
         if(!is.null(terra_options)) {
 
@@ -280,6 +263,8 @@
                     , gsub("\\.", ",", gsub(":", " =", full_run$tune_mean$tune_args))
                     , " and threshold: "
                     , round(full_run$tune_mean$max_spec_sens, 2)
+                    , "\n out file will be "
+                    , basename(pred_file)
                     )
 
         message(m)
@@ -353,7 +338,7 @@
         thresh <- mod$e[[1]]@thresholds$max_spec_sens
 
         terra::app(terra::rast(pred_file)
-                   , \(i) i / pred_mult > thresh
+                   , \(i) i > thresh
                    , filename = thresh_file
                    , overwrite = TRUE
                    , wopt = list(datatype = "INT1U"
@@ -401,12 +386,6 @@
                          , file = log_file
                          , append = TRUE
                          )
-
-    }
-
-    if(exists("subset_file")) {
-
-      if(file.exists(subset_file)) fs::file_delete(subset_file)
 
     }
 
