@@ -244,17 +244,16 @@
       # presence --------
       prep$original <- presence
 
-      ## sf ------
-      p <- presence %>%
-        sf::st_as_sf(coords = c(pres_x, pres_y)
-                     , crs = pres_crs
-                     ) %>%
-        sf::st_transform(crs = sf::st_crs(predictors)) %>%
-        sf::st_coordinates()
-
       ## raster presence ------
 
-      prep$presence_ras <- terra::cellFromXY(predictors) %>%
+      prep$presence_ras <- terra::cellFromXY(predictors
+                                             , presence %>%
+                                               sf::st_as_sf(coords = c(pres_x, pres_y)
+                                                            , crs = pres_crs
+                                                            ) %>%
+                                               sf::st_transform(crs = sf::st_crs(predictors)) %>%
+                                               sf::st_coordinates()
+                                             ) %>%
         terra::xyFromCell(predictors, .) %>%
         stats::na.omit() %>%
         tibble::as_tibble()
@@ -636,6 +635,7 @@
             tibble::as_tibble() %>%
             na.omit() %>%
             dplyr::distinct() %>%
+            dplyr::anti_join(prep$presence_ras) %>% # background not on presences
             sf::st_as_sf(coords = c("x", "y")
                          , crs = sf::st_crs(target_density)
                          )
@@ -713,13 +713,15 @@
                                                    , y = spp_pa
                                                    , include_cols = "pa"
                                                    , include_cell = TRUE
-                                                   , include_xy = TRUE
                                                    , max_cells_in_memory = max_cells_in_memory
                                                    ) %>%
           dplyr::bind_rows() %>%
           stats::na.omit() %>%
           dplyr::select(-coverage_fraction) %>%
-          dplyr::distinct()
+          dplyr::bind_cols(terra::xyFromCell(predictors
+                                             , .$cell
+                                             )
+                           )
 
         if(!is.null(cat_preds)) {
 
