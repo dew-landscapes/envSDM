@@ -36,72 +36,76 @@ make_predict_boundary <- function(poly_list
                                   , force_new = FALSE
                                   ) {
 
-  run <- if(base::file.exists(out_file)) force_new else TRUE
+  if(!is.null(poly_list)) {
 
-  if(run) {
+    run <- if(base::file.exists(out_file)) force_new else TRUE
 
-    if(all(purrr::map_lgl(poly_list, is.character))) {
+    if(run) {
 
-      poly_list <- stats::na.omit(unlist(poly_list))
-      poly_list <- poly_list[base::file.exists(poly_list)]
+      if(all(purrr::map_lgl(poly_list, is.character))) {
 
-      safe_read_parquet <- purrr::safely(sfarrow::st_read_parquet)
+        poly_list <- stats::na.omit(unlist(poly_list))
+        poly_list <- poly_list[base::file.exists(poly_list)]
 
-      polys <- purrr::map(poly_list
-                          , \(x) safe_read_parquet(x)
-                          )
+        safe_read_parquet <- purrr::safely(sfarrow::st_read_parquet)
 
-      polys <- purrr::map(polys
-                          , \(x) if(is.null(x$error)) x$result else tibble::tibble()
-                          )
+        polys <- purrr::map(poly_list
+                            , \(x) safe_read_parquet(x)
+                            )
 
-      polys <- polys[purrr::map_lgl(polys, \(x) nrow(x) > 0)]
+        polys <- purrr::map(polys
+                            , \(x) if(is.null(x$error)) x$result else tibble::tibble()
+                            )
 
-    } else {
+        polys <- polys[purrr::map_lgl(polys, \(x) nrow(x) > 0)]
 
-      polys <- poly_list
+      } else {
 
-    }
-
-    if(length(polys)) {
-
-      fs::dir_create(dirname(out_file))
-
-      mcp <- polys %>%
-        purrr::map(\(x) sf::st_geometry(x) %>%
-                     sf::st_as_sf() %>%
-                     sf::st_transform(crs = out_crs)
-                   ) %>%
-        dplyr::bind_rows() %>%
-        sf::st_cast("MULTIPOINT") %>%
-        dplyr::summarise() %>%
-        sf::st_convex_hull() %>%
-        sf::st_buffer(buffer_metres) %>%
-        dplyr::mutate(!!rlang::ensym(col_name) := col_name_val)
-
-      if(!is.null(clip)) {
-
-        clip <- clip %>%
-          sf::st_transform(crs = out_crs)
-
-        mcp <- sf::st_intersection(mcp, clip)
-
+        polys <- poly_list
 
       }
 
-      sfarrow::st_write_parquet(mcp, out_file)
+      if(length(polys)) {
+
+        fs::dir_create(dirname(out_file))
+
+        mcp <- polys %>%
+          purrr::map(\(x) sf::st_geometry(x) %>%
+                       sf::st_as_sf() %>%
+                       sf::st_transform(crs = out_crs)
+                     ) %>%
+          dplyr::bind_rows() %>%
+          sf::st_cast("MULTIPOINT") %>%
+          dplyr::summarise() %>%
+          sf::st_convex_hull() %>%
+          sf::st_buffer(buffer_metres) %>%
+          dplyr::mutate(!!rlang::ensym(col_name) := col_name_val)
+
+        if(!is.null(clip)) {
+
+          clip <- clip %>%
+            sf::st_transform(crs = out_crs)
+
+          mcp <- sf::st_intersection(mcp, clip)
+
+
+        }
+
+        sfarrow::st_write_parquet(mcp, out_file)
+
+      } else {
+
+        mcp <- NULL
+
+      }
 
     } else {
 
-      mcp <- NULL
+      if(return_poly) mcp <- sfarrow::st_read_parquet(out_file)
 
     }
 
-  } else {
-
-    if(return_poly) mcp <- sfarrow::st_read_parquet(out_file)
-
-  }
+  } else mcp <- NULL
 
   if(return_poly) return(mcp) else return(out_file)
 
