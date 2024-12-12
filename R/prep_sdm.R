@@ -254,9 +254,7 @@
 
       ## raster presence ------
 
-      prep$presence_ras <- terra::cellFromXY(predictors
-                                         , unique(p)
-                                         ) %>%
+      prep$presence_ras <- terra::cellFromXY(predictors) %>%
         terra::xyFromCell(predictors, .) %>%
         stats::na.omit() %>%
         tibble::as_tibble()
