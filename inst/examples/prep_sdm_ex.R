@@ -61,7 +61,7 @@
 
   names(prep)
 
-  # env variables not used
+  # env variables to remove prior to SDM
   prep$reduce_env$remove
 
   # Density raster
