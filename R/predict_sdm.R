@@ -213,6 +213,15 @@
         if(algo == "rf") requireNamespace("randomForest", quietly = TRUE)
         if(algo == "env") requireNamespace("predicts", quietly = TRUE)
 
+        ## terra options -------
+        if(!is.null(terra_options)) {
+
+          do.call(terra::terraOptions
+                  , args = terra_options
+                  )
+
+        }
+
         ## predict_stack---------
         predict_stack_start <- Sys.time()
 
@@ -246,14 +255,6 @@
         pred_start <-  Sys.time()
 
         safe_predict <- purrr::safely(terra::predict)
-
-        if(!is.null(terra_options)) {
-
-          do.call(terra::terraOptions
-                  , args = terra_options
-                  )
-
-        }
 
         m <- paste0("predict for "
                     , this_taxa
