@@ -61,3 +61,29 @@ predict finished in 0 minutes
 thresh for acaule
 thresh done in 0 minutes
 predict finished. elapsed time: 0.03 minutes
+
+
+acaule
+predict start at 2025-01-20 08:23:43.70564
+predict stack for acaule
+predict stack created in 0 minutes
+predict for acaule from maxnet model with arguments: fc = lq, rm = 2 and threshold: 0.36
+ out file will be pred.tif
+error: Error in eval(predvars, data, env): object 'bio12' not found
+
+predict finished in 0 minutes
+thresh for acaule
+thresh done in 0 minutes
+predict finished. elapsed time: 0.03 minutes
+
+
+acaule
+predict start at 2025-01-20 08:57:48.945168
+predict stack for acaule
+predict stack created in 0 minutes
+predict for acaule from maxnet model with arguments: fc = lq, rm = 2 and threshold: 0.4
+ out file will be pred.tif
+predict finished in 0 minutes
+thresh for acaule
+thresh done in 0 minutes
+predict finished. elapsed time: 0.03 minutes

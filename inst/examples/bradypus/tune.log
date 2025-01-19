@@ -7,3 +7,21 @@ tune start 2024-11-26 14:03:06.640917
 maxnet tune finished in: 0.28 minutes
 envelope tune finished in: 0.1 minutes
 rf tune finished in: 0.11 minutes
+
+
+bradypus
+best_run = FALSE
+tune start 2025-01-20 08:26:35.843
+7 out of 9 variables will be used
+maxnet tune finished in: 0.22 minutes
+envelope tune finished in: 0.07 minutes
+rf tune finished in: 0.07 minutes
+
+
+bradypus
+best_run = FALSE
+tune start 2025-01-20 08:33:33.414325
+7 out of 9 variables will be used
+maxnet tune finished in: 0.22 minutes
+envelope tune finished in: 0.07 minutes
+rf tune finished in: 0.07 minutes

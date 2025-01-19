@@ -61,3 +61,27 @@ predict finished in 0.01 minutes
 thresh for bradypus
 thresh done in 0 minutes
 predict finished. elapsed time: 0.03 minutes
+
+
+bradypus
+predict start at 2025-01-20 08:23:45.831401
+predict stack for bradypus
+predict stack created in 0 minutes
+predict for bradypus from rf model with arguments: tr = 500, mt = 1, ns = 2 and threshold: 0.61
+ out file will be pred.tif
+predict finished in 0 minutes
+thresh for bradypus
+thresh done in 0 minutes
+predict finished. elapsed time: 0.03 minutes
+
+
+bradypus
+predict start at 2025-01-20 08:57:50.835747
+predict stack for bradypus
+predict stack created in 0 minutes
+predict for bradypus from rf model with arguments: tr = 500, mt = 1, ns = 2 and threshold: 0.61
+ out file will be pred.tif
+predict finished in 0 minutes
+thresh for bradypus
+thresh done in 0 minutes
+predict finished. elapsed time: 0.03 minutes
