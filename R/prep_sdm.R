@@ -393,7 +393,7 @@
 
             }
 
-            subset_file <- tempfile()
+            subset_file <- paste0(tempfile(), ".tif")
 
             predictors <- terra::crop(x = predictors
                                       , y = terra::vect(prep$predict_boundary)
