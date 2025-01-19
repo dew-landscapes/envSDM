@@ -337,55 +337,6 @@
 
       }
 
-      # subset predictors? ------
-      if(pred_limit) {
-
-        # calculate proportion overlap between prep$predict_boundary & predictors
-        boundary_area <- sf::st_intersection(prep$predict_boundary
-                                             , sf::st_bbox(predictors[[1]]) %>%
-                                               sf::st_as_sfc() %>%
-                                               sf::st_sf()
-                                             ) %>%
-          sf::st_area() %>%
-          units::drop_units()
-
-        predictor_area <- sf::st_bbox(predictors) %>%
-          sf::st_as_sfc() %>%
-          sf::st_sf() %>%
-          sf::st_area() %>%
-          units::drop_units()
-
-        boundary_overlap <- boundary_area / predictor_area
-
-        if(boundary_overlap <= subset_pred_thresh) {
-
-          start_subset <- Sys.time()
-
-          if(!is.null(terra_options)) {
-
-            do.call(terra::terraOptions
-                    , args = terra_options
-                    )
-
-          }
-
-          predictors <- terra::crop(x = predictors
-                                    , y = terra::vect(prep$predict_boundary)
-                                    , mask = TRUE
-                                    , overwrite = TRUE
-                                    )
-
-          readr::write_lines(paste0("subsetting predictors done in "
-                                    , round(difftime(Sys.time(), start_subset, units = "mins"), 2)
-                                    , " minutes"
-                                    )
-                             , file = log_file
-                             , append = TRUE
-                             )
-
-        }
-
-      }
 
       # prep$presence_ras clip to predict_boundary ---------
       # catch some cases where there are presence records on the predictors
@@ -409,6 +360,59 @@
                          )
 
       if(nrow(prep$presence_ras) > min_fold_n) {
+
+        # subset predictors? ------
+        if(pred_limit) {
+
+          # calculate proportion overlap between prep$predict_boundary & predictors
+          boundary_area <- sf::st_intersection(prep$predict_boundary
+                                               , sf::st_bbox(predictors[[1]]) %>%
+                                                 sf::st_as_sfc() %>%
+                                                 sf::st_sf()
+                                               ) %>%
+            sf::st_area() %>%
+            units::drop_units()
+
+          predictor_area <- sf::st_bbox(predictors) %>%
+            sf::st_as_sfc() %>%
+            sf::st_sf() %>%
+            sf::st_area() %>%
+            units::drop_units()
+
+          boundary_overlap <- boundary_area / predictor_area
+
+          if(boundary_overlap <= subset_pred_thresh) {
+
+            start_subset <- Sys.time()
+
+            if(!is.null(terra_options)) {
+
+              do.call(terra::terraOptions
+                      , args = terra_options
+                      )
+
+            }
+
+            subset_file <- tempfile()
+
+            predictors <- terra::crop(x = predictors
+                                      , y = terra::vect(prep$predict_boundary)
+                                      , mask = TRUE
+                                      , filename = subset_file
+                                      , overwrite = TRUE
+                                      )
+
+            readr::write_lines(paste0("subsetting predictors done in "
+                                      , round(difftime(Sys.time(), start_subset, units = "mins"), 2)
+                                      , " minutes"
+                                      )
+                               , file = log_file
+                               , append = TRUE
+                               )
+
+          }
+
+        }
 
         # folds adj -------
 
@@ -1038,6 +1042,7 @@
 
       # save / clean up-------
       # export before gc()
+      if(file.exists(subset_file)) fs::file_delete(subset_file)
       prep$finished <- TRUE
       prep$log <- if(file.exists(log_file)) readr::read_lines(log_file) else NULL
 
