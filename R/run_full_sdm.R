@@ -95,20 +95,22 @@
 
         # mod --------
 
-        full_run <- tune_sdm(prep = prep
-                             , out_dir = out_dir
-                             , return_val = "object"
-                             , algo = tune_args$algo
-                             , fc = tune_args$fc
-                             , rm = tune_args$rm
-                             , trees = tune_args$trees
-                             , mtry = tune_args$mtry
-                             , nodesize = tune_args$nodesize
-                             , keep_model = TRUE
-                             , best_run = TRUE
-                             , do_gc = do_gc
-                             , ...
-                             )
+        full_run_tune <- tune_sdm(prep = prep
+                                  , out_dir = out_dir
+                                  , return_val = "object"
+                                  , algo = tune_args$algo
+                                  , fc = tune_args$fc
+                                  , rm = tune_args$rm
+                                  , trees = tune_args$trees
+                                  , mtry = tune_args$mtry
+                                  , nodesize = tune_args$nodesize
+                                  , keep_model = TRUE
+                                  , best_run = TRUE
+                                  , do_gc = do_gc
+                                  , ...
+                                  )
+
+        full_run <- c(full_run, full_run_tune)
 
       }
 
