@@ -236,10 +236,11 @@
 
         used_preds <- prep$reduce_env$env_cols[prep$reduce_env$env_cols %in% prep$reduce_env$keep]
 
-        x <- terra::subset(x, used_preds)
+        subset_file <- paste0(tempfile(), ".tif")
 
-        x <- terra::crop(x = x
+        x <- terra::crop(x = terra::subset(x, used_preds)
                          , y = terra::vect(prep$predict_boundary)
+                         , filename = subset_file
                          , mask = TRUE
                          )
 
@@ -405,6 +406,8 @@
     res <- c(if(file.exists(pred_file)) list(pred = pred_file)
              , if(file.exists(thresh_file)) list(thresh = thresh_file)
              )
+
+    if(file.exists(subset_file)) fs::file_delete(subset_file)
 
     return(res)
 
