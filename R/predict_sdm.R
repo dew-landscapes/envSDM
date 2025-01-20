@@ -407,7 +407,7 @@
              , if(file.exists(thresh_file)) list(thresh = thresh_file)
              )
 
-    if(file.exists(subset_file)) fs::file_delete(subset_file)
+    if(exists("subset_file")) fs::file_delete(subset_file)
 
     return(res)
 

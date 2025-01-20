@@ -1042,7 +1042,7 @@
 
       # save / clean up-------
       # export before gc()
-      if(file.exists(subset_file)) fs::file_delete(subset_file)
+      if(exists("subset_file")) fs::file_delete(subset_file)
       prep$finished <- TRUE
       prep$log <- if(file.exists(log_file)) readr::read_lines(log_file) else NULL
 
