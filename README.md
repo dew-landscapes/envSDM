@@ -59,13 +59,12 @@ You can install the development version from
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("acanthiza/envSDM")
+devtools::install_github("dew-landscapes/envSDM")
 ```
 
 # References
 
-<div id="refs" class="references csl-bib-body hanging-indent"
-entry-spacing="0">
+<div id="refs" class="references csl-bib-body hanging-indent">
 
 <div id="ref-RN4592" class="csl-entry">
 

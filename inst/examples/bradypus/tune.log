@@ -2,26 +2,11 @@
 
 bradypus
 best_run = FALSE
-tune start 2024-11-26 14:03:06.640917
-6 out of 9 variables will be used
-maxnet tune finished in: 0.28 minutes
-envelope tune finished in: 0.1 minutes
-rf tune finished in: 0.11 minutes
-
-
-bradypus
-best_run = FALSE
-tune start 2025-01-20 08:26:35.843
+tune start 2025-01-20 11:45:18.594069
 7 out of 9 variables will be used
-maxnet tune finished in: 0.22 minutes
-envelope tune finished in: 0.07 minutes
-rf tune finished in: 0.07 minutes
-
-
-bradypus
-best_run = FALSE
-tune start 2025-01-20 08:33:33.414325
-7 out of 9 variables will be used
-maxnet tune finished in: 0.22 minutes
-envelope tune finished in: 0.07 minutes
-rf tune finished in: 0.07 minutes
+maxnet tune finished in: 0.26 minutes
+envelope tune finished in: 0.08 minutes
+rf tune finished in: 0.26 minutes
+tune abandoned
+tune abandoned
+tune abandoned

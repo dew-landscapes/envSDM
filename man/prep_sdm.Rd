@@ -255,7 +255,7 @@ Options for managing memory are \code{terra_options}, \code{max_cells_in_memory}
                                                , pred_limit = d
                                                , limit_buffer = 10000
                                                , dens_res = 1000 # ignored as decimal degrees preds
-                                               , force_new = T
+                                               #, force_new = T
                                                )
                )
 

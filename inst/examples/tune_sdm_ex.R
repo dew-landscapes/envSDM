@@ -16,7 +16,7 @@
                               , fc = "lq"
                               , rm = c(2, 3)
                               , trees = 500
-                              , mtry = 1
+                              , mtry = c(1:3)
                               , nodesize = 2
                               #, force_new = TRUE
                               )

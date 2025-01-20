@@ -208,12 +208,12 @@ elements:</p>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Missing `trust` will be set to FALSE by default for RDS in 2.0.0.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [[1]]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [[1]]$tune_file</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> H:/temp/nige/Rtmp2hSWI8/temp_libpath29784aed27b3/envSDM/examples/acaule/tune.rds</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> H:/temp/nige/Rtmp4cTF9q/temp_libpath4f80474c65c8/envSDM/examples/acaule/tune.rds</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [[2]]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [[2]]$tune_file</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> H:/temp/nige/Rtmp2hSWI8/temp_libpath29784aed27b3/envSDM/examples/bradypus/tune.rds</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> H:/temp/nige/Rtmp4cTF9q/temp_libpath4f80474c65c8/envSDM/examples/bradypus/tune.rds</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span></span></span>
@@ -235,8 +235,8 @@ elements:</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 2 × 8</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   taxa     algo   tune_args             combo auc_po  IMAE   CBI max_spec_sens</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                 <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> acaule   maxnet fc: lq. rm: 2         0.671  0.874 0.830 0.848         0.269</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> bradypus rf     tr: 500. mt: 1. ns: 2 0.445  0.713 0.670 0.865         0.345</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> acaule   maxnet fc: lq. rm: 2         0.828  0.966 0.880 0.948         0.417</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> bradypus rf     tr: 500. mt: 2. ns: 2 0.430  0.685 0.713 0.761         0.309</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>  <span class="co"># or best tune args choosing on just auc_po?</span></span></span>
 <span class="r-in"><span>  <span class="va">data</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
@@ -258,8 +258,8 @@ elements:</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 2 × 7</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   taxa     algo   tune_args             auc_po  IMAE   CBI max_spec_sens</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> acaule   rf     tr: 500. mt: 1. ns: 2  0.881 0.802 0.765         0.338</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> bradypus maxnet fc: lq. rm: 3          0.732 0.571 0.808         0.551</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> acaule   rf     tr: 500. mt: 1. ns: 2  0.977 0.885 0.823         0.352</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> bradypus maxnet fc: lq. rm: 3          0.723 0.620 0.877         0.452</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

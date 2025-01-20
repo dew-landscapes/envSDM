@@ -2,7 +2,6 @@
 
 bradypus
 best_run = TRUE
-tune start 2024-11-26 14:11:19.492618
-6 out of 9 variables will be used
+tune start 2025-01-20 12:01:47.140769
+7 out of 9 variables will be used
 rf tune finished in: 0.01 minutes
-tune abandoned

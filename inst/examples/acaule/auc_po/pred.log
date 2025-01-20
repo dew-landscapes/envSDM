@@ -1,56 +1,12 @@
 
 
 acaule
-predict start at 2024-11-26 14:11:40.620929
+predict start at 2025-01-20 12:02:03.322018
 predict stack for acaule
 predict stack created in 0 minutes
-predict for acaule from rf model with arguments: tr = 500, mt = 1, ns = 2 and threshold: 0.5
-predict finished in 0 minutes
-thresh for acaule
-thresh done in 0 minutes
-predict finished. elapsed time: 0.03 minutes
-
-
-acaule
-predict start at 2024-11-26 14:16:09.415688
-predict stack for acaule
-predict stack created in 0 minutes
-predict for acaule from rf model with arguments: tr = 500, mt = 1, ns = 2 and threshold: 0.5
-predict finished in 0 minutes
-thresh for acaule
-thresh done in 0 minutes
-predict finished. elapsed time: 0.04 minutes
-
-
-acaule
-predict start at 2024-11-26 14:16:25.268604
-predict stack for acaule
-predict stack created in 0 minutes
-predict for acaule from rf model with arguments: tr = 500, mt = 1, ns = 2 and threshold: 0.5
-predict finished in 0 minutes
-thresh for acaule
-thresh done in 0 minutes
-predict finished. elapsed time: 0.04 minutes
-
-
-acaule
-predict start at 2024-11-26 14:17:25.401086
-predict stack for acaule
-predict stack created in 0 minutes
-predict for acaule from rf model with arguments: tr = 500, mt = 1, ns = 2 and threshold: 0.5
-predict finished in 0 minutes
-thresh for acaule
-thresh done in 0 minutes
-predict finished. elapsed time: 0.04 minutes
-
-
-acaule
-predict start at 2025-01-20 08:59:58.209455
-predict stack for acaule
-predict stack created in 0 minutes
-predict for acaule from rf model with arguments: tr = 500, mt = 1, ns = 2 and threshold: 0.81
+predict for acaule from rf model with arguments: tr = 500, mt = 1, ns = 2 and threshold: 0.82
  out file will be pred.tif
-predict finished in 0 minutes
+predict finished in 0.01 minutes
 thresh for acaule
-thresh done in 0 minutes
+thresh done in 0.01 minutes
 predict finished. elapsed time: 0.03 minutes

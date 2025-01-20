@@ -1,113 +1,13 @@
 
-
 acaule
-prep start at 2024-11-26 13:27:31.47817.
+prep start at 2025-01-20 11:39:36.00635.
 1082 original records
 9 predictors
-subsetting predictors done in 0 minutes
-128 presences in predict_boundary and on env rasters
-density raster done in 0.04 minutes
-10000 background points attempted. 4961 achieved in: 0 minutes
-env data extracted in: 0.26 minutes
-warning: 2 out of 5 blocks failed to reach 8 presences. These were lumped until every block reached 8 presences.
-spatial folds = TRUE. Folds = 3. Folds done in 0.23 minutes
-reduce_env completed in: 0.07 minutes
-prep completed. elapsed time: 0.61 minutes
-
-
-acaule
-prep start at 2024-11-26 13:38:51.701887.
-1082 original records
-9 predictors
-
-
-acaule
-prep start at 2024-11-26 13:39:43.435925.
-1082 original records
-9 predictors
-subsetting predictors done in 0 minutes
-128 presences in predict_boundary and on env rasters
-density raster done in 0.02 minutes
-10000 background points attempted. 4932 achieved in: 0 minutes
-env data extracted in: 0.26 minutes
-warning: 2 out of 5 blocks failed to reach 8 presences. These were lumped until every block reached 8 presences.
-spatial folds = TRUE. Folds = 3. Folds done in 0.26 minutes
-reduce_env completed in: 0.01 minutes
-prep completed. elapsed time: 0.57 minutes
-
-
-acaule
-prep start at 2024-11-26 13:41:16.260163.
-1082 original records
-9 predictors
-subsetting predictors done in 0 minutes
-128 presences in predict_boundary and on env rasters
-density raster done in 0.02 minutes
-10000 background points attempted. 4936 achieved in: 0 minutes
-env data extracted in: 0.25 minutes
-warning: 0 out of 5 blocks failed to reach 8 presences. These were lumped until every block reached 8 presences.
-spatial folds = TRUE. Folds = 5. Folds done in 0.2 minutes
-reduce_env completed in: 0.01 minutes
-prep completed. elapsed time: 0.5 minutes
-
-
-acaule
-prep start at 2024-11-26 13:44:32.277195.
-1082 original records
-9 predictors
-subsetting predictors done in 0 minutes
-128 presences in predict_boundary and on env rasters
-density raster done in 0.02 minutes
-10000 background points attempted. 4973 achieved in: 0 minutes
-env data extracted in: 0.27 minutes
-warning: 1 out of 5 blocks failed to reach 8 presences. These were lumped until every block reached 8 presences.
-spatial folds = TRUE. Folds = 4. Folds done in 0.22 minutes
-reduce_env completed in: 0.01 minutes
-prep completed. elapsed time: 0.54 minutes
-
-
-acaule
-prep start at 2024-11-26 13:59:29.425236.
-1082 original records
-9 predictors
-subsetting predictors done in 0 minutes
-128 presences in predict_boundary and on env rasters
-density raster done in 0.02 minutes
-10000 background points attempted. 4947 achieved in: 0 minutes
-env data extracted in: 0.27 minutes
-warning: 2 out of 5 blocks failed to reach 8 presences. These were lumped until every block reached 8 presences.
-spatial folds = TRUE. Folds = 3. Folds done in 0.21 minutes
-reduce_env completed in: 0.01 minutes
-prep completed. elapsed time: 0.52 minutes
-
-acaule
-prep start at 2024-11-26 18:57:18.707282.
-1082 original records
-9 predictors
-subsetting predictors done in 0 minutes
-128 presences in predict_boundary and on env rasters
-density raster done in 0.02 minutes
-10000 background points attempted. 4975 achieved in: 0 minutes
-env data extracted in: 0.24 minutes
-warning: 2 out of 5 blocks failed to reach 8 presences. These were lumped until every block reached 8 presences.
-spatial folds = TRUE. Folds = 3. Folds done in 0.19 minutes
-reduce_env completed in: 0.07 minutes
-prep completed. elapsed time: 0.55 minutes
-
-acaule
-prep start at 2024-12-12 19:00:45.951747.
-1082 original records
-9 predictors
-
-acaule
-prep start at 2024-12-12 19:36:27.394337.
-1082 original records
-9 predictors
-subsetting predictors done in 0 minutes
 1065 presences in predict_boundary and on env rasters
-density raster done in 0.02 minutes
-10000 background points attempted. 4839 achieved in: 0 minutes
+subsetting predictors done in 0.02 minutes
+density raster done in 0.03 minutes
+10000 background points attempted. 4976 achieved in: 0 minutes
 env data extracted in: 0.28 minutes
-spatial folds = TRUE. Folds = 5. Folds done in 0.24 minutes
-reduce_env completed in: 0.04 minutes
-prep completed. elapsed time: 0.59 minutes
+spatial folds = TRUE. Folds = 5. Folds done in 0.27 minutes
+reduce_env completed in: 0.09 minutes
+prep completed. elapsed time: 0.71 minutes
