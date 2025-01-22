@@ -1,26 +1,12 @@
 
 
 bradypus
-predict start at 2025-01-20 12:01:50.747201
-predict stack for bradypus
-predict stack created in 0 minutes
-predict for bradypus from rf model with arguments: tr = 500, mt = 2, ns = 2 and threshold: 0.67
+predict start at 2025-01-22 15:23:03.982616
+predict window for bradypus
+predict window created in 0 minutes
+predict for bradypus from rf model with arguments: tr = 500, mt = 3, ns = 2 and threshold: 0.65
  out file will be pred.tif
-predict finished in 0 minutes
+predict finished in 0.01 minutes
 thresh for bradypus
 thresh done in 0 minutes
 predict finished. elapsed time: 0.03 minutes
-
-
-bradypus
-predict start at 2025-01-22 14:10:26.861837
-predict did not run as:
- threshold file: H:/dev/nige/packages/envSDM/inst/examples/bradypus/combo/thresh.tif already exists and force_new was not TRUE
-
-
-
-bradypus
-predict start at 2025-01-22 14:11:52.568006
-predict did not run as:
- threshold file: H:/dev/nige/packages/envSDM/inst/examples/bradypus/combo/thresh.tif already exists and force_new was not TRUE
-

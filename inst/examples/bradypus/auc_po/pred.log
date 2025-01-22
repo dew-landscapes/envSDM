@@ -1,19 +1,12 @@
 
 
 bradypus
-predict start at 2025-01-20 12:02:05.320151
-predict stack for bradypus
-predict stack created in 0 minutes
-predict for bradypus from maxnet model with arguments: fc = lq, rm = 3 and threshold: 0.43
+predict start at 2025-01-22 15:23:26.099039
+predict window for bradypus
+predict window created in 0 minutes
+predict for bradypus from maxnet model with arguments: fc = lq, rm = 3 and threshold: 0.61
  out file will be pred.tif
 predict finished in 0 minutes
 thresh for bradypus
 thresh done in 0 minutes
 predict finished. elapsed time: 0.03 minutes
-
-
-bradypus
-predict start at 2025-01-22 14:11:55.309332
-predict did not run as:
- threshold file: H:/dev/nige/packages/envSDM/inst/examples/bradypus/auc_po/thresh.tif already exists and force_new was not TRUE
-
