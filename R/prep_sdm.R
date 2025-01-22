@@ -364,53 +364,25 @@
         # subset predictors? ------
         if(pred_limit) {
 
-          # calculate proportion overlap between prep$predict_boundary & predictors
-          boundary_area <- sf::st_intersection(prep$predict_boundary
-                                               , sf::st_bbox(predictors[[1]]) %>%
-                                                 sf::st_as_sfc() %>%
-                                                 sf::st_sf()
-                                               ) %>%
-            sf::st_area() %>%
-            units::drop_units()
+          start_subset <- Sys.time()
 
-          predictor_area <- sf::st_bbox(predictors) %>%
-            sf::st_as_sfc() %>%
-            sf::st_sf() %>%
-            sf::st_area() %>%
-            units::drop_units()
+          if(!is.null(terra_options)) {
 
-          boundary_overlap <- boundary_area / predictor_area
-
-          if(boundary_overlap <= subset_pred_thresh) {
-
-            start_subset <- Sys.time()
-
-            if(!is.null(terra_options)) {
-
-              do.call(terra::terraOptions
-                      , args = terra_options
-                      )
-
-            }
-
-            subset_file <- paste0(tempfile(), ".tif")
-
-            predictors <- terra::crop(x = predictors
-                                      , y = terra::vect(prep$predict_boundary)
-                                      , mask = TRUE
-                                      , filename = subset_file
-                                      , overwrite = TRUE
-                                      )
-
-            readr::write_lines(paste0("subsetting predictors done in "
-                                      , round(difftime(Sys.time(), start_subset, units = "mins"), 2)
-                                      , " minutes"
-                                      )
-                               , file = log_file
-                               , append = TRUE
-                               )
+            do.call(terra::terraOptions
+                    , args = terra_options
+                    )
 
           }
+
+          terra::window(predictors) <- terra::ext(terra::vect(prep$predict_boundary))
+
+          readr::write_lines(paste0("subsetting predictors done in "
+                                    , round(difftime(Sys.time(), start_subset, units = "mins"), 2)
+                                    , " minutes"
+                                    )
+                             , file = log_file
+                             , append = TRUE
+                             )
 
         }
 
@@ -621,7 +593,7 @@
           if(!exists("target_density")) target_density <- terra::rast(density_file)
 
           ptscell <- sample(1:terra::ncell(target_density)
-                           , num_bg * 1.1
+                           , num_bg * 2 # over generate here as terra::window only crops - it does not mask
                            , prob = target_density[]
                            , replace = TRUE
                            )
@@ -642,7 +614,9 @@
             dplyr::anti_join(prep$presence_ras) %>% # background not on presences
             sf::st_as_sf(coords = c("x", "y")
                          , crs = sf::st_crs(target_density)
-                         )
+                         ) %>%
+            # filter back to only those within predict_boundary
+            sf::st_filter(prep$predict_boundary)
 
           if(nrow(prep$bg_points) > num_bg) {
 
