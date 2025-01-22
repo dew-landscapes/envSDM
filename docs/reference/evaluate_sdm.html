@@ -80,38 +80,71 @@ from <code><a href="https://sjevelazco.github.io/flexsdm/reference/sdm_eval.html
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
-<span class="r-in"><span>  <span class="va">out_dir</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span>package <span class="op">=</span> <span class="st">"envSDM"</span><span class="op">)</span>, <span class="st">"examples"</span>, <span class="st">"acaule"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="va">out_dir</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span>package <span class="op">=</span> <span class="st">"envSDM"</span><span class="op">)</span>, <span class="st">"examples"</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span>  <span class="va">prep</span> <span class="op">&lt;-</span> <span class="fu">rio</span><span class="fu">::</span><span class="fu"><a href="http://gesistsa.github.io/rio/reference/import.html" class="external-link">import</a></span><span class="op">(</span><span class="fu">fs</span><span class="fu">::</span><span class="fu"><a href="https://fs.r-lib.org/reference/path.html" class="external-link">path</a></span><span class="op">(</span><span class="va">out_dir</span>, <span class="st">"prep.rds"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="kw"><a href="https://rdrr.io/r/base/source.html" class="external-link">source</a></span><span class="op">(</span><span class="fu">fs</span><span class="fu">::</span><span class="fu"><a href="https://fs.r-lib.org/reference/path.html" class="external-link">path</a></span><span class="op">(</span><span class="va">out_dir</span>, <span class="st">"tune_sdm_ex.R"</span><span class="op">)</span><span class="op">)</span> <span class="co"># make sure following prep file exists</span></span></span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Missing `trust` will be set to FALSE by default for RDS in 2.0.0.</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Missing `trust` will be set to FALSE by default for RDS in 2.0.0.</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Missing `trust` will be set to FALSE by default for RDS in 2.0.0.</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Missing `trust` will be set to FALSE by default for RDS in 2.0.0.</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>There were 2 warnings in `dplyr::mutate()`.</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> The first warning was:</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> In argument: `tune = purrr::map(tune, rio::import)`.</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> Caused by warning:</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">!</span> Missing `trust` will be set to FALSE by default for RDS in 2.0.0.</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Run <a href="x-r-run:dplyr::last_dplyr_warnings()">dplyr::last_dplyr_warnings()</a> to see the 1 remaining warning.</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>There were 2 warnings in `dplyr::mutate()`.</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> The first warning was:</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> In argument: `tune = purrr::map(tune, rio::import)`.</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> Caused by warning:</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">!</span> Missing `trust` will be set to FALSE by default for RDS in 2.0.0.</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Run <a href="x-r-run:dplyr::last_dplyr_warnings()">dplyr::last_dplyr_warnings()</a> to see the 1 remaining warning.</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>  <span class="va">prep</span> <span class="op">&lt;-</span> <span class="fu">rio</span><span class="fu">::</span><span class="fu"><a href="http://gesistsa.github.io/rio/reference/import.html" class="external-link">import</a></span><span class="op">(</span><span class="fu">fs</span><span class="fu">::</span><span class="fu"><a href="https://fs.r-lib.org/reference/path.html" class="external-link">path</a></span><span class="op">(</span><span class="va">out_dir</span>, <span class="st">"acaule"</span>, <span class="st">"prep.rds"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Missing `trust` will be set to FALSE by default for RDS in 2.0.0.</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>  <span class="va">model</span> <span class="op">&lt;-</span> <span class="fu"><a href="tune_sdm.html">tune_sdm</a></span><span class="op">(</span>prep <span class="op">=</span> <span class="va">prep</span></span></span>
+<span class="r-in"><span>                    , out_dir <span class="op">=</span> <span class="cn">FALSE</span></span></span>
+<span class="r-in"><span>                    , return_val <span class="op">=</span> <span class="st">"object"</span></span></span>
+<span class="r-in"><span>                    , algo <span class="op">=</span> <span class="st">"rf"</span></span></span>
+<span class="r-in"><span>                    , trees <span class="op">=</span> <span class="fl">500</span></span></span>
+<span class="r-in"><span>                    , mtry <span class="op">=</span> <span class="fl">2</span></span></span>
+<span class="r-in"><span>                    , nodesize <span class="op">=</span> <span class="fl">1</span></span></span>
+<span class="r-in"><span>                    , keep_model <span class="op">=</span> <span class="cn">TRUE</span></span></span>
+<span class="r-in"><span>                    <span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> tuning acaule</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> out_dir is H:/temp/nige\RtmpcjWyE8\file305061ca3390</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> rf tune</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Joining with `by = join_by(algo)`</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Joining with `by = join_by(metric)`</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Joining with `by = join_by(algo, tune_args, trees, nodesize)`</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>  <span class="va">presences</span> <span class="op">&lt;-</span> <span class="va">prep</span><span class="op">$</span><span class="va">blocks</span><span class="op">[</span><span class="va">prep</span><span class="op">$</span><span class="va">blocks</span><span class="op">$</span><span class="va">pa</span> <span class="op">==</span> <span class="fl">1</span> <span class="op">&amp;</span> <span class="va">prep</span><span class="op">$</span><span class="va">blocks</span><span class="op">$</span><span class="va">block</span> <span class="op">!=</span> <span class="fl">1</span>, <span class="op">]</span></span></span>
 <span class="r-in"><span>  <span class="va">background</span> <span class="op">&lt;-</span> <span class="va">prep</span><span class="op">$</span><span class="va">blocks</span><span class="op">[</span><span class="va">prep</span><span class="op">$</span><span class="va">blocks</span><span class="op">$</span><span class="va">pa</span> <span class="op">==</span> <span class="fl">0</span> <span class="op">&amp;</span> <span class="va">prep</span><span class="op">$</span><span class="va">blocks</span><span class="op">$</span><span class="va">block</span> <span class="op">!=</span> <span class="fl">1</span>, <span class="op">]</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span>  <span class="va">evaluate_ex_dir</span> <span class="op">&lt;-</span> <span class="fu">fs</span><span class="fu">::</span><span class="fu"><a href="https://fs.r-lib.org/reference/path.html" class="external-link">path</a></span><span class="op">(</span><span class="va">out_dir</span>, <span class="st">"evaluate_example"</span><span class="op">)</span></span></span>
-<span class="r-in"><span>  <span class="fu">fs</span><span class="fu">::</span><span class="fu"><a href="https://fs.r-lib.org/reference/create.html" class="external-link">dir_create</a></span><span class="op">(</span><span class="va">evaluate_ex_dir</span><span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span>  <span class="fu"><a href="tune_sdm.html">tune_sdm</a></span><span class="op">(</span>out_dir <span class="op">=</span> <span class="va">out_dir</span></span></span>
-<span class="r-in"><span>           , algo <span class="op">=</span> <span class="st">"rf"</span></span></span>
-<span class="r-in"><span>           , trees <span class="op">=</span> <span class="fl">500</span></span></span>
-<span class="r-in"><span>           , mtry <span class="op">=</span> <span class="cn">FALSE</span></span></span>
-<span class="r-in"><span>           , nodesize <span class="op">=</span> <span class="cn">FALSE</span></span></span>
-<span class="r-in"><span>           , keep_model <span class="op">=</span> <span class="cn">TRUE</span></span></span>
-<span class="r-in"><span>           , save_to <span class="op">=</span> <span class="va">evaluate_ex_dir</span></span></span>
-<span class="r-in"><span>           <span class="op">)</span></span></span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Missing `trust` will be set to FALSE by default for RDS in 2.0.0.</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in tune_sdm(out_dir = out_dir, algo = "rf", trees = 500, mtry = FALSE,     nodesize = FALSE, keep_model = TRUE, save_to = evaluate_ex_dir):</span> argument "prep" is missing, with no default</span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span>  <span class="va">tune</span> <span class="op">&lt;-</span> <span class="fu">rio</span><span class="fu">::</span><span class="fu"><a href="http://gesistsa.github.io/rio/reference/import.html" class="external-link">import</a></span><span class="op">(</span><span class="fu">fs</span><span class="fu">::</span><span class="fu"><a href="https://fs.r-lib.org/reference/path.html" class="external-link">path</a></span><span class="op">(</span><span class="va">evaluate_ex_dir</span>, <span class="st">"tune.rds"</span><span class="op">)</span></span></span>
-<span class="r-in"><span>                      , setclass <span class="op">=</span> <span class="st">"tibble"</span></span></span>
-<span class="r-in"><span>                      <span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> No such file: H:/temp/nige/Rtmp4cTF9q/temp_libpath4f80474c65c8/envSDM/examples/acaule/evaluate_example/tune.rds</span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span>  <span class="fu">evaluate_sdm</span><span class="op">(</span><span class="va">tune</span><span class="op">$</span><span class="va">m</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span></span>
+<span class="r-in"><span>  <span class="fu">evaluate_sdm</span><span class="op">(</span><span class="va">model</span><span class="op">$</span><span class="va">tune_rf</span><span class="op">$</span><span class="va">m</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span></span>
 <span class="r-in"><span>               , p_test <span class="op">=</span> <span class="va">presences</span></span></span>
 <span class="r-in"><span>               , b_test <span class="op">=</span> <span class="va">background</span></span></span>
 <span class="r-in"><span>               <span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'tune' not found</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> @stats</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     np   na prevalence auc   cor pcor   ODP auc_po auc_po_flexsdm   CBI</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 1020 4477      0.186   1 0.973    0 0.814      1              1 0.963</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   CBI_rescale  IMAE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1       0.982 0.978</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> @thresholds</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   max_kappa max_spec_sens no_omission equal_prevalence equal_sens_spec</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1     0.795         0.795       0.592            0.182           0.685</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> @tr_stats</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     treshold kappa  CCR  TPR  TNR  FPR  FNR  PPP  NPP  MCR  OR</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1          0     0 0.19    1    0    1    0 0.19  NaN 0.81 NaN</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2          0  0.38 0.69    1 0.62 0.38    0 0.37    1 0.31 Inf</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3          0  0.38 0.69    1 0.62 0.38    0 0.37    1 0.31 Inf</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4        ...   ...  ...  ...  ...  ...  ...  ...  ...  ... ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 169        1  0.89 0.97 0.84    1    0 0.16    1 0.96 0.03 Inf</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 170        1  0.89 0.97 0.84    1    0 0.16    1 0.96 0.03 Inf</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 171        1     0 0.81    0    1    0    1  NaN 0.81 0.19 NaN</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

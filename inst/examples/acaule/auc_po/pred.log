@@ -1,12 +1,12 @@
 
 
 acaule
-predict start at 2025-01-20 12:02:03.322018
-predict stack for acaule
-predict stack created in 0 minutes
-predict for acaule from rf model with arguments: tr = 500, mt = 1, ns = 2 and threshold: 0.82
+predict start at 2025-01-22 15:23:24.347979
+predict window for acaule
+predict window created in 0 minutes
+predict for acaule from maxnet model with arguments: fc = lq, rm = 2 and threshold: 0.38
  out file will be pred.tif
 predict finished in 0.01 minutes
 thresh for acaule
-thresh done in 0.01 minutes
+thresh done in 0 minutes
 predict finished. elapsed time: 0.03 minutes

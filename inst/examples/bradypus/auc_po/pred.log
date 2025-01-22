@@ -1,10 +1,10 @@
 
 
 bradypus
-predict start at 2025-01-20 12:02:05.320151
-predict stack for bradypus
-predict stack created in 0 minutes
-predict for bradypus from maxnet model with arguments: fc = lq, rm = 3 and threshold: 0.43
+predict start at 2025-01-22 15:23:26.099039
+predict window for bradypus
+predict window created in 0 minutes
+predict for bradypus from maxnet model with arguments: fc = lq, rm = 3 and threshold: 0.61
  out file will be pred.tif
 predict finished in 0 minutes
 thresh for bradypus
