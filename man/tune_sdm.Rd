@@ -123,7 +123,7 @@ Tune, and evaluate, species distribution models
                               , fc = "lq"
                               , rm = c(2, 3)
                               , trees = 500
-                              , mtry = c(1:3)
+                              , mtry = 1
                               , nodesize = 2
                               #, force_new = TRUE
                               )

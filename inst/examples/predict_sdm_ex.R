@@ -108,6 +108,7 @@
                                      , out_dir = b
                                      , predictors = env_dat
                                      , is_env_pred = FALSE
+                                     , limit_to_boundary = TRUE
                                      , check_tifs = TRUE
                                      )
                )
