@@ -43,14 +43,6 @@
 #' writing.
 #' @param terra_options Passed to `terra::terraOptions()`. e.g. list(memfrac =
 #' 0.6)
-#' @param subset_pred_thresh Numeric. A threshold value of the extent of
-#' predict_boundary that overlaps the predictors, below which the predictors
-#' will be cropped and masked to the predict boundary before extraction of
-#' values to points. For predict boundaries much smaller than the predictors,
-#' subsetting before extracting data to points will be much (much)
-#' quicker. As the predict boundary approaches the same area covered by the
-#' predictors, subsetting prior to extraction becomes much (much) slower. Also
-#' very expensive in terms of disc space.
 #' @param num_bg Numeric. How many background points?
 #' @param prop_abs Character. Is `num_bg` a proportion (`prop`) of the number of
 #' records in `presence` or an absolute (`abs`) number?
@@ -131,7 +123,6 @@
                        , is_env_pred = TRUE
                        , max_cells_in_memory = 3e+07
                        , terra_options = NULL
-                       , subset_pred_thresh = 0.2
                        , cat_preds = NULL
                        , num_bg = 10000
                        , prop_abs = "abs"
