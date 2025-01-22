@@ -234,7 +234,7 @@
                            , append = TRUE
                            )
 
-        window(x) <- terra::ext(terra::vect(prep$predict_boundary))
+        terra::window(x) <- terra::ext(terra::vect(prep$predict_boundary))
 
         readr::write_lines(paste0("predict window created in "
                                   , round(difftime(Sys.time(), predict_stack_start, units = "mins"), 2)
