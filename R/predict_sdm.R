@@ -45,9 +45,9 @@
 #' @param check_tifs Logical. Check if any output `.tif` files error on
 #' `terra::rast()` and delete them if they do. Useful after a crash during
 #' predict.
-#' @param ... Passed to `terra::predict()`. e.g. use for wopt = list(). The
-#' argument `overwrite` is already set to `TRUE` so do not provide via `...` -
-#' the `pred.tif` file will only be remade if `force_new` is `TRUE`.
+#' @param ... Passed to `...` in `terra::mask()` - the last step in the
+#' `envSDM::predict_sdm` process. Used to provide additional arguments to
+#' `terra::writeRaster`.
 #'
 #' @return Named list of created .tif files, usually 'pred.tif' and
 #' 'thresh.tif'. Output .tif(s) and .log, written to `out_dir`.
@@ -225,7 +225,7 @@
         ## predict_stack---------
         predict_stack_start <- Sys.time()
 
-        m <- paste0("predict stack for ", this_taxa)
+        m <- paste0("predict window for ", this_taxa)
 
         message(m)
 
@@ -234,17 +234,9 @@
                            , append = TRUE
                            )
 
-        used_preds <- prep$reduce_env$env_cols[prep$reduce_env$env_cols %in% prep$reduce_env$keep]
+        window(x) <- terra::ext(terra::vect(prep$predict_boundary))
 
-        subset_file <- paste0(tempfile(), ".tif")
-
-        x <- terra::crop(x = terra::subset(x, used_preds)
-                         , y = terra::vect(prep$predict_boundary)
-                         , filename = subset_file
-                         , mask = TRUE
-                         )
-
-        readr::write_lines(paste0("predict stack created in "
+        readr::write_lines(paste0("predict window created in "
                                   , round(difftime(Sys.time(), predict_stack_start, units = "mins"), 2)
                                   , " minutes"
                                   )
@@ -276,6 +268,8 @@
                            , append = TRUE
                            )
 
+        window_predict_file <- paste0(tempfile(), ".tif")
+
         p <- safe_predict(object = x
                           , model = mod$m[[1]]
                           , type = if(algo == "rf") "prob" else "cloglog"
@@ -283,9 +277,8 @@
                           , na.rm = TRUE
                           , index = if(algo == "rf") "1" else NULL
                           , names = this_taxa
-                          , filename = pred_file
+                          , filename = window_predict_file
                           , overwrite = TRUE
-                          , ...
                           )
 
         if(!is.null(p$error)) {
@@ -300,6 +293,16 @@
                              , file = log_file
                              , append = TRUE
                              )
+
+        } else {
+
+          terra::mask(p$result
+                      , mask = terra::vect(prep$predict_boundary)
+                      , filename = pred_file
+                      , ...
+                      )
+
+          if(file.exists(window_predict_file)) fs::file_delete(window_predict_file)
 
         }
 
@@ -406,8 +409,6 @@
     res <- c(if(file.exists(pred_file)) list(pred = pred_file)
              , if(file.exists(thresh_file)) list(thresh = thresh_file)
              )
-
-    if(exists("subset_file")) fs::file_delete(subset_file)
 
     return(res)
 
