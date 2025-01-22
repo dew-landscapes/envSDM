@@ -1,12 +1,27 @@
 
 
 acaule
-predict start at 2025-01-20 12:01:48.585131
-predict stack for acaule
-predict stack created in 0 minutes
+predict start at 2025-01-22 14:07:53.100668
+predict window for acaule
+predict window created in 0 minutes
+predict for acaule from maxnet model with arguments: fc = lq, rm = 2 and threshold: 0.4
+ out file will be pred.tif
+
+
+acaule
+predict start at 2025-01-22 14:10:25.033426
+predict window for acaule
+predict window created in 0 minutes
 predict for acaule from maxnet model with arguments: fc = lq, rm = 2 and threshold: 0.4
  out file will be pred.tif
 predict finished in 0 minutes
 thresh for acaule
 thresh done in 0 minutes
 predict finished. elapsed time: 0.03 minutes
+
+
+acaule
+predict start at 2025-01-22 14:11:52.386304
+predict did not run as:
+ threshold file: H:/dev/nige/packages/envSDM/inst/examples/acaule/combo/thresh.tif already exists and force_new was not TRUE
+

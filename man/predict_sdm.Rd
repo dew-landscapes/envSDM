@@ -71,9 +71,9 @@ especially if done in parallel.}
 \code{terra::rast()} and delete them if they do. Useful after a crash during
 predict.}
 
-\item{...}{Passed to \code{terra::predict()}. e.g. use for wopt = list(). The
-argument \code{overwrite} is already set to \code{TRUE} so do not provide via \code{...} -
-the \code{pred.tif} file will only be remade if \code{force_new} is \code{TRUE}.}
+\item{...}{Passed to \code{...} in \code{terra::mask()} - the last step in the
+\code{envSDM::predict_sdm} process. Used to provide additional arguments to
+\code{terra::writeRaster}.}
 }
 \value{
 Named list of created .tif files, usually 'pred.tif' and
@@ -199,7 +199,6 @@ as the predictors. The default name of the files created (\code{pred.tif} and
                                      , out_dir = b
                                      , predictors = env_dat
                                      , is_env_pred = FALSE
-                                     , limit_to_boundary = TRUE
                                      , check_tifs = TRUE
                                      )
                )

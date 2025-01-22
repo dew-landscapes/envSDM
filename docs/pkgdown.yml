@@ -2,7 +2,7 @@ pandoc: 3.1.1
 pkgdown: 2.1.1
 pkgdown_sha: ~
 articles: {}
-last_built: 2025-01-20T01:35Z
+last_built: 2025-01-22T03:45Z
 urls:
   reference: https://acanthiza.github.io/envSDM/reference
   article: https://acanthiza.github.io/envSDM/articles
