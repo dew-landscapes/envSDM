@@ -10,3 +10,17 @@ predict finished in 0 minutes
 thresh for bradypus
 thresh done in 0 minutes
 predict finished. elapsed time: 0.03 minutes
+
+
+bradypus
+predict process started at 2025-01-23 11:07:57.291556
+predict did not run as:
+ threshold file: H:/dev/nige/packages/envSDM/inst/examples/bradypus/auc_po/thresh.tif already exists and force_new was not TRUE
+
+
+
+bradypus
+predict process started at 2025-01-23 11:14:28.698553
+predict did not run as:
+ threshold file: H:/dev/nige/packages/envSDM/inst/examples/bradypus/auc_po/thresh.tif already exists and force_new was not TRUE
+
