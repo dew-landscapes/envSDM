@@ -133,7 +133,7 @@
     ### log --------
     readr::write_lines(paste0("\n\n"
                               , this_taxa
-                              , "\npredict start at "
+                              , "\npredict process started at "
                               , start_time
                               )
                        , file = log_file
@@ -281,10 +281,13 @@
                           , overwrite = TRUE
                           )
 
+        ## if error -------
         if(!is.null(p$error)) {
+
 
           m <- paste0("error: "
                       , as.character(p$error)
+                      , ". Predict process not finished."
                       )
 
           message(m)
@@ -294,7 +297,29 @@
                              , append = TRUE
                              )
 
-        } else {
+        }
+
+        ## else mask -------
+        if(is.null(p$error)) {
+
+          readr::write_lines(paste0("predict finished in "
+                                    , round(difftime(Sys.time(), pred_start, units = "mins"), 2)
+                                    , " minutes"
+                                    )
+                             , file = log_file
+                             , append = TRUE
+                             )
+
+          predict_mask_start <- Sys.time()
+
+          m <- paste0("predict mask for ", this_taxa)
+
+          message(m)
+
+          readr::write_lines(m
+                             , file = log_file
+                             , append = TRUE
+                             )
 
           terra::mask(p$result
                       , mask = terra::vect(prep$predict_boundary)
@@ -303,6 +328,66 @@
                       )
 
           if(file.exists(window_predict_file)) fs::file_delete(window_predict_file)
+
+          readr::write_lines(paste0("predict mask created in "
+                                    , round(difftime(Sys.time(), predict_mask_start, units = "mins"), 2)
+                                    , " minutes"
+                                    )
+                             , file = log_file
+                             , append = TRUE
+                             )
+
+          run <- if(file.exists(thresh_file)) force_new else TRUE
+
+          if(all(apply_thresh, run)) {
+
+            ## then thresh ------
+            thresh_start <- Sys.time()
+
+            m <- paste0("thresh for ", this_taxa)
+
+            message(m)
+
+            readr::write_lines(m
+                               , file = log_file
+                               , append = TRUE
+                               )
+
+            thresh <- mod$e[[1]]@thresholds$max_spec_sens
+
+            terra::app(terra::rast(pred_file)
+                       , \(i) i > thresh
+                       , filename = thresh_file
+                       , overwrite = TRUE
+                       , wopt = list(datatype = "INT1U"
+                                     , names = this_taxa
+                                     )
+                       )
+
+            readr::write_lines(paste0("thresh done in "
+                                      , round(difftime(Sys.time(), thresh_start, units = "mins"), 2)
+                                      , " minutes"
+                                      )
+                               , file = log_file
+                               , append = TRUE
+                               )
+
+            if(do_gc) {
+
+              gc()
+
+            }
+
+          }
+
+          ## finish ----
+          readr::write_lines(paste0("predict process finished. elapsed time: "
+                                    , round(difftime(Sys.time(), start_time, units = "mins"), 2)
+                                    , " minutes"
+                                    )
+                             , file = log_file
+                             , append = TRUE
+                             )
 
         }
 
@@ -314,67 +399,7 @@
 
         }
 
-        readr::write_lines(paste0("predict finished in "
-                                  , round(difftime(Sys.time(), pred_start, units = "mins"), 2)
-                                  , " minutes"
-                                  )
-                           , file = log_file
-                           , append = TRUE
-                           )
-
       }
-
-      run <- if(file.exists(thresh_file)) force_new else TRUE
-
-      if(all(apply_thresh, run)) {
-
-        ## thresh ------
-        thresh_start <- Sys.time()
-
-        m <- paste0("thresh for ", this_taxa)
-
-        message(m)
-
-        readr::write_lines(m
-                           , file = log_file
-                           , append = TRUE
-                           )
-
-        thresh <- mod$e[[1]]@thresholds$max_spec_sens
-
-        terra::app(terra::rast(pred_file)
-                   , \(i) i > thresh
-                   , filename = thresh_file
-                   , overwrite = TRUE
-                   , wopt = list(datatype = "INT1U"
-                                 , names = this_taxa
-                                 )
-                   )
-
-        readr::write_lines(paste0("thresh done in "
-                                  , round(difftime(Sys.time(), thresh_start, units = "mins"), 2)
-                                  , " minutes"
-                                  )
-                           , file = log_file
-                           , append = TRUE
-                           )
-
-        if(do_gc) {
-
-          gc()
-
-        }
-
-      }
-
-      # finish ----
-      readr::write_lines(paste0("predict finished. elapsed time: "
-                                , round(difftime(Sys.time(), start_time, units = "mins"), 2)
-                                , " minutes"
-                                )
-                         , file = log_file
-                         , append = TRUE
-                         )
 
     } else {
 
