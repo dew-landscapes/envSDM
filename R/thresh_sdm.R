@@ -49,7 +49,7 @@ thresh_sdm <- function(pred_file
   dir_name <- if(dirname(thresh_file) == ".") dirname(pred_file) else dirname(thresh_file)
   thresh_file <- fs::path(dir_name, file_name)
 
-  log_file <- gsub("\\.tif$", ".log", thresh_file)
+  log_file <- gsub("tif$", "log", thresh_file)
 
   ### log --------
   readr::write_lines(paste0("\n"
