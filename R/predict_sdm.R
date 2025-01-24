@@ -229,8 +229,6 @@ predict_sdm <- function(prep
                   , algo
                   , " model with arguments: "
                   , gsub("\\.", ",", gsub(":", " =", full_run$tune_mean$tune_args))
-                  , " and threshold: "
-                  , round(full_run$tune_mean$max_spec_sens, 2)
                   , "\n out file will be "
                   , basename(pred_file)
                   )

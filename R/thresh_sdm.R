@@ -86,6 +86,21 @@ thresh_sdm <- function(pred_file
 
   if(run) {
 
+    m <- paste0("create "
+                , thresh_file
+                , " for "
+                , this_taxa
+                , " with threshold value: "
+                , threshold
+                )
+
+    message(m)
+
+    readr::write_lines(m
+                       , file = log_file
+                       , append = TRUE
+                       )
+
     safe_app <- purrr::safely(terra::app)
 
     t <- safe_app(terra::rast(pred_file)
