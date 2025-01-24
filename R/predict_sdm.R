@@ -309,8 +309,6 @@ predict_sdm <- function(prep
                            , append = TRUE
                            )
 
-        run <- if(file.exists(thresh_file)) force_new else TRUE
-
         ## finish ----
         readr::write_lines(paste0("predict process finished. elapsed time: "
                                   , round(difftime(Sys.time(), start_time, units = "mins"), 2)
@@ -339,7 +337,7 @@ predict_sdm <- function(prep
                 , if(! prep$finished) "prep did not finish\n "
                 , if(any(prep$abandoned, ! prep$finished)) paste0("prep log:\n  ", paste0(prep$log, collapse = "\n  "), "\n ")
                 , if (! full_run$finished) paste0("full run did not finish\n full run log:\n  ", paste0(full_run$log, collapse = "\n  "), "\n ")
-                , if(file.exists(thresh_file)) paste0("threshold file: ", thresh_file, " already exists and force_new was not TRUE")
+                , if(file.exists(pred_file)) paste0("predict file: ", pred_file, " already exists and force_new was not TRUE")
                 , "\n"
                 )
 
@@ -362,9 +360,7 @@ predict_sdm <- function(prep
 
   }
 
-  res <- c(if(file.exists(pred_file)) list(pred = pred_file)
-           , if(file.exists(thresh_file)) list(thresh = thresh_file)
-           )
+  res <- if(file.exists(pred_file)) list(pred = pred_file) else NULL
 
   return(res)
 
