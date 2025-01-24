@@ -17,7 +17,7 @@ predict_sdm(
   apply_thresh = TRUE,
   force_new = FALSE,
   do_gc = FALSE,
-  check_tifs = TRUE,
+  check_tifs = FALSE,
   ...
 )
 }
@@ -33,16 +33,13 @@ with return_val = "object".}
 \item{out_dir}{Character. Name of directory into which \code{.tif}s will be saved.
 Will be created if it does not exist.}
 
-\item{file_name}{Character. Name to give the output prediction .tif.
-If saving a threshold file (\code{apply_thresh} is \code{TRUE}), this must be of length
-two with the first element used for the predictions and the second for the
-threshold.}
+\item{file_name}{Character. Name to give the output prediction .tif.}
 
 \item{use_env_naming}{Logical. If \code{TRUE}, and \code{is_env_pred} is \code{TRUE}, naming
 will ignore \code{file_name} and instead generate a name matching
 \code{name_env_tif()} with \code{layer} being \code{this_taxa} from \code{prep} and \code{start_date}
-being the minimum available \code{start_date} from the predictors. \code{pred} and
-\code{thresh} appear between \code{this_taxa} and \code{start_date}.}
+being the minimum available \code{start_date} from the predictors. \code{pred} appears
+between \code{this_taxa} and \code{start_date}.}
 
 \item{predictors}{Character. Vector of paths to predictor \code{.tif} files.}
 
@@ -54,11 +51,6 @@ being the minimum available \code{start_date} from the predictors. \code{pred} a
 
 \item{doClamp}{Passed to \code{terra::predict()} (which then passes as \code{...} to
 \code{fun}). Possibly orphaned from older envSDM?}
-
-\item{apply_thresh}{Logical. If \code{TRUE}, an output raster \code{thresh.tif} will be
-created using the maximum of specificity + sensitivity. The threshold value
-can be accessed within \code{tune.rds} as, say, \code{mod <- rio::import("tune.rds")}
-and then \code{mod$e[[1]]@thresholds$max_spec_sens}}
 
 \item{force_new}{Logical. If output files already exist, should they be
 remade?}
@@ -82,11 +74,7 @@ Named list of created .tif files, usually 'pred.tif' and
 \description{
 The resulting \code{pred.tif} is masked to the boundary provided to the
 \code{pred_limit} argument of prep_sdm; or generated in prep_sdm from the
-\code{pred_limit}, \code{limit_buffer} and \code{pred_clip} arguments. A threshold raster
-can also be saved (saved as 'thresh.tif') - see \code{apply_thresh} argument. In
-both cases the resulting files will have the same extent, resolution and crs
-as the predictors. The default name of the files created (\code{pred.tif} and
-\code{thresh.tif}) can be changed via the file_name argument.
+\code{pred_limit}, \code{limit_buffer} and \code{pred_clip} arguments.
 }
 \examples{
 
@@ -163,14 +151,6 @@ as the predictors. The default name of the files created (\code{pred.tif} and
                 terra::plot()
               )
 
-  ### threshold ------
-  purrr::walk(data$out_dir
-              , \(x) fs::path(x, "thresh.tif") \%>\%
-                terra::rast() \%>\%
-                terra::trim() \%>\%
-                terra::plot()
-              )
-
   # Best auc--------
   ## run full SDM --------
   data <- data \%>\%
@@ -208,14 +188,6 @@ as the predictors. The default name of the files created (\code{pred.tif} and
   ### mask -------
   purrr::walk(data$out_dir
               , \(x) fs::path(x, "pred.tif") \%>\%
-                terra::rast() \%>\%
-                terra::trim() \%>\%
-                terra::plot()
-              )
-
-  ### threshold ------
-  purrr::walk(data$out_dir
-              , \(x) fs::path(x, "thresh.tif") \%>\%
                 terra::rast() \%>\%
                 terra::trim() \%>\%
                 terra::plot()

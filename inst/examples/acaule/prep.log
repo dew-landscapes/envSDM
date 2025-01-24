@@ -1,13 +1,14 @@
 
 acaule
-prep start at 2025-01-22 15:06:40.300072.
+prep start at 2025-01-24 16:49:57.468342.
 1082 original records
 9 predictors
 1065 presences in predict_boundary and on env rasters
 subsetting predictors done in 0 minutes
 density raster done in 0.01 minutes
-10000 background points attempted. 5599 achieved in: 0 minutes
-env data extracted in: 0.29 minutes
-spatial folds = TRUE. Folds = 5. Folds done in 0.25 minutes
-reduce_env completed in: 0.1 minutes
-prep completed. elapsed time: 0.66 minutes
+10000 background points attempted. 5584 achieved in: 0 minutes
+env data extracted in: 0.28 minutes
+warning: 1 out of 5 blocks failed to reach 8 presences. These were lumped until every block reached 8 presences.
+spatial folds = TRUE. Folds = 4. Folds done in 0.27 minutes
+reduce_env completed in: 0.12 minutes
+prep completed. elapsed time: 0.72 minutes

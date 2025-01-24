@@ -72,14 +72,6 @@
                 terra::plot()
               )
 
-  ### threshold ------
-  purrr::walk(data$out_dir
-              , \(x) fs::path(x, "thresh.tif") %>%
-                terra::rast() %>%
-                terra::trim() %>%
-                terra::plot()
-              )
-
   # Best auc--------
   ## run full SDM --------
   data <- data %>%
@@ -117,14 +109,6 @@
   ### mask -------
   purrr::walk(data$out_dir
               , \(x) fs::path(x, "pred.tif") %>%
-                terra::rast() %>%
-                terra::trim() %>%
-                terra::plot()
-              )
-
-  ### threshold ------
-  purrr::walk(data$out_dir
-              , \(x) fs::path(x, "thresh.tif") %>%
                 terra::rast() %>%
                 terra::trim() %>%
                 terra::plot()
