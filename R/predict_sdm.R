@@ -54,10 +54,9 @@ predict_sdm <- function(prep
                         , is_env_pred = FALSE
                         , terra_options = NULL
                         , doClamp = TRUE
-                        , apply_thresh = TRUE
                         , force_new = FALSE
                         , do_gc = FALSE
-                        , check_tifs = TRUE
+                        , check_tifs = FALSE
                         , ...
                         ) {
 
@@ -106,9 +105,7 @@ predict_sdm <- function(prep
 
   ### new -------
   pred_file <- fs::path(out_dir, file_name[1])
-  if(apply_thresh) thresh_file <- fs::path(out_dir, file_name[2])
-  log_file <- gsub("tif$", "log", pred_file) %>%
-    gsub("__pred__", "__log__", .)
+  log_file <- gsub("\\.tif$", ".log", pred_file)
 
   ### out_dir ------
   fs::dir_create(dirname(pred_file))
@@ -135,9 +132,9 @@ predict_sdm <- function(prep
 
     safe_rast <- purrr::safely(terra::rast)
 
-    tests <- if(file.exists(pred_file)) safe_rast(pred_file) else NULL
+    tests <- if(file.exists(pred_file)) safe_rast(pred_file)
 
-    if(length(tests)) {
+    if(!is.null(tests$error)) {
 
       warning(pred_file
               , " will be deleted as it errored on terra::rast()"
@@ -154,7 +151,7 @@ predict_sdm <- function(prep
   run <- all(!prep$abandoned
              , prep$finished
              , full_run$finished
-             , if(file.exists(thresh_file)) force_new else TRUE # output not already exists (unless force_new)
+             , if(file.exists(pred_file)) force_new else TRUE # output not already exists (unless force_new)
              )
 
   if(run) {

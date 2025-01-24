@@ -7,8 +7,6 @@
 #' stored in the file at `pred_file`. Often this value will be available within
 #' the result of a call to `tune_sdm()`. e.g. `mod <- rio::import("tune.rds")`
 #' and then `mod$e[[1]]@thresholds$max_spec_sens`
-#' @param out_dir Character. Name of directory into which `.tif`s will be saved.
-#' Will be created if it does not exist. Defaults to `dirname(pred_file)`
 #' @param thresh_file Character. Name to give the output threshold. Defaults to
 #' `gsub("pred", "thresh", pred_file)`
 #' @param terra_options Passed to `terra::terraOptions()`. e.g. list(memfrac =
@@ -29,43 +27,35 @@
 #' @example inst/examples/thresh_sdm_ex.R
 #'
 thresh_sdm <- function(pred_file
+                       , this_taxa = stringr::str_extract(pred_file, "[[:alpha:]]+\\s[[:alpha:]]+")
                        , threshold
-                       , out_dir = dirname(pred_file)
                        , thresh_file = gsub("__pred__", "__thresh__", pred_file)
-                       , terra_options
-                       , force_new
-                       , do_gc
-                       , check_tifs
+                       , terra_options = NULL
+                       , force_new = FALSE
+                       , do_gc = FALSE
+                       , check_tifs = TRUE
                        ) {
+
+  # pred exists -----
+  if(!file.exists(pred_file)) stop(pred_file, " does not exist")
 
   # setup -------
   ## start timer ------
   start_thresh <- Sys.time()
 
-  ## this taxa ------
-  this_taxa <- stringr::str_extract(basename(pred_file), "[a-zA-Z]+\\s[a-zA-Z]+")
-
   ## files -----
   ### new -------
-  thresh_file <- fs::path(out_dir, thresh_file)
+  file_name <- basename(thresh_file)
+  dir_name <- if(dirname(thresh_file) == ".") dirname(pred_file) else dirname(thresh_file)
+  thresh_file <- fs::path(dir_name, file_name)
 
-  log_file <- gsub("tif$", "log", pred_file) |>
-      gsub("__pred__", "__thresh_log__", x = _)
-
-  ### out_dir ------
-  fs::dir_create(dirname(thresh_file))
-
-  if(!dir.exists(dirname(thresh_file))) {
-
-    stop("can't create ", dirname(thresh_file))
-
-  }
+  log_file <- gsub("\\.tif$", ".log", thresh_file)
 
   ### log --------
   readr::write_lines(paste0("\n"
                             , this_taxa
-                            , "\threshold started at "
-                            , start_time
+                            , " threshold started at "
+                            , start_thresh
                             )
                      , file = log_file
                      , append = TRUE
@@ -77,9 +67,9 @@ thresh_sdm <- function(pred_file
 
     safe_rast <- purrr::safely(terra::rast)
 
-    tests <- if(file.exists(thresh_file)) safe_rast(thresh_file) else NULL
+    tests <- if(file.exists(thresh_file)) safe_rast(thresh_file)
 
-    if(length(tests)) {
+    if(!is.null(tests$error)) {
 
       warning(thresh_file
               , " will be deleted as it errored on terra::rast()"
@@ -96,10 +86,10 @@ thresh_sdm <- function(pred_file
 
   if(run) {
 
-    safe_app <- purrr::safely(terra::)
+    safe_app <- purrr::safely(terra::app)
 
     t <- safe_app(terra::rast(pred_file)
-                  , \(i) i > thresh
+                  , \(i) i > threshold
                   , filename = thresh_file
                   , overwrite = TRUE
                   , wopt = list(datatype = "INT1U"
