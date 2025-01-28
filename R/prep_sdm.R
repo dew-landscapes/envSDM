@@ -225,7 +225,7 @@
 
       }
 
-      readr::write_lines(paste0(length(names(predictors))
+      readr::write_lines(paste0(length(names(prep_preds))
                                 , " predictors"
                                 )
                          , file = log_file
@@ -327,6 +327,13 @@
           sf::st_make_valid()
 
       }
+
+      # predict_boundary only on env rasters
+      prep$predict_boundary <- prep$predict_boundary %>%
+        sf::st_intersection(sf::st_bbox(prep_preds) %>%
+                              sf::st_as_sfc() %>%
+                              sf::st_sf()
+                            )
 
 
       # prep$presence_ras clip to predict_boundary ---------
@@ -782,7 +789,7 @@
                                         , ". spatial_folds set to FALSE"
                                         )
                                  , file = log_file
-                                 , append = FALSE
+                                 , append = TRUE
                                  )
 
               spatial_folds <- FALSE
