@@ -216,12 +216,12 @@
         pred_names <- envRaster::name_env_tif(tibble::tibble(path = predictors), parse = TRUE) %>%
           dplyr::pull(name)
 
-        predictors <- terra::rast(predictors)
-        names(predictors) <- pred_names
+        prep_preds <- terra::rast(predictors)
+        names(prep_preds) <- pred_names
 
       } else {
 
-        predictors <- terra::rast(predictors)
+        prep_preds <- terra::rast(predictors)
 
       }
 
@@ -237,15 +237,15 @@
 
       ## raster presence ------
 
-      prep$presence_ras <- terra::cellFromXY(predictors
+      prep$presence_ras <- terra::cellFromXY(prep_preds
                                              , presence %>%
                                                sf::st_as_sf(coords = c(pres_x, pres_y)
                                                             , crs = pres_crs
                                                             ) %>%
-                                               sf::st_transform(crs = sf::st_crs(predictors)) %>%
+                                               sf::st_transform(crs = sf::st_crs(prep_preds)) %>%
                                                sf::st_coordinates()
                                              ) %>%
-        terra::xyFromCell(predictors, .) %>%
+        terra::xyFromCell(prep_preds, .) %>%
         stats::na.omit() %>%
         tibble::as_tibble()
 
@@ -261,7 +261,7 @@
           sf::st_as_sf(coords = c(pres_x, pres_y)
                        , crs = pres_crs
                        ) %>%
-          sf::st_transform(crs = sf::st_crs(predictors[[1]])) %>%
+          sf::st_transform(crs = sf::st_crs(prep_preds[[1]])) %>%
           sf::st_union() %>%
           sf::st_convex_hull() %>%
           sf::st_sf() %>%
@@ -279,7 +279,7 @@
           prep$predict_boundary <- sfarrow::st_read_parquet(pred_limit) %>%
             sf::st_geometry() %>%
             sf::st_sf() %>%
-            sf::st_transform(crs = sf::st_crs(predictors[[1]])) %>%
+            sf::st_transform(crs = sf::st_crs(prep_preds[[1]])) %>%
             sf::st_make_valid()
 
         }
@@ -291,9 +291,9 @@
       if("sf" %in% class(pred_limit)) {
 
         prep$predict_boundary <- pred_limit %>%
-          sf::st_transform(crs = sf::st_crs(predictors[[1]])) %>%
+          sf::st_transform(crs = sf::st_crs(prep_preds[[1]])) %>%
           sf::st_make_valid() %>%
-          sf::st_intersection(sf::st_bbox(predictors) %>%
+          sf::st_intersection(sf::st_bbox(prep_preds) %>%
                                 sf::st_as_sfc() %>%
                                 sf::st_sf()
                               ) %>%
@@ -310,7 +310,7 @@
       # captures anything not already captured above
       if(isFALSE(pred_limit)) {
 
-        prep$predict_boundary <- sf::st_bbox(predictors) %>%
+        prep$predict_boundary <- sf::st_bbox(prep_preds) %>%
           sf::st_as_sfc() %>%
           sf::st_sf()  %>%
           sf::st_make_valid()
@@ -334,10 +334,10 @@
       # but outside the predict boundary.
       prep$presence_ras <- prep$presence_ras %>%
         sf::st_as_sf(coords = c("x", "y")
-                     , crs = sf::st_crs(predictors)
+                     , crs = sf::st_crs(prep_preds)
                      ) %>%
         sf::st_filter(prep$predict_boundary %>%
-                        sf::st_transform(crs = sf::st_crs(predictors))
+                        sf::st_transform(crs = sf::st_crs(prep_preds))
                       ) %>%
         sf::st_coordinates() %>%
         tibble::as_tibble() %>%
@@ -365,7 +365,7 @@
 
           }
 
-          terra::window(predictors) <- terra::ext(terra::vect(prep$predict_boundary))
+          terra::window(prep_preds) <- terra::ext(terra::vect(prep$predict_boundary))
 
           readr::write_lines(paste0("subsetting predictors done in "
                                     , round(difftime(Sys.time(), start_subset, units = "mins"), 2)
@@ -440,14 +440,14 @@
 
           start_dens_ras <- Sys.time()
 
-          if(all(!is.null(dens_res), !terra::is.lonlat(predictors[[1]]))) {
+          if(all(!is.null(dens_res), !terra::is.lonlat(prep_preds[[1]]))) {
 
             # resolution of density raster < pred raster
 
-            use_res <- if(terra::res(predictors)[[1]] < dens_res) dens_res else terra::res(predictors)[[1]]
+            use_res <- if(terra::res(prep_preds)[[1]] < dens_res) dens_res else terra::res(prep_preds)[[1]]
 
             temp_ras <- terra::rast(resolution = use_res
-                                    , crs = terra::crs(predictors[[1]])
+                                    , crs = terra::crs(prep_preds[[1]])
                                     , extent = terra::ext(prep$predict_boundary)
                                     , vals = 1
                                     )
@@ -474,15 +474,15 @@
             # weighted bandwidth
             ## same method as spatialEco::sf.kde
 
-            temp_ras <- terra::rast(resolution = terra::res(predictors)
-                                    , crs = terra::crs(predictors[[1]])
+            temp_ras <- terra::rast(resolution = terra::res(prep_preds)
+                                    , crs = terra::crs(prep_preds[[1]])
                                     , extent = terra::ext(prep$predict_boundary)
                                     , vals = 1
                                     )
 
             pres_ras <- terra::rasterize(prep$presence_ras %>%
                                            sf::st_as_sf(coords = c("x", "y")
-                                                        , crs = sf::st_crs(predictors[[1]])
+                                                        , crs = sf::st_crs(prep_preds[[1]])
                                                         )
                                          , y = temp_ras
                                          , fun = length
@@ -542,12 +542,12 @@
 
           if(FALSE) {
 
-            terra::plot(predictors[[1]])
+            terra::plot(prep_preds[[1]])
             terra::plot(target_density, add = TRUE)
 
             ps <- prep$presence_ras %>%
               tibble::as_tibble() %>%
-              sf::st_as_sf(coords = c("x", "y"), crs = sf::st_crs(predictors)) %>%
+              sf::st_as_sf(coords = c("x", "y"), crs = sf::st_crs(prep_preds)) %>%
               terra::vect()
 
             terra::plot(ps, add = TRUE)
@@ -597,8 +597,8 @@
                                   , runif(nrow(centres), centres[, 2] - hs[2], centres[, 2] + hs[2])
                                   ) %>%
             as.matrix() %>%
-            terra::cellFromXY(predictors[[1]], .) %>%
-            terra::xyFromCell(predictors[[1]], .) %>%
+            terra::cellFromXY(prep_preds[[1]], .) %>%
+            terra::xyFromCell(prep_preds[[1]], .) %>%
             tibble::as_tibble() %>%
             na.omit() %>%
             dplyr::distinct() %>%
@@ -646,7 +646,7 @@
                        , title = this_taxa
                        , dots = prep$presence_ras %>%
                          sf::st_as_sf(coords = c("x", "y")
-                                      , crs = sf::st_crs(predictors)
+                                      , crs = sf::st_crs(prep_preds)
                                       ) %>%
                          sf::st_transform(crs = sf::st_crs(target_density))
                        , trim = TRUE
@@ -669,16 +669,16 @@
         spp_pa <- dplyr::bind_rows(prep$presence_ras %>%
                                      tibble::as_tibble() %>%
                                      sf::st_as_sf(coords = c("x", "y")
-                                                  , crs = sf::st_crs(predictors[[1]])
+                                                  , crs = sf::st_crs(prep_preds[[1]])
                                                   ) %>%
                                      dplyr::mutate(pa = 1)
                                    , prep$bg_points %>%
                                      dplyr::mutate(pa = 0) %>%
                                      dplyr::select(pa)
                                    ) %>%
-          sf::st_buffer(terra::res(predictors)[[1]] / 100)
+          sf::st_buffer(terra::res(prep_preds)[[1]] / 100)
 
-        spp_pa_env <- exactextractr::exact_extract(predictors
+        spp_pa_env <- exactextractr::exact_extract(prep_preds
                                                    , y = spp_pa
                                                    , include_cols = "pa"
                                                    , include_cell = TRUE
@@ -687,7 +687,7 @@
           dplyr::bind_rows() %>%
           stats::na.omit() %>%
           dplyr::select(-coverage_fraction) %>%
-          dplyr::bind_cols(terra::xyFromCell(predictors
+          dplyr::bind_cols(terra::xyFromCell(prep_preds
                                              , .$cell
                                              )
                            )
@@ -749,7 +749,7 @@
               na.omit() %>%
               dplyr::select(x, y, pa) %>%
               sf::st_as_sf(coords = c("x", "y")
-                           , crs = sf::st_crs(predictors[[1]])
+                           , crs = sf::st_crs(prep_preds[[1]])
                            )
 
             block_dist <- prep$predict_boundary %>%
@@ -764,7 +764,7 @@
 
             blocks <- safe_cv_spatial(x
                                       , column = "pa"
-                                      #, r = predictors[[1]] # hashed out 2024-09-17
+                                      #, r = prep_preds[[1]] # hashed out 2024-09-17
                                       , k = k_folds
                                       , size = block_dist
                                       , iteration = 200
@@ -881,7 +881,7 @@
 
           prep$blocks <- spp_pa_env %>%
             dplyr::mutate(block = blocks$fold_ids) %>%
-            dplyr::filter(dplyr::if_any(.cols = names(predictors)
+            dplyr::filter(dplyr::if_any(.cols = names(prep_preds)
                                         , .fns = \(x) !is.na(x) & !is.infinite(x)
                                         )
                           )
@@ -955,7 +955,7 @@
           start_reduce_env <- Sys.time()
 
           prep$reduce_env <- envModel::reduce_env(env_df = prep$blocks
-                                                  , env_cols = names(predictors)
+                                                  , env_cols = names(prep_preds)
                                                   , y_col = "pa"
                                                   , thresh = thresh
                                                   , remove_always = c(pres_x, pres_y, "x", "y", "pa", "block", "cell")
@@ -976,7 +976,8 @@
         if(!prep$abandoned) {
 
           prep$reduce_env$remove <- ""
-          prep$reduce_env$env_cols <- names(predictors)
+          prep$reduce_env$keep <- names(prep_preds)
+          prep$reduce_env$env_cols <- names(prep_preds)
 
         }
 
