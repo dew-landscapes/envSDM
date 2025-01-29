@@ -62,11 +62,10 @@
 #' Set to `NULL` to use the same resolution as the predictors.
 #' @param save_pngs Logical. Save out a .png of the density raster and spatial
 #' blocks
-#' @param reduce_env Logical. If TRUE, highly correlated and low importance
-#' variables will be removed. In the case of highly correlated pairs of
-#' variables, only one is removed.
-#' @param thresh Numeric. Threshold used to flag highly correlated and low
-#' importance variables
+#' @param reduce_env_thresh Numeric. Threshold used to flag highly correlated
+#' and low importance variables. Set to 0 to skip this step. If > 0, highly
+#' correlated and low importance variables will be removed. In the case of
+#' highly correlated pairs of variables, only one is removed.
 #' @param do_gc Logical. Run `base::rm(list = ls)` and `base::gc()` at end of
 #' function? Useful when running SDMs for many, many taxa, especially if done in
 #' parallel.
@@ -104,7 +103,8 @@
 #' * correlated:
 #'     + list with elements as per `envModel::reduce_env()`, or, if
 #'     `reduce_env` is `FALSE`, a list with elements `remove_env` which is
-#'     empty, and `env_var`, containing the names of all predictors.
+#'     empty, and `env_var` and `keep`, which both contain the names of all
+#'     predictors.
 #'
 #' @export
 #'
@@ -133,8 +133,7 @@
                        , stretch_value = 10
                        , dens_res = 1000
                        , save_pngs = FALSE
-                       , reduce_env = TRUE
-                       , thresh = 0.9
+                       , reduce_env_thresh = 0.9
                        , do_gc = FALSE
                        , force_new = FALSE
                        ) {
@@ -953,7 +952,7 @@
 
       # reduce env -------
 
-      if(all(reduce_env, !prep$abandoned)) {
+      if(all(reduce_env_thresh, !prep$abandoned)) {
 
         run <- if(exists("reduce_env", prep)) force_new else TRUE
 
@@ -964,7 +963,7 @@
           prep$reduce_env <- envModel::reduce_env(env_df = prep$blocks
                                                   , env_cols = names(prep_preds)
                                                   , y_col = "pa"
-                                                  , thresh = thresh
+                                                  , thresh = reduce_env_thresh
                                                   , remove_always = c(pres_x, pres_y, "x", "y", "pa", "block", "cell")
                                                   )
 
