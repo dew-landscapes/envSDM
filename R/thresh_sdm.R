@@ -94,7 +94,7 @@ thresh_sdm <- function(pred_file
     if(run) {
 
       m <- paste0("create "
-                  , thresh_file
+                  , basename(thresh_file)
                   , " for "
                   , this_taxa
                   , " with threshold value: "
