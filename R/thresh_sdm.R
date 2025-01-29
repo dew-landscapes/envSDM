@@ -27,9 +27,9 @@
 #' @example inst/examples/thresh_sdm_ex.R
 #'
 thresh_sdm <- function(pred_file
-                       , this_taxa = stringr::str_extract(pred_file, "[[:alpha:]]+\\s[[:alpha:]]+")
+                       , this_taxa = NULL
                        , threshold
-                       , thresh_file = gsub("__pred__", "__thresh__", pred_file)
+                       , thresh_file = NULL
                        , terra_options = NULL
                        , force_new = FALSE
                        , do_gc = FALSE
@@ -37,125 +37,139 @@ thresh_sdm <- function(pred_file
                        ) {
 
   # pred exists -----
-  if(!file.exists(pred_file)) stop(pred_file, " does not exist")
+  if(!file.exists(pred_file)) {
 
-  # setup -------
-  ## start timer ------
-  start_thresh <- Sys.time()
+    # setup -------
+    ## NULL args -------
+    if(is.null(this_taxa)) this_taxa <- stringr::str_extract(pred_file, "[[:alpha:]]+\\s[[:alpha:]]+")
+    if(is.null(thresh_file)) thresh_file <- gsub("__pred__", "__thresh__", pred_file)
 
-  ## files -----
-  ### new -------
-  file_name <- basename(thresh_file)
-  dir_name <- if(dirname(thresh_file) == ".") dirname(pred_file) else dirname(thresh_file)
-  thresh_file <- fs::path(dir_name, file_name)
+    ## start timer ------
+    start_thresh <- Sys.time()
 
-  log_file <- gsub("tif$", "log", thresh_file)
+    ## files -----
+    ### new -------
+    file_name <- basename(thresh_file)
+    dir_name <- if(dirname(thresh_file) == ".") dirname(pred_file) else dirname(thresh_file)
+    thresh_file <- fs::path(dir_name, file_name)
 
-  ### log --------
-  readr::write_lines(paste0("\n"
-                            , this_taxa
-                            , " threshold started at "
-                            , start_thresh
-                            )
-                     , file = log_file
-                     , append = TRUE
-                     )
+    log_file <- gsub("tif$", "log", thresh_file)
 
-  ## test tifs ------
-  # need to test before running, in case the test deletes an incomplete .tif
-  if(check_tifs) {
-
-    safe_rast <- purrr::safely(terra::rast)
-
-    tests <- if(file.exists(thresh_file)) safe_rast(thresh_file)
-
-    if(!is.null(tests$error)) {
-
-      warning(thresh_file
-              , " will be deleted as it errored on terra::rast()"
-              )
-
-      fs::file_delete(thresh_file)
-
-    }
-
-  }
-
-  # run?-----
-  run <- if(file.exists(thresh_file)) force_new else TRUE # output not already exists (unless force_new)
-
-  if(run) {
-
-    m <- paste0("create "
-                , thresh_file
-                , " for "
-                , this_taxa
-                , " with threshold value: "
-                , threshold
-                )
-
-    message(m)
-
-    readr::write_lines(m
+    ### log --------
+    readr::write_lines(paste0("\n"
+                              , this_taxa
+                              , " threshold started at "
+                              , start_thresh
+                              )
                        , file = log_file
                        , append = TRUE
                        )
 
-    safe_app <- purrr::safely(terra::app)
+    ## test tifs ------
+    # need to test before running, in case the test deletes an incomplete .tif
+    if(check_tifs) {
 
-    t <- safe_app(terra::rast(pred_file)
-                  , \(i) i > threshold
-                  , filename = thresh_file
-                  , overwrite = TRUE
-                  , wopt = list(datatype = "INT1U"
-                                , names = this_taxa
-                                )
-                  )
+      safe_rast <- purrr::safely(terra::rast)
 
-    if(is.null(t$error)) {
+      tests <- if(file.exists(thresh_file)) safe_rast(thresh_file)
 
-      readr::write_lines(paste0("thresh done in "
-                                , round(difftime(Sys.time(), start_thresh, units = "mins"), 2)
-                                , " minutes"
-                                )
-                         , file = log_file
-                         , append = TRUE
-                         )
+      if(!is.null(tests$error)) {
 
-      rm(t)
+        warning(thresh_file
+                , " will be deleted as it errored on terra::rast()"
+                )
 
-      if(do_gc) {
-
-        gc()
+        fs::file_delete(thresh_file)
 
       }
 
-      res <- list(thresh = thresh_file)
+    }
 
-    } else {
+    # run?-----
+    run <- if(file.exists(thresh_file)) force_new else TRUE # output not already exists (unless force_new)
 
-      m <- as.character(t$error)
+    if(run) {
 
-      readr::write_lines(paste0(m
-                                , "\n"
-                                , "threshold file not completed"
-                                )
+      m <- paste0("create "
+                  , thresh_file
+                  , " for "
+                  , this_taxa
+                  , " with threshold value: "
+                  , threshold
+                  )
+
+      message(m)
+
+      readr::write_lines(m
                          , file = log_file
                          , append = TRUE
                          )
 
-      stop(m)
+      safe_app <- purrr::safely(terra::app)
+
+      t <- safe_app(terra::rast(pred_file)
+                    , \(i) i > threshold
+                    , filename = thresh_file
+                    , overwrite = TRUE
+                    , wopt = list(datatype = "INT1U"
+                                  , names = this_taxa
+                                  )
+                    )
+
+      if(is.null(t$error)) {
+
+        readr::write_lines(paste0("thresh done in "
+                                  , round(difftime(Sys.time(), start_thresh, units = "mins"), 2)
+                                  , " minutes"
+                                  )
+                           , file = log_file
+                           , append = TRUE
+                           )
+
+        rm(t)
+
+        if(do_gc) {
+
+          gc()
+
+        }
+
+        res <- list(thresh = thresh_file)
+
+      } else {
+
+        m <- as.character(t$error)
+
+        readr::write_lines(paste0(m
+                                  , "\n"
+                                  , "threshold file not completed"
+                                  )
+                           , file = log_file
+                           , append = TRUE
+                           )
+
+        stop(m)
+
+      }
+
+    } else {
+
+      message("threshold file: "
+              , thresh_file
+              , " already exists"
+              )
+
+      res <- list(thresh = thresh_file)
 
     }
 
   } else {
 
-    message("threshold file: "
-            , thresh_file
-            , " already exists"
+    message(pred_file
+            , " doesn't exist"
             )
 
-    res <- list(thresh = thresh_file)
+    res <- NULL
 
   }
 
