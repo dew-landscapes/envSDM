@@ -40,7 +40,7 @@ thresh_sdm <- function(pred_file
                        ) {
 
   # pred exists -----
-  if(!file.exists(pred_file)) {
+  if(file.exists(pred_file)) {
 
     # setup -------
     ## NULL args -------
