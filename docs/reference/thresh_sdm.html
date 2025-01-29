@@ -40,9 +40,9 @@
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">thresh_sdm</span><span class="op">(</span></span>
 <span>  <span class="va">pred_file</span>,</span>
-<span>  this_taxa <span class="op">=</span> <span class="fu">stringr</span><span class="fu">::</span><span class="fu"><a href="https://stringr.tidyverse.org/reference/str_extract.html" class="external-link">str_extract</a></span><span class="op">(</span><span class="va">pred_file</span>, <span class="st">"[[:alpha:]]+\\s[[:alpha:]]+"</span><span class="op">)</span>,</span>
+<span>  this_taxa <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="va">threshold</span>,</span>
-<span>  thresh_file <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">gsub</a></span><span class="op">(</span><span class="st">"__pred__"</span>, <span class="st">"__thresh__"</span>, <span class="va">pred_file</span><span class="op">)</span>,</span>
+<span>  thresh_file <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  terra_options <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  force_new <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  do_gc <span class="op">=</span> <span class="cn">FALSE</span>,</span>
@@ -58,6 +58,11 @@
 <dd><p>Character. File path of predicted sdm to threshold.</p></dd>
 
 
+<dt id="arg-this-taxa">this_taxa<a class="anchor" aria-label="anchor" href="#arg-this-taxa"></a></dt>
+<dd><p>Character. If left as default <code>NULL</code> an attempt will be made
+to extract a taxa name from <code>pred_file</code></p></dd>
+
+
 <dt id="arg-threshold">threshold<a class="anchor" aria-label="anchor" href="#arg-threshold"></a></dt>
 <dd><p>Numeric. &gt; 0 and &lt; 1. Threshold to apply to the raster
 stored in the file at <code>pred_file</code>. Often this value will be available within
@@ -66,7 +71,8 @@ and then <code>mod$e[[1]]@thresholds$max_spec_sens</code></p></dd>
 
 
 <dt id="arg-thresh-file">thresh_file<a class="anchor" aria-label="anchor" href="#arg-thresh-file"></a></dt>
-<dd><p>Character. Name to give the output threshold. Defaults to
+<dd><p>Character. Name to give the output threshold. If left as
+default <code>NULL</code>, <code>thresh_file</code> will be set to
 <code>gsub("pred", "thresh", pred_file)</code></p></dd>
 
 
@@ -147,10 +153,10 @@ pred_file.</p></dd>
 <span class="r-in"><span>                                       , force_new <span class="op">=</span> <span class="cn">TRUE</span></span></span>
 <span class="r-in"><span>                                       <span class="op">)</span></span></span>
 <span class="r-in"><span>               <span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> create H:/temp/nige/RtmpC2p9fj/temp_libpath43b46e674aa1/envSDM/examples/acaule/auc_po/thresh.tif for acaule with threshold value: 0.233017</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> create H:/temp/nige/RtmpC2p9fj/temp_libpath43b46e674aa1/envSDM/examples/acaule/combo/thresh.tif for acaule with threshold value: 0.3116847625</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> create H:/temp/nige/RtmpC2p9fj/temp_libpath43b46e674aa1/envSDM/examples/bradypus/auc_po/thresh.tif for bradypus with threshold value: 0.447779478</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> create H:/temp/nige/RtmpC2p9fj/temp_libpath43b46e674aa1/envSDM/examples/bradypus/combo/thresh.tif for bradypus with threshold value: 0.3259</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> C:/temp/nige/RtmpYzu5uu/temp_libpath338854d36751/envSDM/examples/acaule/auc_po/pred.tif doesn't exist</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> C:/temp/nige/RtmpYzu5uu/temp_libpath338854d36751/envSDM/examples/acaule/combo/pred.tif doesn't exist</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> C:/temp/nige/RtmpYzu5uu/temp_libpath338854d36751/envSDM/examples/bradypus/auc_po/pred.tif doesn't exist</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> C:/temp/nige/RtmpYzu5uu/temp_libpath338854d36751/envSDM/examples/bradypus/combo/pred.tif doesn't exist</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>  <span class="co">## visualise-------</span></span></span>
 <span class="r-in"><span>  <span class="co">### threshold -------</span></span></span>

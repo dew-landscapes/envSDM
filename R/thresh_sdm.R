@@ -3,11 +3,14 @@
 #'
 #'
 #' @param pred_file Character. File path of predicted sdm to threshold.
+#' @param this_taxa Character. If left as default `NULL` an attempt will be made
+#' to extract a taxa name from `pred_file`
 #' @param threshold Numeric. > 0 and < 1. Threshold to apply to the raster
 #' stored in the file at `pred_file`. Often this value will be available within
 #' the result of a call to `tune_sdm()`. e.g. `mod <- rio::import("tune.rds")`
 #' and then `mod$e[[1]]@thresholds$max_spec_sens`
-#' @param thresh_file Character. Name to give the output threshold. Defaults to
+#' @param thresh_file Character. Name to give the output threshold. If left as
+#' default `NULL`, `thresh_file` will be set to
 #' `gsub("pred", "thresh", pred_file)`
 #' @param terra_options Passed to `terra::terraOptions()`. e.g. list(memfrac =
 #' 0.6)

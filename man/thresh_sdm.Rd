@@ -6,9 +6,9 @@
 \usage{
 thresh_sdm(
   pred_file,
-  this_taxa = stringr::str_extract(pred_file, "[[:alpha:]]+\\\\s[[:alpha:]]+"),
+  this_taxa = NULL,
   threshold,
-  thresh_file = gsub("__pred__", "__thresh__", pred_file),
+  thresh_file = NULL,
   terra_options = NULL,
   force_new = FALSE,
   do_gc = FALSE,
@@ -18,12 +18,16 @@ thresh_sdm(
 \arguments{
 \item{pred_file}{Character. File path of predicted sdm to threshold.}
 
+\item{this_taxa}{Character. If left as default \code{NULL} an attempt will be made
+to extract a taxa name from \code{pred_file}}
+
 \item{threshold}{Numeric. > 0 and < 1. Threshold to apply to the raster
 stored in the file at \code{pred_file}. Often this value will be available within
 the result of a call to \code{tune_sdm()}. e.g. \code{mod <- rio::import("tune.rds")}
 and then \code{mod$e[[1]]@thresholds$max_spec_sens}}
 
-\item{thresh_file}{Character. Name to give the output threshold. Defaults to
+\item{thresh_file}{Character. Name to give the output threshold. If left as
+default \code{NULL}, \code{thresh_file} will be set to
 \code{gsub("pred", "thresh", pred_file)}}
 
 \item{terra_options}{Passed to \code{terra::terraOptions()}. e.g. list(memfrac =
