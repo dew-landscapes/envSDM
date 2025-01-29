@@ -12,3 +12,29 @@ warning: 1 out of 5 blocks failed to reach 8 presences. These were lumped until 
 spatial folds = TRUE. Folds = 4. Folds done in 0.27 minutes
 reduce_env completed in: 0.12 minutes
 prep completed. elapsed time: 0.72 minutes
+
+acaule
+prep start at 2025-01-28 08:57:40.362937.
+1082 original records
+9 predictors
+1065 presences in predict_boundary and on env rasters
+subsetting predictors done in 0 minutes
+density raster done in 0.02 minutes
+10000 background points attempted. 5622 achieved in: 0 minutes
+env data extracted in: 0.26 minutes
+spatial folds = TRUE. Folds = 5. Folds done in 0.23 minutes
+reduce_env completed in: 0.07 minutes
+prep completed. elapsed time: 0.6 minutes
+
+acaule
+prep start at 2025-01-28 12:07:52.913689.
+1082 original records
+9 predictors
+1065 presences in predict_boundary and on env rasters
+subsetting predictors done in 0 minutes
+density raster done in 0.01 minutes
+10000 background points attempted. 5604 achieved in: 0 minutes
+env data extracted in: 0.26 minutes
+spatial folds = TRUE. Folds = 5. Folds done in 0.22 minutes
+reduce_env completed in: 0.05 minutes
+prep completed. elapsed time: 0.56 minutes

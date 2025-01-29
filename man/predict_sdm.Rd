@@ -14,7 +14,6 @@ predict_sdm(
   is_env_pred = FALSE,
   terra_options = NULL,
   doClamp = TRUE,
-  apply_thresh = TRUE,
   force_new = FALSE,
   do_gc = FALSE,
   check_tifs = FALSE,
