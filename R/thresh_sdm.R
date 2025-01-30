@@ -40,7 +40,7 @@ thresh_sdm <- function(pred_file
                        ) {
 
   # pred exists -----
-  if(file.exists(pred_file)) {
+  if(!is.null(pred_file)) {
 
     # setup -------
     ## NULL args -------
@@ -168,9 +168,7 @@ thresh_sdm <- function(pred_file
 
   } else {
 
-    message(pred_file
-            , " doesn't exist"
-            )
+    message("pred_file is null")
 
     res <- NULL
 
