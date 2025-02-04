@@ -48,7 +48,7 @@
 predict_sdm <- function(prep
                         , full_run
                         , out_dir
-                        , file_name = c("pred.tif", "thresh.tif")
+                        , file_name = "pred.tif"
                         , use_env_naming = FALSE
                         , predictors = NULL
                         , is_env_pred = FALSE
