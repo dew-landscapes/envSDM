@@ -5,7 +5,7 @@
     fs::dir_ls(regexp = "\\.csv$") |>
     tibble::enframe(name = NULL, value = "path") |>
     dplyr::mutate(taxa = gsub("\\.csv", "", basename(path))
-                  , presence = purrr::map(path, rio::import, setclass = "tibble")
+                  , presence = purrr::map(path, rio::import, setclass = "tibble", trust = TRUE)
                   , presence = purrr::map(presence
                                           , \(x) x |>
                                             dplyr::filter(!is.na(lat)
@@ -52,12 +52,12 @@
                                                , pred_limit = d
                                                , limit_buffer = 10000
                                                , dens_res = 1000 # ignored as decimal degrees preds
-                                               #, force_new = T
+                                               #, force_new = F
                                                )
                )
 
   # example of 'prep'
-  prep <- rio::import(fs::path(data$taxa_dir[[2]], "prep.rds"))
+  prep <- rio::import(fs::path(data$taxa_dir[[2]], "prep.rds"), trust = TRUE)
 
   names(prep)
 

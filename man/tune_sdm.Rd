@@ -132,7 +132,7 @@ Tune, and evaluate, species distribution models
   # which tune args were best for each taxa using 'combo'?
   data \%>\%
     dplyr::mutate(tune = fs::path(out_dir, "tune.rds")
-                  , tune = purrr::map(tune, rio::import)
+                  , tune = purrr::map(tune, rio::import, trust = TRUE)
                   , tune_mean = purrr::map(tune, "tune_mean")
                   ) \%>\%
     tidyr::unnest(cols = c(tune_mean)) \%>\%
@@ -142,7 +142,7 @@ Tune, and evaluate, species distribution models
   # or best tune args choosing on just auc_po?
   data \%>\%
     dplyr::mutate(tune = fs::path(out_dir, "tune.rds")
-                  , tune = purrr::map(tune, rio::import)
+                  , tune = purrr::map(tune, rio::import, trust = TRUE)
                   , all = purrr::map(tune, "tune_mean")
                   ) \%>\%
     tidyr::unnest(cols = c(all)) \%>\%

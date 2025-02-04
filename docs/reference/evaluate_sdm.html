@@ -83,25 +83,10 @@ from <code><a href="https://sjevelazco.github.io/flexsdm/reference/sdm_eval.html
 <span class="r-in"><span>  <span class="va">out_dir</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span>package <span class="op">=</span> <span class="st">"envSDM"</span><span class="op">)</span>, <span class="st">"examples"</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>  <span class="kw"><a href="https://rdrr.io/r/base/source.html" class="external-link">source</a></span><span class="op">(</span><span class="fu">fs</span><span class="fu">::</span><span class="fu"><a href="https://fs.r-lib.org/reference/path.html" class="external-link">path</a></span><span class="op">(</span><span class="va">out_dir</span>, <span class="st">"tune_sdm_ex.R"</span><span class="op">)</span><span class="op">)</span> <span class="co"># make sure following prep file exists</span></span></span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Missing `trust` will be set to FALSE by default for RDS in 2.0.0.</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Missing `trust` will be set to FALSE by default for RDS in 2.0.0.</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Missing `trust` will be set to FALSE by default for RDS in 2.0.0.</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Missing `trust` will be set to FALSE by default for RDS in 2.0.0.</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>There were 2 warnings in `dplyr::mutate()`.</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> The first warning was:</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> In argument: `tune = purrr::map(tune, rio::import)`.</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> Caused by warning:</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">!</span> Missing `trust` will be set to FALSE by default for RDS in 2.0.0.</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Run <a href="x-r-run:dplyr::last_dplyr_warnings()">dplyr::last_dplyr_warnings()</a> to see the 1 remaining warning.</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>There were 2 warnings in `dplyr::mutate()`.</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> The first warning was:</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> In argument: `tune = purrr::map(tune, rio::import)`.</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> Caused by warning:</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">!</span> Missing `trust` will be set to FALSE by default for RDS in 2.0.0.</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Run <a href="x-r-run:dplyr::last_dplyr_warnings()">dplyr::last_dplyr_warnings()</a> to see the 1 remaining warning.</span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span>  <span class="va">prep</span> <span class="op">&lt;-</span> <span class="fu">rio</span><span class="fu">::</span><span class="fu"><a href="http://gesistsa.github.io/rio/reference/import.html" class="external-link">import</a></span><span class="op">(</span><span class="fu">fs</span><span class="fu">::</span><span class="fu"><a href="https://fs.r-lib.org/reference/path.html" class="external-link">path</a></span><span class="op">(</span><span class="va">out_dir</span>, <span class="st">"acaule"</span>, <span class="st">"prep.rds"</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Missing `trust` will be set to FALSE by default for RDS in 2.0.0.</span>
+<span class="r-in"><span>  <span class="va">prep</span> <span class="op">&lt;-</span> <span class="fu">rio</span><span class="fu">::</span><span class="fu"><a href="http://gesistsa.github.io/rio/reference/import.html" class="external-link">import</a></span><span class="op">(</span><span class="fu">fs</span><span class="fu">::</span><span class="fu"><a href="https://fs.r-lib.org/reference/path.html" class="external-link">path</a></span><span class="op">(</span><span class="va">out_dir</span>, <span class="st">"acaule"</span>, <span class="st">"prep.rds"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>                      , trust <span class="op">=</span> <span class="cn">TRUE</span></span></span>
+<span class="r-in"><span>                      <span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>  <span class="va">model</span> <span class="op">&lt;-</span> <span class="fu"><a href="tune_sdm.html">tune_sdm</a></span><span class="op">(</span>prep <span class="op">=</span> <span class="va">prep</span></span></span>
 <span class="r-in"><span>                    , out_dir <span class="op">=</span> <span class="cn">FALSE</span></span></span>
@@ -113,38 +98,38 @@ from <code><a href="https://sjevelazco.github.io/flexsdm/reference/sdm_eval.html
 <span class="r-in"><span>                    , keep_model <span class="op">=</span> <span class="cn">TRUE</span></span></span>
 <span class="r-in"><span>                    <span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> tuning acaule</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> out_dir is C:/temp/nige\RtmpWs2tro\file4b9c17a15475</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> out_dir is C:/temp/nige\RtmpEfG5Dy\file1d5c114635e1</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> rf tune</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Joining with `by = join_by(algo)`</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Joining with `by = join_by(metric)`</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Joining with `by = join_by(algo, tune_args, trees, nodesize)`</span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span>  <span class="va">presences</span> <span class="op">&lt;-</span> <span class="va">prep</span><span class="op">$</span><span class="va">blocks</span><span class="op">[</span><span class="va">prep</span><span class="op">$</span><span class="va">blocks</span><span class="op">$</span><span class="va">pa</span> <span class="op">==</span> <span class="fl">1</span> <span class="op">&amp;</span> <span class="va">prep</span><span class="op">$</span><span class="va">blocks</span><span class="op">$</span><span class="va">block</span> <span class="op">!=</span> <span class="fl">1</span>, <span class="op">]</span></span></span>
-<span class="r-in"><span>  <span class="va">background</span> <span class="op">&lt;-</span> <span class="va">prep</span><span class="op">$</span><span class="va">blocks</span><span class="op">[</span><span class="va">prep</span><span class="op">$</span><span class="va">blocks</span><span class="op">$</span><span class="va">pa</span> <span class="op">==</span> <span class="fl">0</span> <span class="op">&amp;</span> <span class="va">prep</span><span class="op">$</span><span class="va">blocks</span><span class="op">$</span><span class="va">block</span> <span class="op">!=</span> <span class="fl">1</span>, <span class="op">]</span></span></span>
+<span class="r-in"><span>  <span class="va">presences</span> <span class="op">&lt;-</span> <span class="va">prep</span><span class="op">$</span><span class="va">validation</span><span class="op">[</span><span class="va">prep</span><span class="op">$</span><span class="va">validation</span><span class="op">$</span><span class="va">pa</span> <span class="op">==</span> <span class="fl">1</span>, <span class="op">]</span></span></span>
+<span class="r-in"><span>  <span class="va">background</span> <span class="op">&lt;-</span> <span class="va">prep</span><span class="op">$</span><span class="va">validation</span><span class="op">[</span><span class="va">prep</span><span class="op">$</span><span class="va">validation</span><span class="op">$</span><span class="va">pa</span> <span class="op">==</span> <span class="fl">0</span>, <span class="op">]</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>  <span class="fu">evaluate_sdm</span><span class="op">(</span><span class="va">model</span><span class="op">$</span><span class="va">tune_rf</span><span class="op">$</span><span class="va">m</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span></span>
 <span class="r-in"><span>               , p_test <span class="op">=</span> <span class="va">presences</span></span></span>
 <span class="r-in"><span>               , b_test <span class="op">=</span> <span class="va">background</span></span></span>
 <span class="r-in"><span>               <span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> @stats</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     np   na prevalence auc  cor pcor   ODP auc_po auc_po_flexsdm   CBI</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1 1022 4430      0.187   1 0.97    0 0.813      1              1 0.984</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    np   na prevalence  auc   cor pcor  ODP auc_po auc_po_flexsdm   CBI</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 320 1684       0.16 0.98 0.803    0 0.84   0.98           0.98 0.983</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   CBI_rescale  IMAE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1       0.992 0.973</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1       0.991 0.869</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> @thresholds</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   max_kappa max_spec_sens no_omission equal_prevalence equal_sens_spec</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1     0.806          0.62       0.622             0.19           0.667</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1     0.452         0.452        0.11            0.159           0.455</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> @tr_stats</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     treshold kappa  CCR  TPR  TNR  FPR  FNR  PPP  NPP  MCR  OR</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1          0     0 0.19    1    0    1    0 0.19  NaN 0.81 NaN</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2          0  0.43 0.73    1 0.67 0.33    0 0.41    1 0.27 Inf</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3          0  0.49 0.77    1 0.72 0.28    0 0.45    1 0.23 Inf</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4        ...   ...  ...  ...  ...  ...  ...  ...  ...  ... ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 197        1  0.91 0.97 0.86    1    0 0.14    1 0.97 0.03 Inf</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 198        1  0.91 0.97 0.86    1    0 0.14    1 0.97 0.03 Inf</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 199        1     0 0.81    0    1    0    1  NaN 0.81 0.19 NaN</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     treshold kappa  CCR TPR  TNR  FPR FNR  PPP  NPP  MCR  OR</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1          0     0 0.16   1    0    1   0 0.16  NaN 0.84 NaN</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2          0  0.11 0.39   1 0.28 0.72   0 0.21    1 0.61 Inf</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3          0  0.11 0.39   1 0.28 0.72   0 0.21    1 0.61 Inf</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4        ...   ...  ... ...  ...  ... ...  ...  ...  ... ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 407     0.99     0 0.84   0    1    0   1    0 0.84 0.16   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 408     0.99     0 0.84   0    1    0   1    0 0.84 0.16   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 409     0.99     0 0.84   0    1    0   1  NaN 0.84 0.16 NaN</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

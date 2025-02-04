@@ -72,8 +72,8 @@ Threshold a previously predicted SDM
     dplyr::mutate(out_dir = dirname(pred)
                   , taxa = basename(dirname(out_dir))
                   , metric = basename(out_dir)
-                  , tune = fs::dir_ls(dirname(out_dir), regexp = "tune.rds")
-                  , tune_mean = purrr::map(tune, \(x) rio::import(x)$tune_mean |> dplyr::select(algo, tune_args, auc_po, combo, max_spec_sens))
+                  , tune = fs::dir_ls(out_dir, regexp = "full_run.rds")
+                  , tune_mean = purrr::map(tune, \(x) rio::import(x, trust = TRUE)$tune_mean |> dplyr::select(algo, tune_args, auc_po, combo, max_spec_sens))
                   , thresh = purrr::map2_dbl(tune_mean
                                              , metric
                                              , extract_thresh
@@ -90,7 +90,7 @@ Threshold a previously predicted SDM
                                        , threshold = b
                                        , this_taxa = c
                                        , thresh_file = "thresh.tif"
-                                       , force_new = TRUE
+                                       #, force_new = TRUE
                                        )
                )
 

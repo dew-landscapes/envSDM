@@ -26,6 +26,7 @@ prep_sdm(
   folds = 5,
   spatial_folds = TRUE,
   min_fold_n = 8,
+  hold_prop = 0.3,
   stretch_value = 10,
   dens_res = 1000,
   save_pngs = FALSE,
@@ -102,6 +103,9 @@ not enough presences to support more than one fold.}
 
 \item{min_fold_n}{Numeric. Sets both minimum number of presences, and,
 by default, the minimum number of presences required for a model.}
+
+\item{hold_prop}{Numeric. Proportion of data to be held back from training
+to use to validate the final model.}
 
 \item{stretch_value}{Numeric. Stretch the density raster to this value.}
 
@@ -196,7 +200,7 @@ Options for managing memory are \code{terra_options}, \code{max_cells_in_memory}
     fs::dir_ls(regexp = "\\\\.csv$") |>
     tibble::enframe(name = NULL, value = "path") |>
     dplyr::mutate(taxa = gsub("\\\\.csv", "", basename(path))
-                  , presence = purrr::map(path, rio::import, setclass = "tibble")
+                  , presence = purrr::map(path, rio::import, setclass = "tibble", trust = TRUE)
                   , presence = purrr::map(presence
                                           , \(x) x |>
                                             dplyr::filter(!is.na(lat)
@@ -243,12 +247,12 @@ Options for managing memory are \code{terra_options}, \code{max_cells_in_memory}
                                                , pred_limit = d
                                                , limit_buffer = 10000
                                                , dens_res = 1000 # ignored as decimal degrees preds
-                                               #, force_new = T
+                                               #, force_new = F
                                                )
                )
 
   # example of 'prep'
-  prep <- rio::import(fs::path(data$taxa_dir[[2]], "prep.rds"))
+  prep <- rio::import(fs::path(data$taxa_dir[[2]], "prep.rds"), trust = TRUE)
 
   names(prep)
 

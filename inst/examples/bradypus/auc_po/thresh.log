@@ -1,13 +1,4 @@
 
-bradypus threshold started at 2025-01-24 16:53:51.338688
+bradypus threshold started at 2025-02-04 12:49:40.190072
+create thresh.tif for bradypus with threshold value: 0.63852272
 thresh done in 0 minutes
-
-bradypus threshold started at 2025-01-24 16:54:55.830886
-thresh done in 0 minutes
-
-bradypus threshold started at 2025-01-24 16:57:29.060133
-thresh done in 0 minutes
-
-bradypus threshold started at 2025-01-24 18:30:49.63616
-create H:/dev/nige/packages/envSDM/inst/examples/bradypus/auc_po/thresh.tif for bradypus with threshold value: 0.447779478
-thresh done in 0.01 minutes

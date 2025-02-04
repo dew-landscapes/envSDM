@@ -2,6 +2,6 @@
 
 bradypus
 best_run = TRUE
-tune start 2025-01-24 16:53:45.104074
-7 out of 9 variables will be used
-maxnet tune finished in: 0.02 minutes
+tune start 2025-02-04 12:49:34.859175
+6 out of 9 variables will be used
+maxnet tune finished in: 0.01 minutes

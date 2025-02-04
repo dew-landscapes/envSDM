@@ -1,39 +1,13 @@
 
 bradypus
-prep start at 2025-01-24 16:50:41.186276.
+prep start at 2025-02-04 12:47:53.842146.
 116 original records
 9 predictors
 114 presences in predict_boundary and on env rasters
 subsetting predictors done in 0 minutes
-density raster done in 0.04 minutes
-10000 background points attempted. 3123 achieved in: 0 minutes
+density raster done in 0.01 minutes
+10000 background points attempted. 3135 achieved in: 0 minutes
 env data extracted in: 0.14 minutes
-spatial folds = TRUE. Folds = 5. Folds done in 0.13 minutes
+spatial folds = TRUE. Folds = 5. Folds done in 0.1 minutes
 reduce_env completed in: 0.01 minutes
-prep completed. elapsed time: 0.34 minutes
-
-bradypus
-prep start at 2025-01-28 08:58:16.919836.
-116 original records
-9 predictors
-114 presences in predict_boundary and on env rasters
-subsetting predictors done in 0 minutes
-density raster done in 0.02 minutes
-10000 background points attempted. 3139 achieved in: 0 minutes
-env data extracted in: 0.13 minutes
-spatial folds = TRUE. Folds = 5. Folds done in 0.12 minutes
-reduce_env completed in: 0.01 minutes
-prep completed. elapsed time: 0.29 minutes
-
-bradypus
-prep start at 2025-01-28 12:08:27.088371.
-116 original records
-9 predictors
-114 presences in predict_boundary and on env rasters
-subsetting predictors done in 0 minutes
-density raster done in 0.02 minutes
-10000 background points attempted. 3126 achieved in: 0 minutes
-env data extracted in: 0.13 minutes
-spatial folds = TRUE. Folds = 5. Folds done in 0.11 minutes
-reduce_env completed in: 0.01 minutes
-prep completed. elapsed time: 0.29 minutes
+prep completed. elapsed time: 0.27 minutes

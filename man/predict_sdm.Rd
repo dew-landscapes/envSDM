@@ -107,6 +107,7 @@ The resulting \code{pred.tif} is masked to the boundary provided to the
 
                                          # passed to tune_sdm via dots
                                          , metrics_df = envSDM::sdm_metrics
+                                         #, force_new = TRUE
                                          )
                )
 
@@ -166,6 +167,7 @@ The resulting \code{pred.tif} is masked to the boundary provided to the
 
                                          # passed to tune_sdm via dots
                                          , metrics_df = envSDM::sdm_metrics
+                                         #, force_new = TRUE
                                          )
               )
 
@@ -179,6 +181,7 @@ The resulting \code{pred.tif} is masked to the boundary provided to the
                                      , predictors = env_dat
                                      , is_env_pred = FALSE
                                      , check_tifs = TRUE
+                                     #, force_new = TRUE
                                      )
                )
 
