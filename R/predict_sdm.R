@@ -65,10 +65,10 @@ predict_sdm <- function(prep
   start_time <- Sys.time()
 
   ## prep -------
-  if(! "list" %in% class(prep)) prep <- rio::import(prep)
+  if(! "list" %in% class(prep)) prep <- rio::import(prep, trust = TRUE)
 
   ## tune ---------
-  if(! "list" %in% class(full_run)) full_run <- rio::import(full_run)
+  if(! "list" %in% class(full_run)) full_run <- rio::import(full_run, trust = TRUE)
 
   ## this taxa ------
   this_taxa <- prep$this_taxa
@@ -296,6 +296,7 @@ predict_sdm <- function(prep
         terra::mask(p$result
                     , mask = terra::vect(prep$predict_boundary)
                     , filename = pred_file
+                    , overwrite = TRUE
                     , ...
                     )
 

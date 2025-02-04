@@ -66,6 +66,8 @@
 #' and low importance variables. Set to 0 to skip this step. If > 0, highly
 #' correlated and low importance variables will be removed. In the case of
 #' highly correlated pairs of variables, only one is removed.
+#' @param hold_prop Numeric. Proportion of data to be held back from training
+#' to use to validate the final model.
 #' @param do_gc Logical. Run `base::rm(list = ls)` and `base::gc()` at end of
 #' function? Useful when running SDMs for many, many taxa, especially if done in
 #' parallel.
@@ -130,6 +132,7 @@
                        , folds = 5
                        , spatial_folds = TRUE
                        , min_fold_n = 8
+                       , hold_prop = 0.3
                        , stretch_value = 10
                        , dens_res = 1000
                        , save_pngs = FALSE
@@ -167,7 +170,7 @@
 
         if(file.exists(prep_file)) {
 
-          prep <- rio::import(prep_file)
+          prep <- rio::import(prep_file, trust = TRUE)
 
         }
 
@@ -349,14 +352,17 @@
         tibble::as_tibble() %>%
         purrr::set_names(c("x", "y"))
 
-      readr::write_lines(paste0(nrow(prep$presence_ras)
+      n_p <- nrow(prep$presence_ras)
+      needed_p <- 3 * min_fold_n
+
+      readr::write_lines(paste0(n_p
                                 , " presences in predict_boundary and on env rasters"
                                 )
                          , file = log_file
                          , append = TRUE
                          )
 
-      if(nrow(prep$presence_ras) > min_fold_n) {
+      if(n_p > needed_p) {
 
         # subset predictors? ------
         if(pred_limit) {
@@ -389,7 +395,7 @@
 
         k_folds <- folds
 
-        while(nrow(prep$presence_ras) < min_fold_n * k_folds) {
+        while(ceiling(n_p * (1 - hold_prop)) < min_fold_n * k_folds) {
 
           k_folds <- k_folds - 1
 
@@ -410,16 +416,23 @@
 
         }
 
-        if(k_folds < 2) {
+        if(k_folds < 3) {
 
-          readr::write_lines(paste0("WARNING: folds = ", k_folds)
+          readr::write_lines(paste0("WARNING: there are only "
+                                    , n_p
+                                    , " presences. This is not enough to support the bare minimum"
+                                    , " of three sets (one validation and 2 for cross-fold tuning) with "
+                                    , min_fold_n
+                                    , " presences in each set. SDM abandoned"
+                                    )
                              , file = log_file
                              , append = TRUE
                              )
 
-          spatial_folds <- FALSE
+          prep$abandoned <- TRUE
 
         }
+
 
         k_folds_adj <- k_folds
         # use k_folds_adj if need to revert to non-spatial cv later (see folds/non-spatial)
@@ -428,11 +441,11 @@
 
         if(prop_abs == "prop") {
 
-          num_bg <- num_bg * nrow(prep$presence_ras)
+          num_bg <- num_bg * n_p
 
         }
 
-        if(num_bg < many_p_prop * nrow(prep$presence_ras)) num_bg <- many_p_prop * nrow(prep$presence_ras)
+        if(num_bg < many_p_prop * n_p) num_bg <- many_p_prop * n_p
 
         # density raster ------
 
@@ -640,33 +653,10 @@
 
       }
 
-      if(save_pngs) {
 
-        # density png ------
+        # env--------
 
-        dens_png <- fs::path(out_dir, "density.png")
-
-        if(!file.exists(dens_png)) {
-
-          png_from_tif(target_density
-                       , title = this_taxa
-                       , dots = prep$presence_ras %>%
-                         sf::st_as_sf(coords = c("x", "y")
-                                      , crs = sf::st_crs(prep_preds)
-                                      ) %>%
-                         sf::st_transform(crs = sf::st_crs(target_density))
-                       , trim = TRUE
-                       , out_png = dens_png
-                       )
-
-        }
-
-      }
-
-
-      # env--------
-
-      run <- if(exists("spp_pa_env", prep)) force_new else TRUE
+      run <- if(exists("blocks", prep)) force_new else TRUE
 
       if(run) {
 
@@ -684,7 +674,7 @@
                                    ) %>%
           sf::st_buffer(terra::res(prep_preds)[[1]] / 100)
 
-        spp_pa_env <- exactextractr::exact_extract(prep_preds
+        prep$env <- exactextractr::exact_extract(prep_preds
                                                    , y = spp_pa
                                                    , include_cols = "pa"
                                                    , include_cell = TRUE
@@ -700,7 +690,7 @@
 
         if(!is.null(cat_preds)) {
 
-          spp_pa_env <- spp_pa_env %>%
+          prep$env <- prep$env %>%
             dplyr::mutate(dplyr::across(tidyselect::any_of(cat_preds), as.factor))
 
         }
@@ -716,10 +706,10 @@
       }
 
       # Abandon if too few presences with env data
-      if(nrow(spp_pa_env[spp_pa_env$pa == 1,]) < min_fold_n) {
+      if(nrow(prep$env[prep$env$pa == 1,]) < min_fold_n) {
 
         readr::write_lines(paste0("warning: too few presences ("
-                                  , nrow(spp_pa_env[spp_pa_env$pa == 1,])
+                                  , nrow(prep$env[prep$env$pa == 1,])
                                   , ") with environmental variables. SDM abandoned"
                                   )
                            , file = log_file
@@ -741,6 +731,14 @@
 
           start_blocks <- Sys.time()
 
+          prep$validation <- prep$env %>%
+            dplyr::group_by(pa) %>%
+            dplyr::sample_frac(hold_prop) %>%
+            dplyr::ungroup()
+
+          prep$training <- prep$env %>%
+            dplyr::anti_join(prep$validation)
+
           if(!all(spatial_folds, k_folds > 1)) {
 
             spatial_folds <- FALSE
@@ -751,7 +749,8 @@
 
             safe_cv_spatial <- purrr::safely(blockCV::cv_spatial)
 
-            x <- spp_pa_env %>%
+            x <- prep$training %>%
+              dplyr::anti_join(prep$validation) %>%
               na.omit() %>%
               dplyr::select(x, y, pa) %>%
               sf::st_as_sf(coords = c("x", "y")
@@ -804,7 +803,7 @@
 
             if(!is.null(blocks)) {
 
-              blocks_p <- blocks[spp_pa_env$pa == 1,]
+              blocks_p <- blocks[prep$training$pa == 1,]
 
               if(any(c(table(blocks_p$fold_ids) < min_fold_n), length(setdiff(1:k_folds, unique(blocks_p$fold_ids))) > 0)) {
 
@@ -871,12 +870,12 @@
             ## non-spatial -------
 
             blocks <- tibble::tibble(fold_ids = c(sample(1:k_folds_adj
-                                                         , sum(spp_pa_env$pa == 1)
+                                                         , sum(prep$training$pa == 1)
                                                          , replace = TRUE
                                                          , prob = rep(1 / k_folds_adj, k_folds_adj)
                                                          )
                                                   , sample(1:k_folds_adj
-                                                           , sum(spp_pa_env$pa == 0)
+                                                           , sum(prep$training$pa == 0)
                                                            , replace = TRUE
                                                            , prob = rep(1 / k_folds_adj, k_folds_adj)
                                                            )
@@ -885,7 +884,7 @@
 
           }
 
-          prep$blocks <- spp_pa_env %>%
+          prep$blocks <- prep$training %>%
             dplyr::mutate(block = blocks$fold_ids) %>%
             dplyr::filter(dplyr::if_any(.cols = names(prep_preds)
                                         , .fns = \(x) !is.na(x) & !is.infinite(x)
@@ -906,45 +905,6 @@
                              , append = TRUE
                              )
 
-          ### block png -------
-          if(save_pngs) {
-
-            block_file <- fs::path(out_dir, "blocks.png")
-
-            title <- paste0(this_taxa
-                            , "\nSpatial folds = "
-                            , prep$spatial_folds_used
-                            , "\nFolds = "
-                            , length(unique(prep$blocks$block))
-                            , "\nPresences = "
-                            , format(nrow(prep$blocks[prep$blocks$pa == 1,]), big.mark = ",")
-                            , "\nBackground = "
-                            , format(nrow(prep$blocks[prep$blocks$pa == 0,]), big.mark = ",")
-                            )
-
-            m <- prep$blocks %>%
-              dplyr::select(x, y, block) %>%
-              sf::st_as_sf(coords = c("x", "y")
-                           , crs = sf::st_crs(prep$bg_points)
-                           ) %>%
-              tmap::tm_shape() +
-                tmap::tm_dots(col = "block"
-                              , size = 0.01
-                              , palette = "viridis"
-                              , breaks = seq(1, max(prep$blocks$block) + 1, 1)
-                              , labels = as.character(seq(1, max(prep$blocks$block), 1))
-                              , alpha = 0.5
-                              ) +
-              tmap::tm_credits(text = title
-                               , position = c("left", "bottom")
-                               )
-
-              tmap::tmap_save(m
-                              , block_file
-                              )
-
-          }
-
         }
 
       }
@@ -963,6 +923,7 @@
           prep$reduce_env <- envModel::reduce_env(env_df = prep$blocks
                                                   , env_cols = names(prep_preds)
                                                   , y_col = "pa"
+                                                  , imp_col = "1"
                                                   , thresh = reduce_env_thresh
                                                   , remove_always = c(pres_x, pres_y, "x", "y", "pa", "block", "cell")
                                                   )
@@ -1003,7 +964,7 @@
         prep$abandoned <- TRUE
 
         readr::write_lines(paste0("only "
-                                  , nrow(prep$presence_ras)
+                                  , n_p
                                   , " useable presence points. SDM abandoned"
                                   )
                            , file = log_file

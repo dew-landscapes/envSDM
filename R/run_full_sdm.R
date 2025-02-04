@@ -61,7 +61,7 @@
 
         if(file.exists(full_run_file)) {
 
-          full_run <- rio::import(full_run_file)
+          full_run <- rio::import(full_run_file, trust = TRUE)
 
         }
 
@@ -70,10 +70,10 @@
     }
 
     ## prep -------
-    if(! "list" %in% class(prep)) prep <- rio::import(prep)
+    if(! "list" %in% class(prep)) prep <- rio::import(prep, trust = TRUE)
 
     ## tune ---------
-    if(! "list" %in% class(tune)) tune <- rio::import(tune)
+    if(! "list" %in% class(tune)) tune <- rio::import(tune, trust = TRUE)
 
     ## full_run -------
     if(!exists("full_run", inherits = FALSE)) full_run <- list(finished = FALSE)

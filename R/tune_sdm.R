@@ -105,7 +105,7 @@
 
         if(file.exists(tune_file)) {
 
-          tune <- rio::import(tune_file)
+          tune <- rio::import(tune_file, trust = TRUE)
 
         }
 
@@ -114,7 +114,7 @@
     }
 
     ## prep -------
-    if(! "list" %in% class(prep)) prep <- rio::import(prep)
+    if(! "list" %in% class(prep)) prep <- rio::import(prep, trust = TRUE)
 
     ## tune ---------
     if(!exists("tune", inherits = FALSE)) tune <- list(finished = FALSE)
@@ -207,10 +207,11 @@
                                                        as.data.frame()
                                                      )
                           , n_p_test = purrr::map_dbl(p_data_test
-                                                  , nrow
-                                                  )
-                          , n_p_train = purrr::map_dbl(pa_train, sum)
-                          , n_a_train = purrr::map2_dbl(data_train, n_p_train
+                                                      , nrow
+                                                      )
+                          , n_p_train = purrr::map_dbl(pa_train, \(x) sum(x == 1))
+                          , n_a_train = purrr::map2_dbl(data_train
+                                                        , n_p_train
                                                         , \(x, y) nrow(x) - y
                                                         )
                           # 'hack' to ensure min of p's and a's is used (as n_p_train)
@@ -220,6 +221,26 @@
                                                         )
                           ) %>%
             dplyr::filter(n_p_test > 0)
+
+          if(best_run) {
+
+            # validation set --------
+            start_df <- start_df %>%
+              dplyr::mutate(p_data_test = list(prep$validation %>%
+                                                 dplyr::filter(pa == 1) %>%
+                                                 dplyr::select(tidyselect::any_of(preds)) %>%
+                                                 as.data.frame()
+                                               )
+                            , a_data_test = list(prep$validation %>%
+                                                   dplyr::filter(pa == 0) %>%
+                                                   dplyr::select(tidyselect::any_of(preds)) %>%
+                                                   as.data.frame()
+                                                 )
+                            , n_a_train = sum(prep$validation$pa == 1)
+                            )
+
+
+          }
 
           ## tune maxnet------
 
