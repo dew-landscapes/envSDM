@@ -401,8 +401,6 @@
 
         }
 
-        if(k_folds == 0) k_folds <- 1
-
         if(k_folds < folds) {
 
           readr::write_lines(paste0("warning: too few records to support original folds ("
@@ -416,12 +414,12 @@
 
         }
 
-        if(k_folds < 3) {
+        if(k_folds < 2) {
 
           readr::write_lines(paste0("WARNING: there are only "
                                     , n_p
                                     , " presences. This is not enough to support the bare minimum"
-                                    , " of three sets (one validation and 2 for cross-fold tuning) with "
+                                    , " of three sets (one hold out and 2 for cross-fold tuning) with "
                                     , min_fold_n
                                     , " presences in each set. SDM abandoned"
                                     )
