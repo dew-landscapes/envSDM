@@ -224,19 +224,19 @@
 
           if(best_run) {
 
-            # validation set --------
+            # testing set --------
             start_df <- start_df %>%
-              dplyr::mutate(p_data_test = list(prep$validation %>%
+              dplyr::mutate(p_data_test = list(prep$testing %>%
                                                  dplyr::filter(pa == 1) %>%
                                                  dplyr::select(tidyselect::any_of(preds)) %>%
                                                  as.data.frame()
                                                )
-                            , a_data_test = list(prep$validation %>%
+                            , a_data_test = list(prep$testing %>%
                                                    dplyr::filter(pa == 0) %>%
                                                    dplyr::select(tidyselect::any_of(preds)) %>%
                                                    as.data.frame()
                                                  )
-                            , n_a_train = sum(prep$validation$pa == 1)
+                            , n_a_train = sum(prep$testing$pa == 1)
                             )
 
 
