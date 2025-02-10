@@ -729,13 +729,13 @@
 
           start_blocks <- Sys.time()
 
-          prep$validation <- prep$env %>%
+          prep$testing <- prep$env %>%
             dplyr::group_by(pa) %>%
             dplyr::sample_frac(hold_prop) %>%
             dplyr::ungroup()
 
           prep$training <- prep$env %>%
-            dplyr::anti_join(prep$validation)
+            dplyr::anti_join(prep$testing)
 
           if(!all(spatial_folds, k_folds > 1)) {
 
@@ -748,7 +748,7 @@
             safe_cv_spatial <- purrr::safely(blockCV::cv_spatial)
 
             x <- prep$training %>%
-              dplyr::anti_join(prep$validation) %>%
+              dplyr::anti_join(prep$testing) %>%
               na.omit() %>%
               dplyr::select(x, y, pa) %>%
               sf::st_as_sf(coords = c("x", "y")
