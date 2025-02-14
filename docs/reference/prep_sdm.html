@@ -72,7 +72,6 @@ by user <a href="https://gis.stackexchange.com/users/865/spacedman" class="exter
 <span>  hold_prop <span class="op">=</span> <span class="fl">0.3</span>,</span>
 <span>  stretch_value <span class="op">=</span> <span class="fl">10</span>,</span>
 <span>  dens_res <span class="op">=</span> <span class="fl">1000</span>,</span>
-<span>  save_pngs <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  reduce_env_thresh <span class="op">=</span> <span class="fl">0.9</span>,</span>
 <span>  do_gc <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  force_new <span class="op">=</span> <span class="cn">FALSE</span></span>
@@ -205,11 +204,6 @@ to use to validate the final model.</p></dd>
 Set to <code>NULL</code> to use the same resolution as the predictors.</p></dd>
 
 
-<dt id="arg-save-pngs">save_pngs<a class="anchor" aria-label="anchor" href="#arg-save-pngs"></a></dt>
-<dd><p>Logical. Save out a .png of the density raster and spatial
-blocks</p></dd>
-
-
 <dt id="arg-reduce-env-thresh">reduce_env_thresh<a class="anchor" aria-label="anchor" href="#arg-reduce-env-thresh"></a></dt>
 <dd><p>Numeric. Threshold used to flag highly correlated
 and low importance variables. Set to 0 to skip this step. If &gt; 0, highly
@@ -335,13 +329,13 @@ predictors.</p></li>
 <span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">prep</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [1] "abandoned"          "finished"           "this_taxa"         </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [4] "original"           "presence_ras"       "predict_boundary"  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [7] "bg_points"          "env"                "validation"        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [7] "bg_points"          "env"                "testing"           </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [10] "training"           "blocks"             "spatial_folds_used"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [13] "reduce_env"         "log"               </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>  <span class="co"># env variables to remove prior to SDM</span></span></span>
 <span class="r-in"><span>  <span class="va">prep</span><span class="op">$</span><span class="va">reduce_env</span><span class="op">$</span><span class="va">remove</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [1] "bio1"  "bio12" "bio9"  "block" "cell"  "lat"   "lon"   "pa"    "x"    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [1] "bio1"  "bio17" "bio9"  "block" "cell"  "lat"   "lon"   "pa"    "x"    </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [10] "y"    </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>  <span class="co"># Density raster</span></span></span>

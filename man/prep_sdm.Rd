@@ -29,7 +29,6 @@ prep_sdm(
   hold_prop = 0.3,
   stretch_value = 10,
   dens_res = 1000,
-  save_pngs = FALSE,
   reduce_env_thresh = 0.9,
   do_gc = FALSE,
   force_new = FALSE
@@ -111,9 +110,6 @@ to use to validate the final model.}
 
 \item{dens_res}{\code{NULL} or numeric. Resolution (in metres) of density raster.
 Set to \code{NULL} to use the same resolution as the predictors.}
-
-\item{save_pngs}{Logical. Save out a .png of the density raster and spatial
-blocks}
 
 \item{reduce_env_thresh}{Numeric. Threshold used to flag highly correlated
 and low importance variables. Set to 0 to skip this step. If > 0, highly

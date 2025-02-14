@@ -98,38 +98,38 @@ from <code><a href="https://sjevelazco.github.io/flexsdm/reference/sdm_eval.html
 <span class="r-in"><span>                    , keep_model <span class="op">=</span> <span class="cn">TRUE</span></span></span>
 <span class="r-in"><span>                    <span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> tuning acaule</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> out_dir is C:/temp/nige\RtmpEfG5Dy\file1d5c114635e1</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> out_dir is C:/temp/nige\RtmpS80z5v\file42ac603c363a</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> rf tune</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Joining with `by = join_by(algo)`</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Joining with `by = join_by(metric)`</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Joining with `by = join_by(algo, tune_args, trees, nodesize)`</span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span>  <span class="va">presences</span> <span class="op">&lt;-</span> <span class="va">prep</span><span class="op">$</span><span class="va">validation</span><span class="op">[</span><span class="va">prep</span><span class="op">$</span><span class="va">validation</span><span class="op">$</span><span class="va">pa</span> <span class="op">==</span> <span class="fl">1</span>, <span class="op">]</span></span></span>
-<span class="r-in"><span>  <span class="va">background</span> <span class="op">&lt;-</span> <span class="va">prep</span><span class="op">$</span><span class="va">validation</span><span class="op">[</span><span class="va">prep</span><span class="op">$</span><span class="va">validation</span><span class="op">$</span><span class="va">pa</span> <span class="op">==</span> <span class="fl">0</span>, <span class="op">]</span></span></span>
+<span class="r-in"><span>  <span class="va">presences</span> <span class="op">&lt;-</span> <span class="va">prep</span><span class="op">$</span><span class="va">testing</span><span class="op">[</span><span class="va">prep</span><span class="op">$</span><span class="va">testing</span><span class="op">$</span><span class="va">pa</span> <span class="op">==</span> <span class="fl">1</span>, <span class="op">]</span></span></span>
+<span class="r-in"><span>  <span class="va">background</span> <span class="op">&lt;-</span> <span class="va">prep</span><span class="op">$</span><span class="va">testing</span><span class="op">[</span><span class="va">prep</span><span class="op">$</span><span class="va">testing</span><span class="op">$</span><span class="va">pa</span> <span class="op">==</span> <span class="fl">0</span>, <span class="op">]</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>  <span class="fu">evaluate_sdm</span><span class="op">(</span><span class="va">model</span><span class="op">$</span><span class="va">tune_rf</span><span class="op">$</span><span class="va">m</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span></span>
 <span class="r-in"><span>               , p_test <span class="op">=</span> <span class="va">presences</span></span></span>
 <span class="r-in"><span>               , b_test <span class="op">=</span> <span class="va">background</span></span></span>
 <span class="r-in"><span>               <span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> @stats</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    np   na prevalence  auc   cor pcor  ODP auc_po auc_po_flexsdm   CBI</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1 320 1684       0.16 0.98 0.803    0 0.84   0.98           0.98 0.983</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    np   na prevalence   auc   cor pcor  ODP auc_po auc_po_flexsdm   CBI</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 320 1678       0.16 0.973 0.786    0 0.84  0.973          0.973 0.946</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   CBI_rescale  IMAE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1       0.991 0.869</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1       0.973 0.874</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> @thresholds</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   max_kappa max_spec_sens no_omission equal_prevalence equal_sens_spec</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1     0.452         0.452        0.11            0.159           0.455</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1     0.662         0.662       0.016             0.16           0.662</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> @tr_stats</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     treshold kappa  CCR TPR  TNR  FPR FNR  PPP  NPP  MCR  OR</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1          0     0 0.16   1    0    1   0 0.16  NaN 0.84 NaN</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2          0  0.11 0.39   1 0.28 0.72   0 0.21    1 0.61 Inf</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3          0  0.11 0.39   1 0.28 0.72   0 0.21    1 0.61 Inf</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4        ...   ...  ... ...  ...  ... ...  ...  ...  ... ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 407     0.99     0 0.84   0    1    0   1    0 0.84 0.16   0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 408     0.99     0 0.84   0    1    0   1    0 0.84 0.16   0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 409     0.99     0 0.84   0    1    0   1  NaN 0.84 0.16 NaN</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     treshold kappa  CCR  TPR  TNR  FPR  FNR  PPP  NPP  MCR  OR</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1          0     0 0.16    1    0    1    0 0.16  NaN 0.84 NaN</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2          0  0.08 0.33    1 0.21 0.79    0 0.19    1 0.67 Inf</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3          0  0.08 0.33    1 0.21 0.79    0 0.19    1 0.67 Inf</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4        ...   ...  ...  ...  ...  ...  ...  ...  ...  ... ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 370     0.99  0.01 0.84 0.01    1    0 0.99    1 0.84 0.16 Inf</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 371     0.99  0.01 0.84 0.01    1    0 0.99    1 0.84 0.16 Inf</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 372     0.99     0 0.84    0    1    0    1  NaN 0.84 0.16 NaN</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

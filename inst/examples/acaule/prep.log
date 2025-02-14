@@ -1,14 +1,17 @@
 
 acaule
-prep start at 2025-02-04 12:47:19.986885.
+prep start at 2025-02-14 14:27:31.817523.
 1082 original records
 9 predictors
+24 presences required for 3 sets of min_fold_n (which is 8):
+  * 2 as cross folds
+  * 1 as holdout
 1065 presences in predict_boundary and on env rasters
 subsetting predictors done in 0 minutes
 density raster done in 0.01 minutes
-10000 background points attempted. 5615 achieved in: 0 minutes
-env data extracted in: 0.31 minutes
-warning: 1 out of 5 blocks failed to reach 8 presences. These were lumped until every block reached 8 presences.
-spatial folds = TRUE. Folds = 4. Folds done in 0.17 minutes
-reduce_env completed in: 0.04 minutes
-prep completed. elapsed time: 0.55 minutes
+10000 background points attempted. 5593 achieved in: 0 minutes
+env data extracted in: 0.26 minutes
+warning: 2 out of 5 blocks failed to reach 8 presences. These were lumped until every block reached 8 presences.
+spatial folds = TRUE. Folds = 3. Folds done in 0.13 minutes
+reduce_env completed in: 0.02 minutes
+prep completed. elapsed time: 0.44 minutes

@@ -17,8 +17,8 @@
                     , keep_model = TRUE
                     )
 
-  presences <- prep$validation[prep$validation$pa == 1, ]
-  background <- prep$validation[prep$validation$pa == 0, ]
+  presences <- prep$testing[prep$testing$pa == 1, ]
+  background <- prep$testing[prep$testing$pa == 0, ]
 
   evaluate_sdm(model$tune_rf$m[[1]]
                , p_test = presences
