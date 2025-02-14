@@ -60,8 +60,6 @@
 #' @param stretch_value Numeric. Stretch the density raster to this value.
 #' @param dens_res `NULL` or numeric. Resolution (in metres) of density raster.
 #' Set to `NULL` to use the same resolution as the predictors.
-#' @param save_pngs Logical. Save out a .png of the density raster and spatial
-#' blocks
 #' @param reduce_env_thresh Numeric. Threshold used to flag highly correlated
 #' and low importance variables. Set to 0 to skip this step. If > 0, highly
 #' correlated and low importance variables will be removed. In the case of
@@ -135,7 +133,6 @@
                        , hold_prop = 0.3
                        , stretch_value = 10
                        , dens_res = 1000
-                       , save_pngs = FALSE
                        , reduce_env_thresh = 0.9
                        , do_gc = FALSE
                        , force_new = FALSE
@@ -355,7 +352,12 @@
       n_p <- nrow(prep$presence_ras)
       needed_p <- 3 * min_fold_n
 
-      readr::write_lines(paste0(n_p
+      readr::write_lines(paste0(needed_p
+                                , " presences required for "
+                                , "3 sets of min_fold_n (which is "
+                                , min_fold_n
+                                , "):\n  * 2 as cross folds\n  * 1 as holdout\n"
+                                , n_p
                                 , " presences in predict_boundary and on env rasters"
                                 )
                          , file = log_file
@@ -704,7 +706,7 @@
       }
 
       # Abandon if too few presences with env data
-      if(nrow(prep$env[prep$env$pa == 1,]) < min_fold_n) {
+      if(nrow(prep$env[prep$env$pa == 1,]) < needed_p) {
 
         readr::write_lines(paste0("warning: too few presences ("
                                   , nrow(prep$env[prep$env$pa == 1,])
@@ -910,7 +912,7 @@
 
       # reduce env -------
 
-      if(all(reduce_env_thresh, !prep$abandoned)) {
+      if(all(as.logical(reduce_env_thresh), !prep$abandoned)) {
 
         run <- if(exists("reduce_env", prep)) force_new else TRUE
 
@@ -973,7 +975,6 @@
 
       # save / clean up-------
       # export before gc()
-      if(exists("subset_file")) fs::file_delete(subset_file)
       prep$finished <- TRUE
       prep$log <- if(file.exists(log_file)) readr::read_lines(log_file) else NULL
 
