@@ -9,6 +9,11 @@
 #' Options for managing memory are `terra_options`, `max_cells_in_memory` and
 #' `do_gc`.
 #'
+#' To help build the density raster for assigning background points, 'absence'
+#' data can be supplied in `presence` as `0` values. e.g. For a bird, absence
+#' data might be generated from other sites where birds were recorded but
+#' `this_taxa` was not.
+#'
 #' @param this_taxa Character. Name of taxa. Only used to print some messages.
 #' Ignored if NULL
 #' @param out_dir FALSE or character. If FALSE the result of prep_sdm will be
@@ -18,6 +23,10 @@
 #' the case of "path" the named list is simply list(prep = out_dir). Will be set
 #' to "object" if `out_dir` is FALSE.
 #' @param presence Dataframe of presences with columns `pres_x` and `pres_y`.
+#' @param pres_col Character. Name of column in `presence` that defines presence
+#' (`1`) or absence (`0`). Optional if only presence data is supplied.
+#' @param pres_val Numeric. Values in `pres_col` that represent presences.
+#' Optional if only presence data is supplied.
 #' @param pres_crs Anything that will return a legitimate crs when passed to the
 #' crs attribute of `sf::st_transform()` or `sf::st_as_sf()`.
 #' @param pres_x,pres_y Character. Name of the columns in `presence` that have
@@ -113,6 +122,8 @@
                        , out_dir = FALSE
                        , return_val = "path"
                        , presence
+                       , pres_col = "pa"
+                       , pres_val = 1
                        , pres_crs = 4326
                        , pres_x = "long"
                        , pres_y = "lat"
@@ -232,21 +243,32 @@
                          )
 
       # presence --------
+      ## original -------
       prep$original <- presence
 
-      ## raster presence ------
-
-      prep$presence_ras <- terra::cellFromXY(prep_preds
-                                             , presence %>%
-                                               sf::st_as_sf(coords = c(pres_x, pres_y)
-                                                            , crs = pres_crs
-                                                            ) %>%
-                                               sf::st_transform(crs = sf::st_crs(prep_preds)) %>%
-                                               sf::st_coordinates()
-                                             ) %>%
+      ## raster pa -------
+      prep$pa_ras <- terra::cellFromXY(prep_preds
+                                       , presence %>%
+                                         sf::st_as_sf(coords = c(pres_x, pres_y)
+                                                      , crs = pres_crs
+                                                      ) %>%
+                                         sf::st_transform(crs = sf::st_crs(prep_preds)) %>%
+                                         sf::st_coordinates()
+                                       ) %>%
         terra::xyFromCell(prep_preds, .) %>%
-        stats::na.omit() %>%
-        tibble::as_tibble()
+        tibble::as_tibble() %>%
+        {if(pres_col %in% names(presence)) (.) %>% dplyr::bind_cols(presence) else (.)} %>%
+        stats::na.omit()
+
+      ## raster presence ------
+      # not limited to raster yet thought
+      prep$presence_ras <- if(pres_col %in% names(prep$pa_ras)) {
+
+        prep$pa_ras |>
+          dplyr::filter(!!rlang::ensym(pres_col) == pres_val) |>
+          dplyr::select(- !!rlang::ensym(pres_col))
+
+      } else prep$pa_ras
 
 
       # predict_boundary -------
@@ -255,7 +277,7 @@
       # create new mcp from points
       if(isTRUE(pred_limit)) {
 
-        prep$predict_boundary <- presence %>%
+        prep$predict_boundary <- prep$presence_ras %>%
           dplyr::distinct(!!rlang::ensym(pres_x), !!rlang::ensym(pres_y)) %>%
           sf::st_as_sf(coords = c(pres_x, pres_y)
                        , crs = pres_crs
@@ -471,8 +493,8 @@
                                     , vals = 1
                                     )
 
-            bw <- MASS::kde2d(as.matrix(prep$presence_ras[,1])
-                              , as.matrix(prep$presence_ras[,2])
+            bw <- MASS::kde2d(as.matrix(prep$pa_ras[,1])
+                              , as.matrix(prep$pa_ras[,2])
                               , n = c(nrow(temp_ras), ncol(temp_ras))
                               , lims = terra::ext(temp_ras) %>% as.vector()
                               )
@@ -499,7 +521,7 @@
                                     , vals = 1
                                     )
 
-            pres_ras <- terra::rasterize(prep$presence_ras %>%
+            pres_ras <- terra::rasterize(prep$pa_ras %>%
                                            sf::st_as_sf(coords = c("x", "y")
                                                         , crs = sf::st_crs(prep_preds[[1]])
                                                         )
