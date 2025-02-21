@@ -280,11 +280,28 @@
                 fc <- fc[nchar(fc) > 0]
               }
 
+              ## limit_p ------
               # if limit_p, ensure p not in fc
               if(!isFALSE(limit_p)) {
 
                 # Only limit if too many preds, or limit_p is TRUE
-                if(any(length(preds) > limit_p, isTRUE(limit_p))) {
+                if(is.numeric(limit_p)) {
+
+                  remove_p <- length(preds) > limit_p
+
+                } else if(isTRUE(limit_p)) {
+
+                  remove_p <- TRUE
+
+                } else {
+
+                  stop("limit_p must be TRUE, FALSE or numeric. current vaule is: "
+                       , limit_p
+                       )
+
+                }
+
+                if(remove_p) {
                   # remove P
                   fc <- unique(gsub("P", "", fc))
                   # remove any empty
