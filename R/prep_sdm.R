@@ -213,8 +213,14 @@
                                 , "\nprep start at "
                                 , start_time
                                 , ".\n"
-                                , nrow(presence), " original record"
-                                , if(nrow(presence) > 1) "s"
+                                , nrow(presence)
+                                , " rows in 'presence'"
+                                , if(pres_col %in% names(presence)) paste0("\n of which "
+                                                                           , presence |>
+                                                                             dplyr::filter(!!rlang::ensym(pres_col) == pres_val) |>
+                                                                             nrow()
+                                                                           , " are presences."
+                                                                           )
                                 )
                          , log_file
                          , append = TRUE
@@ -672,9 +678,7 @@
           }
 
           readr::write_lines(paste0(num_bg
-                                    , " background points attempted. "
-                                    , nrow(prep$bg_points)
-                                    , " achieved in: "
+                                    , " background points attempted. Completed in: "
                                     , round(difftime(Sys.time(), start_bg, units = "mins"), 2)
                                     , " minutes"
                                     )
@@ -733,7 +737,9 @@
 
         readr::write_lines(paste0("env data extracted in: "
                                   , round(difftime(Sys.time(), start_bg, units = "mins"), 2)
-                                  , " minutes"
+                                  , " minutes.\n"
+                                  , nrow(prep$env[prep$env$pa != 1,])
+                                  , " background points with env values."
                                   )
                            , file = log_file
                            , append = TRUE
