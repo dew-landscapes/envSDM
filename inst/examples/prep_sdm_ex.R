@@ -52,7 +52,7 @@
                                                , pred_limit = d
                                                , limit_buffer = 10000
                                                , dens_res = 1000 # ignored as decimal degrees preds
-                                               , force_new = TRUE
+                                               #, force_new = TRUE
                                                )
                )
 
