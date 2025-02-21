@@ -261,7 +261,7 @@
         stats::na.omit()
 
       ## raster presence ------
-      # not limited to raster yet thought
+      # not limited to raster yet though
       prep$presence_ras <- if(pres_col %in% names(prep$pa_ras)) {
 
         prep$pa_ras |>
@@ -481,6 +481,14 @@
 
           start_dens_ras <- Sys.time()
 
+          # limit prep$pa_ras to predict_boundary
+          prep$pa_ras <- prep$pa_ras |>
+            envClean::filter_geo_range(use_aoi = prep$predict_boundary
+                                       , x = "x"
+                                       , y = "y"
+                                       , crs_df = sf::st_crs(prep$predict_boundary)
+                                       )
+
           if(all(!is.null(dens_res), !terra::is.lonlat(prep_preds[[1]]))) {
 
             # resolution of density raster < pred raster
@@ -579,12 +587,14 @@
           ## stretch-------
           target_density <- target_density %>%
             terra::stretch(1, stretch_value) %>%
-            terra::subst(NA,0)
+            terra::subst(NA, 0)
 
           if(FALSE) {
 
             terra::plot(prep_preds[[1]])
-            terra::plot(target_density, add = TRUE)
+            terra::plot(target_density
+                        , add = TRUE
+                        )
 
             ps <- prep$presence_ras %>%
               tibble::as_tibble() %>%
@@ -594,6 +604,10 @@
             terra::plot(ps, add = TRUE)
 
             terra::plot(prep$predict_boundary %>% terra::vect()
+                        , add = TRUE
+                        )
+
+            terra::plot(prep$bg_points %>% terra::vect()
                         , add = TRUE
                         )
 
@@ -753,13 +767,18 @@
 
           start_blocks <- Sys.time()
 
-          prep$testing <- prep$env %>%
-            dplyr::group_by(pa) %>%
-            dplyr::sample_frac(hold_prop) %>%
-            dplyr::ungroup()
+          to_split <- prep$env |>
+            dplyr::mutate(id = dplyr::row_number())
 
-          prep$training <- prep$env %>%
-            dplyr::anti_join(prep$testing)
+          prep$testing <- to_split %>%
+            dplyr::slice_sample(prop = hold_prop, by = pa)
+
+          prep$training <- to_split %>%
+            dplyr::anti_join(prep$testing
+                             , by = "id"
+                             )
+
+          rm(to_split)
 
           if(!all(spatial_folds, k_folds > 1)) {
 
@@ -772,8 +791,6 @@
             safe_cv_spatial <- purrr::safely(blockCV::cv_spatial)
 
             x <- prep$training %>%
-              dplyr::anti_join(prep$testing) %>%
-              na.omit() %>%
               dplyr::select(x, y, pa) %>%
               sf::st_as_sf(coords = c("x", "y")
                            , crs = sf::st_crs(prep_preds[[1]])
@@ -947,7 +964,7 @@
                                                   , y_col = "pa"
                                                   , imp_col = "1"
                                                   , thresh = reduce_env_thresh
-                                                  , remove_always = c(pres_x, pres_y, "x", "y", "pa", "block", "cell")
+                                                  , remove_always = c(pres_x, pres_y, "x", "y", "pa", "block", "cell", "id")
                                                   )
 
           readr::write_lines(paste0("reduce_env completed in: "
