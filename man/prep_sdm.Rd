@@ -9,6 +9,8 @@ prep_sdm(
   out_dir = FALSE,
   return_val = "path",
   presence,
+  pres_col = "pa",
+  pres_val = 1,
   pres_crs = 4326,
   pres_x = "long",
   pres_y = "lat",
@@ -47,6 +49,12 @@ the case of "path" the named list is simply list(prep = out_dir). Will be set
 to "object" if \code{out_dir} is FALSE.}
 
 \item{presence}{Dataframe of presences with columns \code{pres_x} and \code{pres_y}.}
+
+\item{pres_col}{Character. Name of column in \code{presence} that defines presence
+(\code{1}) or absence (\code{0}). Optional if only presence data is supplied.}
+
+\item{pres_val}{Numeric. Values in \code{pres_col} that represent presences.
+Optional if only presence data is supplied.}
 
 \item{pres_crs}{Anything that will return a legitimate crs when passed to the
 crs attribute of \code{sf::st_transform()} or \code{sf::st_as_sf()}.}
@@ -187,6 +195,11 @@ by user \href{https://gis.stackexchange.com/users/865/spacedman}{Spacedman}.
 \details{
 Options for managing memory are \code{terra_options}, \code{max_cells_in_memory} and
 \code{do_gc}.
+
+To help build the density raster for assigning background points, 'absence'
+data can be supplied in \code{presence} as \code{0} values. e.g. For a bird, absence
+data might be generated from other sites where birds were recorded but
+\code{this_taxa} was not.
 }
 \examples{
 
@@ -243,7 +256,7 @@ Options for managing memory are \code{terra_options}, \code{max_cells_in_memory}
                                                , pred_limit = d
                                                , limit_buffer = 10000
                                                , dens_res = 1000 # ignored as decimal degrees preds
-                                               #, force_new = F
+                                               , force_new = TRUE
                                                )
                )
 

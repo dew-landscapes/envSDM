@@ -1,12 +1,12 @@
 
 
 acaule
-predict process started at 2025-02-14 14:32:29.270945
+predict process started at 2025-02-21 13:01:40.887949
 predict window for acaule
 predict window created in 0 minutes
-predict for acaule from maxnet model with arguments: fc = lq, rm = 2
+predict for acaule from rf model with arguments: tr = 500, mt = 1, ns = 2
  out file will be pred.tif
 predict finished in 0 minutes
 predict mask for acaule
 predict mask created in 0 minutes
-predict process finished. elapsed time: 0.02 minutes
+predict process finished. elapsed time: 0.03 minutes
