@@ -778,25 +778,58 @@
             to_split <- prep$env |>
               dplyr::mutate(id = dplyr::row_number())
 
-            prep$testing <- to_split %>%
-              dplyr::slice_sample(prop = hold_prop, by = pa)
+            prep$testing <- tibble::tibble(pa = NA)
+            counter <- 0
 
-            prep$training <- to_split %>%
-              dplyr::anti_join(prep$testing
-                               , by = "id"
-                               )
+            # Try to get min_fold_n presences within prep$testing
+            while(any(sum(prep$testing$pa == 1, na.rm = TRUE) <= min_fold_n, counter <= 10)) {
 
-            rm(to_split)
+              prep$testing <- to_split %>%
+                dplyr::slice_sample(prop = hold_prop, by = pa)
 
-            readr::write_lines(paste0("test/training split\n"
-                                      , nrow(prep$testing), " test data, including "
-                                      , sum(prep$testing$pa == 1), "presences\n "
-                                      , nrow(prep$training), " training data, including "
-                                      , sum(prep$training$pa == 1), "presences\n"
-                                      )
-                               , file = log_file
-                               , append = TRUE
-                               )
+              counter <- counter + 1
+
+            }
+
+            # If still not enough presences in test - abandon
+            if(sum(prep$testing$pa == 1, na.rm = TRUE) <= min_fold_n) {
+
+              readr::write_lines(paste0("ERROR: not enough presences ("
+                                        , n_p
+                                        , ") to acheive min_fold_n ("
+                                        , min_fold_n
+                                        , ") in the test split with hold_prop of "
+                                        , hold_prop
+                                        , ". Try increasing hold_prop?"
+                                        )
+                                 , file = log_file
+                                 , append = TRUE
+                                 )
+
+              prep$abandoned <- TRUE
+
+            }
+
+            if(!prep$abandoned) {
+
+              prep$training <- to_split %>%
+                dplyr::anti_join(prep$testing
+                                 , by = "id"
+                                 )
+
+              rm(to_split)
+
+              readr::write_lines(paste0("test/training split\n"
+                                        , nrow(prep$testing), " test data, including "
+                                        , sum(prep$testing$pa == 1), "presences\n "
+                                        , nrow(prep$training), " training data, including "
+                                        , sum(prep$training$pa == 1), "presences\n"
+                                        )
+                                 , file = log_file
+                                 , append = TRUE
+                                 )
+
+            }
 
           } else {
 
@@ -812,129 +845,131 @@
 
           }
 
-          if(!all(spatial_folds, k_folds > 1)) {
+          if(!prep$abandoned) {
 
-            spatial_folds <- FALSE
-
-          } else {
-
-            ## spatial ------
-
-            safe_cv_spatial <- purrr::safely(blockCV::cv_spatial)
-
-            x <- prep$training %>%
-              dplyr::select(x, y, pa) %>%
-              sf::st_as_sf(coords = c("x", "y")
-                           , crs = sf::st_crs(prep_preds[[1]])
-                           )
-
-            block_dist <- prep$predict_boundary %>%
-              sf::st_as_sf() %>%
-              dplyr::summarise() %>%
-              sf::st_convex_hull() %>%
-              sf::st_area() %>%
-              as.numeric() %>%
-              sqrt() %>%
-              `/` (6)
-            # for a square MCP, this would give 6 blocks by 6 blocks
-
-            blocks <- safe_cv_spatial(x
-                                      , column = "pa"
-                                      #, r = prep_preds[[1]] # hashed out 2024-09-17
-                                      , k = k_folds
-                                      , size = block_dist
-                                      , iteration = 200
-                                      , selection = "random"
-                                      , extend = 0.5
-                                      , progress = FALSE
-                                      , report = FALSE
-                                      , plot = FALSE
-                                      )
-
-            if(!is.null(blocks$error)) {
-
-              readr::write_lines(paste0("error: "
-                                        , as.character(blocks$error)
-                                        , ". spatial_folds set to FALSE"
-                                        )
-                                 , file = log_file
-                                 , append = TRUE
-                                 )
+            if(!all(spatial_folds, k_folds > 1)) {
 
               spatial_folds <- FALSE
 
-              blocks <- NULL
-
             } else {
 
-              blocks <- blocks$result$folds_ids %>%
-                tibble::enframe(name = NULL, value = "fold_ids")
+              ## spatial ------
 
-            }
+              safe_cv_spatial <- purrr::safely(blockCV::cv_spatial)
 
-            if(!is.null(blocks)) {
+              x <- prep$training %>%
+                dplyr::select(x, y, pa) %>%
+                sf::st_as_sf(coords = c("x", "y")
+                             , crs = sf::st_crs(prep_preds[[1]])
+                             )
 
-              blocks_p <- blocks[prep$training$pa == 1,]
+              block_dist <- prep$predict_boundary %>%
+                sf::st_as_sf() %>%
+                dplyr::summarise() %>%
+                sf::st_convex_hull() %>%
+                sf::st_area() %>%
+                as.numeric() %>%
+                sqrt() %>%
+                `/` (6)
+              # for a square MCP, this would give 6 blocks by 6 blocks
 
-              if(any(c(table(blocks_p$fold_ids) < min_fold_n), length(setdiff(1:k_folds, unique(blocks_p$fold_ids))) > 0)) {
+              blocks <- safe_cv_spatial(x
+                                        , column = "pa"
+                                        #, r = prep_preds[[1]] # hashed out 2024-09-17
+                                        , k = k_folds
+                                        , size = block_dist
+                                        , iteration = 200
+                                        , selection = "random"
+                                        , extend = 0.5
+                                        , progress = FALSE
+                                        , report = FALSE
+                                        , plot = FALSE
+                                        )
 
-                how_many_below_thresh <- sum(purrr::map_dbl(1:k_folds, ~ sum(blocks_p$fold_ids == .)) < min_fold_n)
+              if(!is.null(blocks$error)) {
 
-                old_k_folds <- k_folds
-
-                k_folds <- old_k_folds - how_many_below_thresh
-
-                blocks_adj <- tibble::tibble(fold_ids = 1:old_k_folds) %>%
-                  dplyr::mutate(n = purrr::map_dbl(fold_ids, ~ sum(blocks_p$fold_ids == .))) %>%
-                  dplyr::mutate(fold_ids_adj = forcats::fct_lump_n(as.factor(fold_ids), k_folds - 1, w = n)) %>%
-                  dplyr::mutate(fold_ids_adj = as.numeric(fold_ids_adj)) %>%
-                  dplyr::distinct()
-
-                blocks <- blocks %>%
-                  dplyr::left_join(blocks_adj) %>%
-                  dplyr::mutate(fold_ids = fold_ids_adj) %>%
-                  dplyr::select(-fold_ids_adj, -n)
-
-                k_folds <- length(unique(blocks$fold_ids))
-
-                failed_blocks <- max(blocks_adj$fold_ids) - max(blocks_adj$fold_ids_adj)
-
-                if(max(blocks_adj$fold_ids_adj) == 1) {
-
-                  note <- paste0(failed_blocks
-                                 , " out of "
-                                 , nrow(blocks_adj)
-                                 , " blocks failed to reach "
-                                 , min_fold_n
-                                 , " presences, leaving only 1 block. Reverting to non-spatial cv"
-                                 )
-
-                  spatial_folds <- FALSE
-
-                } else {
-
-                  note <- paste0(failed_blocks
-                                 , " out of "
-                                 , nrow(blocks_adj)
-                                 , " blocks failed to reach "
-                                 , min_fold_n
-                                 , " presences. These were lumped until every block reached "
-                                 , min_fold_n
-                                 , " presences."
-                                 )
-
-                }
-
-                readr::write_lines(paste0("warning: ", note)
+                readr::write_lines(paste0("error: "
+                                          , as.character(blocks$error)
+                                          , ". spatial_folds set to FALSE"
+                                          )
                                    , file = log_file
                                    , append = TRUE
                                    )
 
+                spatial_folds <- FALSE
+
+                blocks <- NULL
+
+              } else {
+
+                blocks <- blocks$result$folds_ids %>%
+                  tibble::enframe(name = NULL, value = "fold_ids")
+
+              }
+
+              if(!is.null(blocks)) {
+
+                blocks_p <- blocks[prep$training$pa == 1,]
+
+                if(any(c(table(blocks_p$fold_ids) < min_fold_n), length(setdiff(1:k_folds, unique(blocks_p$fold_ids))) > 0)) {
+
+                  how_many_below_thresh <- sum(purrr::map_dbl(1:k_folds, ~ sum(blocks_p$fold_ids == .)) < min_fold_n)
+
+                  old_k_folds <- k_folds
+
+                  k_folds <- old_k_folds - how_many_below_thresh
+
+                  blocks_adj <- tibble::tibble(fold_ids = 1:old_k_folds) %>%
+                    dplyr::mutate(n = purrr::map_dbl(fold_ids, ~ sum(blocks_p$fold_ids == .))) %>%
+                    dplyr::mutate(fold_ids_adj = forcats::fct_lump_n(as.factor(fold_ids), k_folds - 1, w = n)) %>%
+                    dplyr::mutate(fold_ids_adj = as.numeric(fold_ids_adj)) %>%
+                    dplyr::distinct()
+
+                  blocks <- blocks %>%
+                    dplyr::left_join(blocks_adj) %>%
+                    dplyr::mutate(fold_ids = fold_ids_adj) %>%
+                    dplyr::select(-fold_ids_adj, -n)
+
+                  k_folds <- length(unique(blocks$fold_ids))
+
+                  failed_blocks <- max(blocks_adj$fold_ids) - max(blocks_adj$fold_ids_adj)
+
+                  if(max(blocks_adj$fold_ids_adj) == 1) {
+
+                    note <- paste0(failed_blocks
+                                   , " out of "
+                                   , nrow(blocks_adj)
+                                   , " blocks failed to reach "
+                                   , min_fold_n
+                                   , " presences, leaving only 1 block. Reverting to non-spatial cv"
+                                   )
+
+                    spatial_folds <- FALSE
+
+                  } else {
+
+                    note <- paste0(failed_blocks
+                                   , " out of "
+                                   , nrow(blocks_adj)
+                                   , " blocks failed to reach "
+                                   , min_fold_n
+                                   , " presences. These were lumped until every block reached "
+                                   , min_fold_n
+                                   , " presences."
+                                   )
+
+                  }
+
+                  readr::write_lines(paste0("warning: ", note)
+                                     , file = log_file
+                                     , append = TRUE
+                                     )
+
+                }
+
               }
 
             }
-
-          }
 
           if(any(!spatial_folds, k_folds == 1)) {
 
@@ -975,6 +1010,8 @@
                              , file = log_file
                              , append = TRUE
                              )
+
+          }
 
         }
 
