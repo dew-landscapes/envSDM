@@ -773,18 +773,44 @@
 
           start_blocks <- Sys.time()
 
-          to_split <- prep$env |>
-            dplyr::mutate(id = dplyr::row_number())
+          if(hold_prop > 0) {
 
-          prep$testing <- to_split %>%
-            dplyr::slice_sample(prop = hold_prop, by = pa)
+            to_split <- prep$env |>
+              dplyr::mutate(id = dplyr::row_number())
 
-          prep$training <- to_split %>%
-            dplyr::anti_join(prep$testing
-                             , by = "id"
-                             )
+            prep$testing <- to_split %>%
+              dplyr::slice_sample(prop = hold_prop, by = pa)
 
-          rm(to_split)
+            prep$training <- to_split %>%
+              dplyr::anti_join(prep$testing
+                               , by = "id"
+                               )
+
+            rm(to_split)
+
+            readr::write_lines(paste0("test/training split\n"
+                                      , nrow(prep$testing), " test data, including "
+                                      , sum(prep$testing$pa == 1), "presences\n "
+                                      , nrow(prep$training), " training data, including "
+                                      , sum(prep$training$pa == 1), "presences\n"
+                                      )
+                               , file = log_file
+                               , append = TRUE
+                               )
+
+          } else {
+
+            prep$training <- prep$env
+            prep$testing <- prep$env
+
+            readr::write_lines(paste0("WARNING: no test/training split\n"
+                                      , " full model will be tested against the same data that was used to train it!"
+                                      )
+                               , file = log_file
+                               , append = TRUE
+                               )
+
+          }
 
           if(!all(spatial_folds, k_folds > 1)) {
 
