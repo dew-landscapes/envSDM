@@ -52,6 +52,8 @@
                                                , pred_limit = d
                                                , limit_buffer = 10000
                                                , dens_res = 1000 # ignored as decimal degrees preds
+                                               , reduce_env_thresh_corr = 0.95
+                                               , reduce_env_quant_rf_imp = 0.2
                                                #, force_new = TRUE
                                                )
                )

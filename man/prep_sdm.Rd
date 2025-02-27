@@ -31,7 +31,8 @@ prep_sdm(
   hold_prop = 0.3,
   stretch_value = 10,
   dens_res = 1000,
-  reduce_env_thresh = 0.9,
+  reduce_env_thresh_corr = 0.9,
+  reduce_env_quant_rf_imp = 0.2,
   do_gc = FALSE,
   force_new = FALSE
 )
@@ -119,10 +120,13 @@ to use to validate the final model.}
 \item{dens_res}{\code{NULL} or numeric. Resolution (in metres) of density raster.
 Set to \code{NULL} to use the same resolution as the predictors.}
 
-\item{reduce_env_thresh}{Numeric. Threshold used to flag highly correlated
-and low importance variables. Set to 0 to skip this step. If > 0, highly
+\item{reduce_env_thresh_corr}{Numeric. Threshold used to flag highly
+correlated variables. Set to 1 to skip this step. If > 0, highly
 correlated and low importance variables will be removed. In the case of
 highly correlated pairs of variables, only one is removed.}
+
+\item{reduce_env_quant_rf_imp}{Numeric. Bottom quantile of importance values
+to drop.}
 
 \item{do_gc}{Logical. Run \code{base::rm(list = ls)} and \code{base::gc()} at end of
 function? Useful when running SDMs for many, many taxa, especially if done in
@@ -256,7 +260,9 @@ data might be generated from other sites where birds were recorded but
                                                , pred_limit = d
                                                , limit_buffer = 10000
                                                , dens_res = 1000 # ignored as decimal degrees preds
-                                               , force_new = TRUE
+                                               , reduce_env_thresh_corr = 0.95
+                                               , reduce_env_quant_rf_imp = 0.2
+                                               #, force_new = TRUE
                                                )
                )
 

@@ -52,6 +52,8 @@ by user <a href="https://gis.stackexchange.com/users/865/spacedman" class="exter
 <span>  out_dir <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  return_val <span class="op">=</span> <span class="st">"path"</span>,</span>
 <span>  <span class="va">presence</span>,</span>
+<span>  pres_col <span class="op">=</span> <span class="st">"pa"</span>,</span>
+<span>  pres_val <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  pres_crs <span class="op">=</span> <span class="fl">4326</span>,</span>
 <span>  pres_x <span class="op">=</span> <span class="st">"long"</span>,</span>
 <span>  pres_y <span class="op">=</span> <span class="st">"lat"</span>,</span>
@@ -72,7 +74,8 @@ by user <a href="https://gis.stackexchange.com/users/865/spacedman" class="exter
 <span>  hold_prop <span class="op">=</span> <span class="fl">0.3</span>,</span>
 <span>  stretch_value <span class="op">=</span> <span class="fl">10</span>,</span>
 <span>  dens_res <span class="op">=</span> <span class="fl">1000</span>,</span>
-<span>  reduce_env_thresh <span class="op">=</span> <span class="fl">0.9</span>,</span>
+<span>  reduce_env_thresh_corr <span class="op">=</span> <span class="fl">0.9</span>,</span>
+<span>  reduce_env_quant_rf_imp <span class="op">=</span> <span class="fl">0.2</span>,</span>
 <span>  do_gc <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  force_new <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -101,6 +104,16 @@ to "object" if <code>out_dir</code> is FALSE.</p></dd>
 
 <dt id="arg-presence">presence<a class="anchor" aria-label="anchor" href="#arg-presence"></a></dt>
 <dd><p>Dataframe of presences with columns <code>pres_x</code> and <code>pres_y</code>.</p></dd>
+
+
+<dt id="arg-pres-col">pres_col<a class="anchor" aria-label="anchor" href="#arg-pres-col"></a></dt>
+<dd><p>Character. Name of column in <code>presence</code> that defines presence
+(<code>1</code>) or absence (<code>0</code>). Optional if only presence data is supplied.</p></dd>
+
+
+<dt id="arg-pres-val">pres_val<a class="anchor" aria-label="anchor" href="#arg-pres-val"></a></dt>
+<dd><p>Numeric. Values in <code>pres_col</code> that represent presences.
+Optional if only presence data is supplied.</p></dd>
 
 
 <dt id="arg-pres-crs">pres_crs<a class="anchor" aria-label="anchor" href="#arg-pres-crs"></a></dt>
@@ -204,11 +217,16 @@ to use to validate the final model.</p></dd>
 Set to <code>NULL</code> to use the same resolution as the predictors.</p></dd>
 
 
-<dt id="arg-reduce-env-thresh">reduce_env_thresh<a class="anchor" aria-label="anchor" href="#arg-reduce-env-thresh"></a></dt>
-<dd><p>Numeric. Threshold used to flag highly correlated
-and low importance variables. Set to 0 to skip this step. If &gt; 0, highly
+<dt id="arg-reduce-env-thresh-corr">reduce_env_thresh_corr<a class="anchor" aria-label="anchor" href="#arg-reduce-env-thresh-corr"></a></dt>
+<dd><p>Numeric. Threshold used to flag highly
+correlated variables. Set to 1 to skip this step. If &gt; 0, highly
 correlated and low importance variables will be removed. In the case of
 highly correlated pairs of variables, only one is removed.</p></dd>
+
+
+<dt id="arg-reduce-env-quant-rf-imp">reduce_env_quant_rf_imp<a class="anchor" aria-label="anchor" href="#arg-reduce-env-quant-rf-imp"></a></dt>
+<dd><p>Numeric. Bottom quantile of importance values
+to drop.</p></dd>
 
 
 <dt id="arg-do-gc">do_gc<a class="anchor" aria-label="anchor" href="#arg-do-gc"></a></dt>
@@ -251,7 +269,7 @@ points</p></li>
 the <code>spatial_folds</code> argument provided to <code>prep_sdm()</code> if an attempt to
 use spatial folds failed to meet desired <code>folds</code> and <code>min_fold_n</code></p></li>
 </ul></li>
-<li><p>correlated:</p><ul><li><p>list with elements as per <code><a href="https://dew-landscapes.github.io/envModel/reference/reduce_env.html" class="external-link">envModel::reduce_env()</a></code>, or, if
+<li><p>correlated:</p><ul><li><p>list with elements as per <code><a href="https://acanthiza.github.io/envModel/reference/reduce_env.html" class="external-link">envModel::reduce_env()</a></code>, or, if
 <code>reduce_env</code> is <code>FALSE</code>, a list with elements <code>remove_env</code> which is
 empty, and <code>env_var</code> and <code>keep</code>, which both contain the names of all
 predictors.</p></li>
@@ -261,6 +279,10 @@ predictors.</p></li>
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>Options for managing memory are <code>terra_options</code>, <code>max_cells_in_memory</code> and
 <code>do_gc</code>.</p>
+<p>To help build the density raster for assigning background points, 'absence'
+data can be supplied in <code>presence</code> as <code>0</code> values. e.g. For a bird, absence
+data might be generated from other sites where birds were recorded but
+<code>this_taxa</code> was not.</p>
     </div>
 
     <div class="section level2">
@@ -319,7 +341,9 @@ predictors.</p></li>
 <span class="r-in"><span>                                               , pred_limit <span class="op">=</span> <span class="va">d</span></span></span>
 <span class="r-in"><span>                                               , limit_buffer <span class="op">=</span> <span class="fl">10000</span></span></span>
 <span class="r-in"><span>                                               , dens_res <span class="op">=</span> <span class="fl">1000</span> <span class="co"># ignored as decimal degrees preds</span></span></span>
-<span class="r-in"><span>                                               <span class="co">#, force_new = F</span></span></span>
+<span class="r-in"><span>                                               , reduce_env_thresh_corr <span class="op">=</span> <span class="fl">0.95</span></span></span>
+<span class="r-in"><span>                                               , reduce_env_quant_rf_imp <span class="op">=</span> <span class="fl">0.2</span></span></span>
+<span class="r-in"><span>                                               <span class="co">#, force_new = TRUE</span></span></span>
 <span class="r-in"><span>                                               <span class="op">)</span></span></span>
 <span class="r-in"><span>               <span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
@@ -328,15 +352,15 @@ predictors.</p></li>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">prep</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [1] "abandoned"          "finished"           "this_taxa"         </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [4] "original"           "presence_ras"       "predict_boundary"  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [7] "bg_points"          "env"                "testing"           </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [10] "training"           "blocks"             "spatial_folds_used"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [13] "reduce_env"         "log"               </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [4] "original"           "pa_ras"             "presence_ras"      </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [7] "predict_boundary"   "bg_points"          "env"               </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [10] "testing"            "training"           "blocks"            </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [13] "spatial_folds_used" "reduce_env"         "log"               </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>  <span class="co"># env variables to remove prior to SDM</span></span></span>
 <span class="r-in"><span>  <span class="va">prep</span><span class="op">$</span><span class="va">reduce_env</span><span class="op">$</span><span class="va">remove</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [1] "bio1"  "bio17" "bio9"  "block" "cell"  "lat"   "lon"   "pa"    "x"    </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [10] "y"    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [1] "bio1"  "bio17" "bio9"  "block" "cell"  "id"    "lat"   "lon"   "pa"   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [10] "x"     "y"    </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>  <span class="co"># Density raster</span></span></span>
 <span class="r-in"><span>  <span class="va">dens_ras</span> <span class="op">&lt;-</span> <span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rspatial.github.io/terra/reference/rast.html" class="external-link">rast</a></span><span class="op">(</span><span class="fu">fs</span><span class="fu">::</span><span class="fu"><a href="https://fs.r-lib.org/reference/path.html" class="external-link">path</a></span><span class="op">(</span><span class="va">data</span><span class="op">$</span><span class="va">taxa_dir</span><span class="op">[[</span><span class="fl">2</span><span class="op">]</span><span class="op">]</span>, <span class="st">"density.tif"</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>

@@ -124,8 +124,9 @@ Tune, and evaluate, species distribution models
                               , rm = c(2, 3)
                               , trees = 500
                               , mtry = c(1:3)
-                              , nodesize = 2
-                              #, force_new = TRUE
+                              , nodesize = c(1, 2, 3)
+                              , limit_p = 3
+                              # , force_new = TRUE
                               )
               )
 
