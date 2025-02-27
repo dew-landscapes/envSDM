@@ -69,10 +69,12 @@
 #' @param stretch_value Numeric. Stretch the density raster to this value.
 #' @param dens_res `NULL` or numeric. Resolution (in metres) of density raster.
 #' Set to `NULL` to use the same resolution as the predictors.
-#' @param reduce_env_thresh Numeric. Threshold used to flag highly correlated
-#' and low importance variables. Set to 0 to skip this step. If > 0, highly
+#' @param reduce_env_thresh_corr Numeric. Threshold used to flag highly
+#' correlated variables. Set to 1 to skip this step. If > 0, highly
 #' correlated and low importance variables will be removed. In the case of
 #' highly correlated pairs of variables, only one is removed.
+#' @param reduce_env_quant_rf_imp Numeric. Bottom quantile of importance values
+#' to drop.
 #' @param hold_prop Numeric. Proportion of data to be held back from training
 #' to use to validate the final model.
 #' @param do_gc Logical. Run `base::rm(list = ls)` and `base::gc()` at end of
@@ -144,7 +146,8 @@
                        , hold_prop = 0.3
                        , stretch_value = 10
                        , dens_res = 1000
-                       , reduce_env_thresh = 0.9
+                       , reduce_env_thresh_corr = 0.9
+                       , reduce_env_quant_rf_imp = 0.2
                        , do_gc = FALSE
                        , force_new = FALSE
                        ) {
@@ -1020,7 +1023,10 @@
 
       # reduce env -------
 
-      if(all(as.logical(reduce_env_thresh), !prep$abandoned)) {
+      if(all(!is.null(reduce_env_thresh_corr) | !is.null(reduce_env_quant_rf_imp)
+             , !prep$abandoned
+             )
+         ) {
 
         run <- if(exists("reduce_env", prep)) force_new else TRUE
 
@@ -1032,13 +1038,17 @@
                                                   , env_cols = names(prep_preds)
                                                   , y_col = "pa"
                                                   , imp_col = "1"
-                                                  , thresh = reduce_env_thresh
+                                                  , thresh_corr = reduce_env_thresh_corr
+                                                  , quant_rf_imp = reduce_env_quant_rf_imp
                                                   , remove_always = c(pres_x, pres_y, "x", "y", "pa", "block", "cell", "id")
                                                   )
 
           readr::write_lines(paste0("reduce_env completed in: "
                                     , round(difftime(Sys.time(), start_reduce_env, units = "mins"), 2)
-                                    , " minutes"
+                                    , " minutes. Original "
+                                    , length(names(prep_preds))
+                                    , " variables reduced to "
+                                    , length(prep$reduce_env$keep)
                                     )
                              , file = log_file
                              , append = TRUE
