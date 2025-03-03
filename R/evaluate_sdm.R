@@ -67,6 +67,7 @@
 
       e_fsdm <- flexsdm::sdm_eval(p[p$p == 1, 1][[1]]
                                  , p[p$p == 0, 1][[1]]
+                                 , thr = c("sensitivity", sens = "0.9")
                                  )
 
       e@stats$auc_po <- e@stats$auc
@@ -74,6 +75,9 @@
       e@stats$CBI <- mean(e_fsdm$BOYCE, na.rm = TRUE)
       e@stats$CBI_rescale <- (e@stats$CBI + 1) / 2
       e@stats$IMAE <- mean(e_fsdm$IMAE, na.rm = TRUE)
+
+      # 10% omission rate
+      e@thresholds$or10 <- e@tr_stats$treshold[which.min(abs(e@tr_stats$TPR - 0.9))]
 
       if(do_gc) {
 
