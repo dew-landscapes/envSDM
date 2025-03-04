@@ -422,9 +422,11 @@
               start_envelope <- Sys.time()
 
               tune$tune_envelope <- start_df %>%
-                dplyr::mutate(m = purrr::map(data_train
-                                             , function(x) predicts::envelope(x = x)
-                                             )
+                dplyr::mutate(m = purrr::map2(pa_train
+                                              , data_train
+                                              # Only allow presences into envelope
+                                              , \(x, y) predicts::envelope(y[x == 1,])
+                                              )
                               , tune_args = "none"
                               , e = purrr::pmap(list(m
                                                      , p_data_test
