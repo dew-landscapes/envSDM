@@ -2,17 +2,9 @@
 
 acaule
 best_run = FALSE
-tune start 2025-02-26 18:16:09.906721
-4 out of 9 variables will be used
-maxnet tune finished in: 0.91 minutes
+tune start 2025-03-04 17:44:54.735479
+6 out of 9 variables will be used
+maxnet tune finished in: 0.99 minutes
 envelope tune finished in: 0.08 minutes
-rf tune finished in: 0.98 minutes
-
-
-acaule
-best_run = FALSE
-tune start 2025-02-26 18:19:10.422288
-4 out of 9 variables will be used
-maxnet tune finished in: 0.85 minutes
-envelope tune finished in: 0.08 minutes
-rf tune finished in: 0.88 minutes
+rf tune finished in: 1.15 minutes
+tune abandoned
