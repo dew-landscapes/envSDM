@@ -11,6 +11,9 @@
 #' the case of "path" the named list is simply list(tune = out_dir). Will be set
 #' to "object" if `out_dir` is FALSE.
 #' @param algo Character. Name of algorithm to use.
+#' @param max_corr Named list. Names of list elements must match algorithms
+#' being used. For each pair of predictor variables correlated at or above
+#' `max_corr` one will be dropped using `caret::findCorrelation()`.
 #' @param fc Character. Used to generate levels of `classes` argument to
 #' `maxnet::maxnet()` that are tuned.
 #' @param limit_p `TRUE`, `FALSE` or number of predictor variables above which
@@ -64,7 +67,8 @@
   tune_sdm <- function(prep
                        , out_dir = FALSE
                        , return_val = "path"
-                       , algo = c("all", "maxnet", "bioclim", "envelope", "rf") # envelope = bioclim
+                       , algo = c("all", "maxnet", "envelope", "rf")
+                       , max_corr = list(maxnet = 0.7, envelope = 0.9, rf = 0.99)
                        , fc = "auto_feature" # maxnet tune
                        , limit_p = FALSE # T, F or number of preds above which to limit p
                        , rm = seq(1, 6, 0.5) # maxnet tune
@@ -157,213 +161,309 @@
                            )
 
 
-          ## setup ------
+        ## setup ------
 
-          nobs <- nrow(prep$blocks[prep$blocks$pa == 1,])
+        nobs <- nrow(prep$blocks[prep$blocks$pa == 1,])
 
-          ## start data frame -----
+        ## start data frame -----
 
-          if(best_run) {
+        if(best_run) {
 
-            old_prep_block <- prep$blocks$block
+          old_prep_block <- prep$blocks$block
 
-            prep$blocks$block <- 1
+          prep$blocks$block <- 1
 
-          }
+        }
 
-          single_block <- if(length(unique(prep$blocks[prep$blocks$pa == 1,]$block)) == 1) TRUE else FALSE
+        single_block <- if(length(unique(prep$blocks[prep$blocks$pa == 1,]$block)) == 1) TRUE else FALSE
 
-          preds <- prep$reduce_env$env_cols[prep$reduce_env$env_cols %in% prep$reduce_env$keep]
+        # correlation -------
+        if(!is.null(max_corr)) {
 
-          readr::write_lines(paste0(length(preds)
-                                    , " out of "
-                                    , length(prep$reduce_env$env_cols)
-                                    , " variables will be used"
-                                    )
-                             , file = log_file
-                             , append = TRUE
-                             )
+          preds <- purrr::map(max_corr
+                              , \(x) prep$reduce_env$env_corr |>
+                                caret::findCorrelation(cutoff = x
+                                                       , names = TRUE
+                                                       #, verbose = TRUE
+                                                       , exact = TRUE
+                                                       )
+                              ) |>
+            purrr::map(\(x) prep$reduce_env$env_cols[! prep$reduce_env$env_cols %in% x])
 
-          p <- prep$blocks$pa
+        } else {
 
-          data <- prep$blocks %>%
-            dplyr::select(tidyselect::any_of(preds))
+          preds <- purrr::map(algo
+                              , \(x) prep$reduce_env$env_cols[prep$reduce_env$env_cols %in% prep$reduce_env$keep]
+                              ) |>
+            purrr::set_names(algo)
 
-          # start_df --------
-          start_df <- tibble::tibble(k = sort(unique(prep$blocks$block))) %>%
-            dplyr::mutate(ids = if(any(best_run, single_block)) purrr::map(k, ~prep$blocks$block == .) else purrr::map(k, ~ prep$blocks$block != .)
-                          , pa_train = purrr::map(ids, \(a) p[a])
-                          , data_train = purrr::map(ids, \(a) data[a,])
-                          , p_data_test = purrr::map(k
-                                                     , \(a) prep$blocks %>%
-                                                       dplyr::filter(p == 1
-                                                                     , block == a
-                                                                     ) %>%
-                                                       dplyr::select(tidyselect::any_of(preds)) %>%
-                                                       as.data.frame()
-                                                     )
-                          , a_data_test = purrr::map(k
-                                                     , \(a) prep$blocks %>%
-                                                       dplyr::filter(p == 0
-                                                                     , block == a
-                                                                     ) %>%
-                                                       dplyr::select(tidyselect::any_of(preds)) %>%
-                                                       as.data.frame()
-                                                     )
-                          , n_p_test = purrr::map_dbl(p_data_test
-                                                      , nrow
+        }
+
+        readr::write_lines(paste0(purrr::imap(preds
+                                              , \(x, idx) paste0(length(x)
+                                                                 , " out of "
+                                                                 , length(prep$reduce_env$env_cols)
+                                                                 , " variables will be used for "
+                                                                 , idx
+                                                                 )
+                                              )
+                                  , collapse = "\n"
+                                  )
+                           , file = log_file
+                           , append = TRUE
+                           )
+
+        p <- prep$blocks$pa
+
+        data <- prep$blocks %>%
+          dplyr::select(tidyselect::any_of(prep$reduce_env$env_cols))
+
+        # start_df --------
+        start_df <- tibble::tibble(k = sort(unique(prep$blocks$block))) %>%
+          dplyr::mutate(ids = if(any(best_run, single_block)) purrr::map(k, ~prep$blocks$block == .) else purrr::map(k, ~ prep$blocks$block != .)
+                        , pa_train = purrr::map(ids, \(a) p[a])
+                        , data_train = purrr::map(ids, \(a) data[a,])
+                        , p_data_test = purrr::map(k
+                                                   , \(a) prep$blocks %>%
+                                                     dplyr::filter(p == 1
+                                                                   , block == a
+                                                                   ) %>%
+                                                     dplyr::select(tidyselect::any_of(prep$reduce_env$env_cols)) %>%
+                                                     as.data.frame()
+                                                   )
+                        , a_data_test = purrr::map(k
+                                                   , \(a) prep$blocks %>%
+                                                     dplyr::filter(p == 0
+                                                                   , block == a
+                                                                   ) %>%
+                                                     dplyr::select(tidyselect::any_of(prep$reduce_env$env_cols)) %>%
+                                                     as.data.frame()
+                                                   )
+                        , n_p_test = purrr::map_dbl(p_data_test
+                                                    , nrow
+                                                    )
+                        , n_p_train = purrr::map_dbl(pa_train, \(x) sum(x == 1))
+                        , n_a_train = purrr::map2_dbl(data_train
+                                                      , n_p_train
+                                                      , \(x, y) nrow(x) - y
                                                       )
-                          , n_p_train = purrr::map_dbl(pa_train, \(x) sum(x == 1))
-                          , n_a_train = purrr::map2_dbl(data_train
-                                                        , n_p_train
-                                                        , \(x, y) nrow(x) - y
-                                                        )
-                          # 'hack' to ensure min of p's and a's is used (as n_p_train)
-                          , n_p_train = purrr::map2_dbl(n_p_train
-                                                        , n_a_train
-                                                        , \(x, y) min(x, y)
-                                                        )
-                          ) %>%
-            dplyr::filter(n_p_test > 0)
+                        # 'hack' to ensure min of p's and a's is used (as n_p_train)
+                        , n_p_train = purrr::map2_dbl(n_p_train
+                                                      , n_a_train
+                                                      , \(x, y) min(x, y)
+                                                      )
+                        ) %>%
+          dplyr::filter(n_p_test > 0)
 
-          if(best_run) {
+        if(best_run) {
 
-            # testing set --------
-            start_df <- start_df %>%
-              dplyr::mutate(p_data_test = list(prep$testing %>%
-                                                 dplyr::filter(pa == 1) %>%
-                                                 dplyr::select(tidyselect::any_of(preds)) %>%
+          # testing set --------
+          start_df <- start_df %>%
+            dplyr::mutate(p_data_test = list(prep$testing %>%
+                                               dplyr::filter(pa == 1) %>%
+                                               dplyr::select(tidyselect::any_of(prep$reduce_env$env_cols)) %>%
+                                               as.data.frame()
+                                             )
+                          , a_data_test = list(prep$testing %>%
+                                                 dplyr::filter(pa == 0) %>%
+                                                 dplyr::select(tidyselect::any_of(prep$reduce_env$env_cols)) %>%
                                                  as.data.frame()
                                                )
-                            , a_data_test = list(prep$testing %>%
-                                                   dplyr::filter(pa == 0) %>%
-                                                   dplyr::select(tidyselect::any_of(preds)) %>%
-                                                   as.data.frame()
-                                                 )
-                            , n_a_train = sum(prep$testing$pa == 1)
-                            )
+                          , n_a_train = sum(prep$testing$pa == 1)
+                          )
 
 
-          }
+        }
 
-          ## tune maxnet------
+        ## tune maxnet------
 
-          if(any(c("all", "maxnet") %in% algo)) {
+        if(any(c("all", "maxnet") %in% algo)) {
 
-            run <- if(exists("tune_maxnet", tune, inherits = FALSE)) force_new else TRUE
+          run <- if(exists("tune_maxnet", tune, inherits = FALSE)) force_new else TRUE
 
-            if(run) {
+          if(run) {
 
-              message("maxnet tune")
-              start_maxnet <- Sys.time()
+            message("maxnet tune")
+            start_maxnet <- Sys.time()
 
-              ### fc --------
-              # check auto_features
-              if (any(c(fc == "auto_feature", c("Q", "P", "T", "H") %in% fc))) {
+            ### fc --------
+            # check auto_features
+            if (any(c(fc == "auto_feature", c("Q", "P", "T", "H") %in% fc))) {
 
-                if(any(grepl("auto_feature", fc))) fc <- c("L", "Q", "H", "LQ", "QH", "LQP", "QHP", "LQHP")
+              if(any(grepl("auto_feature", fc))) fc <- c("L", "Q", "H", "LQ", "QH", "LQP", "QHP", "LQHP")
 
-                # set fc based on number of obs
-                if (nobs <= 10) {
-                  fc <- fc[fc %in% "L"] # only linear if less than 10 recs
-                } else if (nobs <= 15) {
-                  fc <- fc[fc %in% c("L", "Q", "LQ")]
-                } else if (nobs < 80) {
-                  fc <- fc[fc %in% c("L", "Q", "LQ", "LH", "QH", "LQH")]
-                }
+              # set fc based on number of obs
+              if (nobs <= 10) {
+                fc <- fc[fc %in% "L"] # only linear if less than 10 recs
+              } else if (nobs <= 15) {
+                fc <- fc[fc %in% c("L", "Q", "LQ")]
+              } else if (nobs < 80) {
+                fc <- fc[fc %in% c("L", "Q", "LQ", "LH", "QH", "LQH")]
+              }
+            }
+
+            # make sure any fc's requested are unique and H and T aren't both specified
+            fc <- unique(fc)
+
+            # if threshold AND hinge requested, keep hinge only
+            if (all(any(grepl(pattern = "H", fc)), any(grepl(pattern = "T", fc)))) {
+              # remove T
+              fc <- unique(gsub("T", "", fc))
+              # remove any empty
+              fc <- fc[nchar(fc) > 0]
+            }
+
+            ## limit_p ------
+            # if limit_p, ensure p not in fc
+            if(!isFALSE(limit_p)) {
+
+              # Only limit if too many preds, or limit_p is TRUE
+              if(is.numeric(limit_p)) {
+
+                remove_p <- length(preds$maxnet) >= limit_p
+
+              } else if(isTRUE(limit_p)) {
+
+                remove_p <- TRUE
+
+              } else {
+
+                stop("limit_p must be TRUE, FALSE or numeric. current vaule is: "
+                     , limit_p
+                     )
+
               }
 
-              # make sure any fc's requested are unique and H and T aren't both specified
-              fc <- unique(fc)
-
-              # if threshold AND hinge requested, keep hinge only
-              if (all(any(grepl(pattern = "H", fc)), any(grepl(pattern = "T", fc)))) {
-                # remove T
-                fc <- unique(gsub("T", "", fc))
+              if(remove_p) {
+                # remove P
+                fc <- unique(gsub("P", "", fc))
                 # remove any empty
                 fc <- fc[nchar(fc) > 0]
               }
 
-              ## limit_p ------
-              # if limit_p, ensure p not in fc
-              if(!isFALSE(limit_p)) {
+            }
 
-                # Only limit if too many preds, or limit_p is TRUE
-                if(is.numeric(limit_p)) {
+            safe_maxnet <- purrr::safely(maxnet::maxnet)
 
-                  remove_p <- length(preds) > limit_p
+            tune_maxnet <- start_df %>%
+              dplyr::mutate(data_train = purrr::map(data_train, \(x) x[names(x) %in% preds$maxnet])) |>
+              dplyr::cross_join(tibble::tibble(fc = tolower(fc))) %>%
+              dplyr::cross_join(tibble::tibble(rm = rm)) %>%
+              dplyr::mutate(tune_args = paste0("fc: ", fc
+                                               , ". rm: ", rm
+                                               )
+                            , m = purrr::pmap(list(pa_train
+                                                   , data_train
+                                                   , fc
+                                                   , rm
+                                                   )
+                                            , \(a, b, c, d) safe_maxnet(p = a
+                                                                        , data = b
+                                                                        , f = maxnet::maxnet.formula(p = a
+                                                                                                      , data = b
+                                                                                                      , classes = c
+                                                                                                     )
+                                                                        , regmult = d
+                                                                        )
+                                            )
+                            )
 
-                } else if(isTRUE(limit_p)) {
+            probs <- tune_maxnet %>%
+              dplyr::mutate(err = purrr::map(m, "error")) %>%
+              dplyr::filter(purrr::map_lgl(err, \(x) !is.null(x)))
 
-                  remove_p <- TRUE
+            if(nrow(probs)) {
 
-                } else {
+              purrr::map2(probs$err
+                          , probs$tune_args
+                          , \(a, b) {
+                            readr::write_lines(paste0("error with tune_args "
+                                                      , b
+                                                      , ": "
+                                                      , as.character(a)
+                                                      )
+                                               , file = log_file
+                                               , append = TRUE
+                                               )
+                            }
+                         )
 
-                  stop("limit_p must be TRUE, FALSE or numeric. current vaule is: "
-                       , limit_p
-                       )
+            }
 
-                }
-
-                if(remove_p) {
-                  # remove P
-                  fc <- unique(gsub("P", "", fc))
-                  # remove any empty
-                  fc <- fc[nchar(fc) > 0]
-                }
-
-              }
-
-              safe_maxnet <- purrr::safely(maxnet::maxnet)
-
-              tune_maxnet <- start_df %>%
-                dplyr::cross_join(tibble::tibble(fc = tolower(fc))) %>%
-                dplyr::cross_join(tibble::tibble(rm = rm)) %>%
-                dplyr::mutate(tune_args = paste0("fc: ", fc
-                                                 , ". rm: ", rm
+            tune$tune_maxnet <- tune_maxnet %>%
+              dplyr::mutate(m = purrr::map(m, "result")) %>%
+              dplyr::filter(purrr::map_lgl(m, \(x) !is.null(x))) %>%
+              dplyr::mutate(e = purrr::pmap(list(m
+                                                 , p_data_test
+                                                 , a_data_test
                                                  )
-                              , m = purrr::pmap(list(pa_train
-                                                     , data_train
-                                                     , fc
-                                                     , rm
-                                                     )
-                                              , \(a, b, c, d) safe_maxnet(p = a
-                                                                          , data = b
-                                                                          , f = maxnet::maxnet.formula(p = a
-                                                                                                        , data = b
-                                                                                                        , classes = c
-                                                                                                       )
-                                                                          , regmult = d
-                                                                          )
-                                              )
-                              )
+                                            , \(a, b, c) evaluate_sdm(a, b, c
+                                                                      , ...
+                                                                      , do_gc = do_gc
+                                                                      )
+                                            )
+                            )
 
-              probs <- tune_maxnet %>%
-                dplyr::mutate(err = purrr::map(m, "error")) %>%
-                dplyr::filter(purrr::map_lgl(err, \(x) !is.null(x)))
+            null_e <- purrr::map_lgl(tune$tune_maxnet$e, \(x) is.null(x))
 
-              if(nrow(probs)) {
+            if(sum(null_e)) {
 
-                purrr::map2(probs$err
-                            , probs$tune_args
-                            , \(a, b) {
-                              readr::write_lines(paste0("error with tune_args "
-                                                        , b
-                                                        , ": "
-                                                        , as.character(a)
-                                                        )
-                                                 , file = log_file
-                                                 , append = TRUE
-                                                 )
-                              }
-                           )
+              null_e_tune <- envFunc::vec_to_sentence(unique(tune$tune_maxnet$tune_args[null_e]))
+              blocks <- envFunc::vec_to_sentence(unique(tune$tune_maxnet$k[null_e]))
 
-              }
+              readr::write_lines(paste0("warning. tune_args: "
+                                        , null_e_tune
+                                        , " failed to predict ("
+                                        , sum(null_e)
+                                        , " out of "
+                                        , nrow(tune$tune_maxnet)
+                                        , " total tunes) in block(s) "
+                                        , blocks
+                                        )
+                               , file = log_file
+                               , append = TRUE
+                               )
 
-              tune$tune_maxnet <- tune_maxnet %>%
-                dplyr::mutate(m = purrr::map(m, "result")) %>%
-                dplyr::filter(purrr::map_lgl(m, \(x) !is.null(x))) %>%
-                dplyr::mutate(e = purrr::pmap(list(m
+            }
+
+            tune$tune_maxnet <- tune$tune_maxnet %>%
+              dplyr::filter(purrr::map_lgl(e, \(x) ! is.null(x))) %>%
+              {if(keep_model) (.) %>% dplyr::select(! dplyr::where(is.list), m, e) else (.) %>% dplyr::select(! dplyr::where(is.list), e)}
+
+            readr::write_lines(paste0("maxnet tune finished in: "
+                                      , round(difftime(Sys.time(), start_maxnet, units = "mins"), 2)
+                                      , " minutes"
+                                      )
+                               , file = log_file
+                               , append = TRUE
+                               )
+
+          }
+
+        }
+
+
+        ## tune envelope -------
+
+        if(any(c("all", "envelope") %in% algo)) {
+
+          run <- if(exists("tune_envelope", tune, inherits = FALSE)) force_new else TRUE
+
+          if(run) {
+
+            message("envelope tune")
+
+            start_envelope <- Sys.time()
+
+            tune$tune_envelope <- start_df %>%
+              dplyr::mutate(data_train = purrr::map(data_train, \(x) x[names(x) %in% preds$envelope])) |>
+              dplyr::mutate(m = purrr::map2(pa_train
+                                            , data_train
+                                            # Only allow presences into envelope
+                                            , \(x, y) predicts::envelope(y[x == 1,])
+                                            )
+                            , tune_args = "none"
+                            , e = purrr::pmap(list(m
                                                    , p_data_test
                                                    , a_data_test
                                                    )
@@ -372,196 +472,128 @@
                                                                         , do_gc = do_gc
                                                                         )
                                               )
-                              )
+                            ) %>%
+              {if(keep_model) (.) %>% dplyr::select(! dplyr::where(is.list), m, e) else (.) %>% dplyr::select(! dplyr::where(is.list), e)}
 
-              null_e <- purrr::map_lgl(tune$tune_maxnet$e, \(x) is.null(x))
-
-              if(sum(null_e)) {
-
-                null_e_tune <- envFunc::vec_to_sentence(unique(tune$tune_maxnet$tune_args[null_e]))
-                blocks <- envFunc::vec_to_sentence(unique(tune$tune_maxnet$k[null_e]))
-
-                readr::write_lines(paste0("warning. tune_args: "
-                                          , null_e_tune
-                                          , " failed to predict ("
-                                          , sum(null_e)
-                                          , " out of "
-                                          , nrow(tune$tune_maxnet)
-                                          , " total tunes) in block(s) "
-                                          , blocks
-                                          )
-                                 , file = log_file
-                                 , append = TRUE
-                                 )
-
-              }
-
-              tune$tune_maxnet <- tune$tune_maxnet %>%
-                dplyr::filter(purrr::map_lgl(e, \(x) ! is.null(x))) %>%
-                {if(keep_model) (.) %>% dplyr::select(! dplyr::where(is.list), m, e) else (.) %>% dplyr::select(! dplyr::where(is.list), e)}
-
-              readr::write_lines(paste0("maxnet tune finished in: "
-                                        , round(difftime(Sys.time(), start_maxnet, units = "mins"), 2)
-                                        , " minutes"
-                                        )
-                                 , file = log_file
-                                 , append = TRUE
-                                 )
-
-            }
+            readr::write_lines(paste0("envelope tune finished in: "
+                                      , round(difftime(Sys.time(), start_envelope, units = "mins"), 2)
+                                      , " minutes"
+                                      )
+                               , file = log_file
+                               , append = TRUE
+                               )
 
           }
 
+        }
 
-          ## tune envelope -------
+        ## tune rf --------
 
-          if(any(c("all", "envelope", "bioclim", "env") %in% algo)) {
+        if(any(c("all", "rf", "randomForest") %in% algo)) {
 
-            run <- if(exists("tune_envelope", tune, inherits = FALSE)) force_new else TRUE
+          run <- if(exists("tune_rf", tune, inherits = FALSE)) force_new else TRUE
 
-            if(run) {
+          if(run) {
 
-              message("envelope tune")
+            message("rf tune")
 
-              start_envelope <- Sys.time()
+            start_rf <- Sys.time()
 
-              tune$tune_envelope <- start_df %>%
-                dplyr::mutate(m = purrr::map2(pa_train
-                                              , data_train
-                                              # Only allow presences into envelope
-                                              , \(x, y) predicts::envelope(y[x == 1,])
-                                              )
-                              , tune_args = "none"
-                              , e = purrr::pmap(list(m
-                                                     , p_data_test
-                                                     , a_data_test
-                                                     )
-                                                , \(a, b, c) evaluate_sdm(a, b, c
-                                                                          , ...
-                                                                          , do_gc = do_gc
-                                                                          )
-                                                )
-                              ) %>%
-                {if(keep_model) (.) %>% dplyr::select(! dplyr::where(is.list), m, e) else (.) %>% dplyr::select(! dplyr::where(is.list), e)}
+            ### trees ------
+            use_trees <- if(isTRUE(trees)) {
 
-              readr::write_lines(paste0("envelope tune finished in: "
-                                        , round(difftime(Sys.time(), start_envelope, units = "mins"), 2)
-                                        , " minutes"
-                                        )
-                                 , file = log_file
-                                 , append = TRUE
-                                 )
+              c(500, 1000, 2000, 4000)
+
+            } else if(isFALSE(trees)) {
+
+              500 # randomForest default for classification
+
+            } else if(is.numeric(trees)) {
+
+              trees
 
             }
 
-          }
+            ### mtry ------
+            use_mtry <- if(isTRUE(mtry)) {
 
-          ## tune rf --------
+              if(!prep$spatial_folds_used) {
 
-          if(any(c("all", "rf", "randomForest") %in% algo)) {
+                # rf default for classification
+                seq(1, floor(sqrt(length(preds$rf))), 1)
 
-            run <- if(exists("tune_rf", tune, inherits = FALSE)) force_new else TRUE
+              } else {
 
-            if(run) {
+                # limit if spatial folds used
+                xm <- seq(1, floor(sqrt(length(preds$rf))), 1)
 
-              message("rf tune")
-
-              start_rf <- Sys.time()
-
-              ### trees ------
-              use_trees <- if(isTRUE(trees)) {
-
-                c(500, 1000, 2000, 4000)
-
-              } else if(isFALSE(trees)) {
-
-                500 # randomForest default for classification
-
-              } else if(is.numeric(trees)) {
-
-                trees
+                xm <- xm[xm <= limit_spat_mtry]
 
               }
 
-              ### mtry ------
-              use_mtry <- if(isTRUE(mtry)) {
+            } else if(isFALSE(mtry)) {
 
-                if(!prep$spatial_folds_used) {
+              floor(sqrt(length(preds$rf))) # randomForest default for classification
 
-                  # rf default for classification
-                  seq(1, floor(sqrt(length(preds))), 1)
+            } else if(is.numeric(mtry)) {
 
-                } else {
+              mtry
 
-                  # limit if spatial folds used
-                  xm <- seq(1, floor(sqrt(length(preds))), 1)
+            }
 
-                  xm <- xm[xm <= limit_spat_mtry]
+            ### nodesize -----
+            use_nodesize <- if(isTRUE(nodesize)) {
 
-                }
+              seq(1, min(10, ceiling(min(start_df$n_p_train) / 2)), 2)
 
-              } else if(isFALSE(mtry)) {
+            } else if(isFALSE(nodesize)) {
 
-                floor(sqrt(length(preds))) # randomForest default for classification
+              1 # randomForest default for classification
 
-              } else if(is.numeric(mtry)) {
+            } else if(is.numeric(nodesize)) {
 
-                mtry
+              nodesize
 
-              }
+            }
 
-              ### nodesize -----
-              use_nodesize <- if(isTRUE(nodesize)) {
+            safe_rf <- purrr::safely(randomForest::randomForest)
 
-                seq(1, min(10, ceiling(min(start_df$n_p_train) / 2)), 2)
-
-              } else if(isFALSE(nodesize)) {
-
-                1 # randomForest default for classification
-
-              } else if(is.numeric(nodesize)) {
-
-                nodesize
-
-              }
-
-              safe_rf <- purrr::safely(randomForest::randomForest)
-
-              tune_rf <- start_df %>%
-                dplyr::cross_join(tibble::tibble(trees = use_trees)) %>%
-                dplyr::cross_join(tibble::tibble(mtry = use_mtry)) %>%
-                dplyr::cross_join(tibble::tibble(nodesize = use_nodesize)) %>%
-                dplyr::mutate(tune_args = paste0("tr: ", trees
-                                                 , ". mt: ", mtry
-                                                 , ". ns: ", nodesize
+            tune_rf <- start_df %>%
+              dplyr::mutate(data_train = purrr::map(data_train, \(x) x[names(x) %in% preds$maxnet])) |>
+              dplyr::cross_join(tibble::tibble(trees = use_trees)) %>%
+              dplyr::cross_join(tibble::tibble(mtry = use_mtry)) %>%
+              dplyr::cross_join(tibble::tibble(nodesize = use_nodesize)) %>%
+              dplyr::mutate(tune_args = paste0("tr: ", trees
+                                               , ". mt: ", mtry
+                                               , ". ns: ", nodesize
+                                               )
+                            , pa_train = purrr::map(pa_train, \(x) as.factor(x))
+                            ) %>%
+              dplyr::mutate(m = purrr::pmap(list(pa_train
+                                                 , data_train
+                                                 , n_p_train
+                                                 , trees
+                                                 , nodesize
+                                                 , mtry
                                                  )
-                              , pa_train = purrr::map(pa_train, \(x) as.factor(x))
-                              ) %>%
-                dplyr::mutate(m = purrr::pmap(list(pa_train
-                                                   , data_train
-                                                   , n_p_train
-                                                   , trees
-                                                   , nodesize
-                                                   , mtry
-                                                   )
-                                              , \(a, b, c, d, e, f) safe_rf(x = b
-                                                                            , y = a
-                                                                            , strata = a
-                                                                            , sampsize = c(c, c)
-                                                                            , ntree = d
-                                                                            , nodesize = e
-                                                                            , mtry = f
-                                                                            )
-                                              )
-                              )
+                                            , \(a, b, c, d, e, f) safe_rf(x = b
+                                                                          , y = a
+                                                                          , strata = a
+                                                                          , sampsize = c(c, c)
+                                                                          , ntree = d
+                                                                          , nodesize = e
+                                                                          , mtry = f
+                                                                          )
+                                            )
+                            )
 
-              probs <- tune_rf %>%
-                dplyr::mutate(e = purrr::map(m, "error")) %>%
-                dplyr::filter(purrr::map_lgl(e, \(x) !is.null(x)))
+            probs <- tune_rf %>%
+              dplyr::mutate(e = purrr::map(m, "error")) %>%
+              dplyr::filter(purrr::map_lgl(e, \(x) !is.null(x)))
+
+            if(nrow(probs)) {
 
               if(nrow(probs)) {
-
-                if(nrow(probs)) {
 
                 purrr::map2(probs$e
                             , probs$tune_args
@@ -570,49 +602,52 @@
                                                         , b
                                                         , ": "
                                                         , as.character(a)
-                                                        )
-                                                 , file = log_file
-                                                 , append = TRUE
-                                                 )
-                              }
-                           )
+                              )
+                              , file = log_file
+                              , append = TRUE
+                              )
+                            }
+                )
 
               }
-
-              }
-
-              tune$tune_rf <- tune_rf %>%
-                dplyr::mutate(m = purrr::map(m, "result")) %>%
-                dplyr::filter(purrr::map_lgl(m, \(x) !is.null(x))) %>%
-                dplyr::mutate(e = purrr::pmap(list(m
-                                                     , p_data_test
-                                                     , a_data_test
-                                                     )
-                                                , \(a, b, c) evaluate_sdm(a, b, c
-                                                                          , ...
-                                                                          , do_gc = do_gc
-                                                                          )
-                                                )
-                              ) %>%
-                {if(keep_model) (.) %>% dplyr::select(! dplyr::where(is.list), m, e) else (.) %>% dplyr::select(! dplyr::where(is.list), e)}
-
-              readr::write_lines(paste0("rf tune finished in: "
-                                        , round(difftime(Sys.time(), start_rf, units = "mins"), 2)
-                                        , " minutes"
-                                        )
-                                 , file = log_file
-                                 , append = TRUE
-                                 )
 
             }
 
+            tune$tune_rf <- tune_rf %>%
+              dplyr::mutate(m = purrr::map(m, "result")) %>%
+              dplyr::filter(purrr::map_lgl(m, \(x) !is.null(x))) %>%
+              dplyr::mutate(e = purrr::pmap(list(m
+                                                 , p_data_test
+                                                 , a_data_test
+                                                 )
+                                            , \(a, b, c) evaluate_sdm(a, b, c
+                                                                      , ...
+                                                                      , do_gc = do_gc
+                                                                      )
+                                            )
+                            ) %>%
+              {if(keep_model) (.) %>%
+                  dplyr::select(! dplyr::where(is.list), m, e) else (.) %>%
+                  dplyr::select(! dplyr::where(is.list), e)
+                }
+
+            readr::write_lines(paste0("rf tune finished in: "
+                                      , round(difftime(Sys.time(), start_rf, units = "mins"), 2)
+                                      , " minutes"
+            )
+            , file = log_file
+            , append = TRUE
+            )
+
           }
 
-          if(best_run) {
+        }
 
-            prep$blocks$block <- old_prep_block
+        if(best_run) {
 
-          }
+          prep$blocks$block <- old_prep_block
+
+        }
 
       } else {
 
