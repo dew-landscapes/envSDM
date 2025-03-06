@@ -2,6 +2,8 @@
 
 acaule
 best_run = TRUE
-tune start 2025-03-06 10:30:26.958142
-6 out of 9 variables will be used
-rf tune finished in: 0.01 minutes
+tune start 2025-03-06 14:26:57.209594
+3 out of 9 variables will be used for maxnet
+4 out of 9 variables will be used for envelope
+8 out of 9 variables will be used for rf
+rf tune finished in: 0.02 minutes

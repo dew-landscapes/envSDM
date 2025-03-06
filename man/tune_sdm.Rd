@@ -8,7 +8,8 @@ tune_sdm(
   prep,
   out_dir = FALSE,
   return_val = "path",
-  algo = c("all", "maxnet", "bioclim", "envelope", "rf"),
+  algo = c("all", "maxnet", "envelope", "rf"),
+  max_corr = list(maxnet = 0.7, envelope = 0.9, rf = 0.99),
   fc = "auto_feature",
   limit_p = FALSE,
   rm = seq(1, 6, 0.5),
@@ -39,6 +40,10 @@ the case of "path" the named list is simply list(tune = out_dir). Will be set
 to "object" if \code{out_dir} is FALSE.}
 
 \item{algo}{Character. Name of algorithm to use.}
+
+\item{max_corr}{Named list. Names of list elements must match algorithms
+being used. For each pair of predictor variables correlated at or above
+\code{max_corr} one will be dropped using \code{caret::findCorrelation()}.}
 
 \item{fc}{Character. Used to generate levels of \code{classes} argument to
 \code{maxnet::maxnet()} that are tuned.}

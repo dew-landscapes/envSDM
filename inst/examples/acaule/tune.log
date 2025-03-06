@@ -2,11 +2,58 @@
 
 acaule
 best_run = FALSE
-tune start 2025-03-06 10:28:32.578994
-6 out of 9 variables will be used
-maxnet tune finished in: 0.84 minutes
+tune start 2025-03-06 14:09:32.652992
+3 out of 9 variables will be used for maxnet
+4 out of 9 variables will be used for envelope
+8 out of 9 variables will be used for rf
+
+
+acaule
+best_run = FALSE
+tune start 2025-03-06 14:14:35.671131
+3 out of 9 variables will be used for maxnet
+4 out of 9 variables will be used for envelope
+8 out of 9 variables will be used for rf
+error with tune_args fc: lq. rm: 2: Error in m[p == 1, ]: (subscript) logical subscript too long
+
+error with tune_args fc: lq. rm: 3: Error in m[p == 1, ]: (subscript) logical subscript too long
+
+error with tune_args fc: lq. rm: 2: Error in m[p == 1, ]: (subscript) logical subscript too long
+
+error with tune_args fc: lq. rm: 3: Error in m[p == 1, ]: (subscript) logical subscript too long
+
+error with tune_args fc: lq. rm: 2: Error in m[p == 1, ]: (subscript) logical subscript too long
+
+error with tune_args fc: lq. rm: 3: Error in m[p == 1, ]: (subscript) logical subscript too long
+
+error with tune_args fc: lq. rm: 2: Error in m[p == 1, ]: (subscript) logical subscript too long
+
+error with tune_args fc: lq. rm: 3: Error in m[p == 1, ]: (subscript) logical subscript too long
+
+error with tune_args fc: lq. rm: 2: Error in m[p == 1, ]: (subscript) logical subscript too long
+
+error with tune_args fc: lq. rm: 3: Error in m[p == 1, ]: (subscript) logical subscript too long
+
+maxnet tune finished in: 0.62 minutes
+
+
+acaule
+best_run = FALSE
+tune start 2025-03-06 14:21:27.096173
+3 out of 9 variables will be used for maxnet
+4 out of 9 variables will be used for envelope
+8 out of 9 variables will be used for rf
+
+
+acaule
+best_run = FALSE
+tune start 2025-03-06 14:24:43.235659
+3 out of 9 variables will be used for maxnet
+4 out of 9 variables will be used for envelope
+8 out of 9 variables will be used for rf
+maxnet tune finished in: 0.78 minutes
 envelope tune finished in: 0.01 minutes
-rf tune finished in: 0.52 minutes
+rf tune finished in: 0.85 minutes
 based on the product of metrics: auc_po, or10, CBI_rescale, IMAE
  the best model is maxnet with tune arguments fc: lq. rm: 3
 tune abandoned

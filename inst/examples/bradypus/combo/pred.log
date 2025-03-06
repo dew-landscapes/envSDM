@@ -1,10 +1,10 @@
 
 
 bradypus
-predict process started at 2025-03-06 10:30:24.626261
+predict process started at 2025-03-06 14:26:54.754626
 predict window for bradypus
 predict window created in 0 minutes
-predict for bradypus from rf model with arguments: tr = 500, mt = 1, ns = 3
+predict for bradypus from rf model with arguments: tr = 500, mt = 1, ns = 2
  out file will be pred.tif
 predict finished in 0 minutes
 predict mask for bradypus
