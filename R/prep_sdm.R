@@ -1023,10 +1023,7 @@
 
       # reduce env -------
 
-      if(all(!is.null(reduce_env_thresh_corr) | !is.null(reduce_env_quant_rf_imp)
-             , !prep$abandoned
-             )
-         ) {
+      if(!prep$abandoned) {
 
         run <- if(exists("reduce_env", prep)) force_new else TRUE
 
@@ -1053,16 +1050,6 @@
                              , file = log_file
                              , append = TRUE
                              )
-
-        }
-
-      } else {
-
-        if(!prep$abandoned) {
-
-          prep$reduce_env$remove <- ""
-          prep$reduce_env$keep <- names(prep_preds)
-          prep$reduce_env$env_cols <- names(prep_preds)
 
         }
 
