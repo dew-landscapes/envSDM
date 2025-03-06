@@ -19,6 +19,7 @@
                               , mtry = c(1:3)
                               , nodesize = c(1, 2, 3)
                               , limit_p = 3
+                              , use_metrics = c("auc_po", "CBI_rescale", "IMAE", "or10")
                               # , force_new = TRUE
                               )
               )

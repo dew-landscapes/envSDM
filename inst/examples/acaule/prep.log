@@ -1,6 +1,6 @@
 
 acaule
-prep start at 2025-03-04 17:43:57.400008.
+prep start at 2025-03-06 10:27:37.030267.
 1082 rows in 'presence'
 9 predictors
 24 presences required for 3 sets of min_fold_n (which is 8):
@@ -10,12 +10,12 @@ prep start at 2025-03-04 17:43:57.400008.
 subsetting predictors done in 0 minutes
 density raster done in 0.02 minutes
 10000 background points attempted. Completed in: 0 minutes
-env data extracted in: 0.31 minutes.
-5565 background points with env values.
+env data extracted in: 0.32 minutes.
+5603 background points with env values.
 test/training split
-1988 test data, including 319presences
- 4642 training data, including 746presences
+ 1999 test data, including 319 presences
+ 4669 training data, including 746 presences
 
-spatial folds = TRUE. Folds = 5. Folds done in 0.21 minutes
-reduce_env completed in: 0.08 minutes. Original 9 variables reduced to 6
-prep completed. elapsed time: 0.63 minutes
+spatial folds = TRUE. Folds = 5. Folds done in 0.18 minutes
+reduce_env completed in: 0.07 minutes. Original 9 variables reduced to 6
+prep completed. elapsed time: 0.6 minutes

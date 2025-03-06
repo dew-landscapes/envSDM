@@ -1,6 +1,6 @@
 
 bradypus
-prep start at 2025-03-04 17:44:36.003889.
+prep start at 2025-03-06 10:28:14.634946.
 116 rows in 'presence'
 9 predictors
 24 presences required for 3 sets of min_fold_n (which is 8):
@@ -8,14 +8,14 @@ prep start at 2025-03-04 17:44:36.003889.
   * 1 as holdout
 114 presences in predict_boundary and on env rasters
 subsetting predictors done in 0 minutes
-density raster done in 0.03 minutes
+density raster done in 0.01 minutes
 10000 background points attempted. Completed in: 0 minutes
 env data extracted in: 0.15 minutes.
-3124 background points with env values.
+3119 background points with env values.
 test/training split
-971 test data, including 34presences
- 2267 training data, including 80presences
+ 969 test data, including 34 presences
+ 2264 training data, including 80 presences
 
 spatial folds = TRUE. Folds = 5. Folds done in 0.1 minutes
 reduce_env completed in: 0.01 minutes. Original 9 variables reduced to 7
-prep completed. elapsed time: 0.3 minutes
+prep completed. elapsed time: 0.29 minutes
