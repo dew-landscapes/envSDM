@@ -68,7 +68,7 @@
                        , fc = "auto_feature" # maxnet tune
                        , limit_p = FALSE # T, F or number of preds above which to limit p
                        , rm = seq(1, 6, 0.5) # maxnet tune
-                       , trees = c(500, 1000, 2000) # T, F or numeric
+                       , trees = c(999) # T, F or numeric
                        , mtry = TRUE # T, F or numeric
                        , limit_spat_mtry = 4
                        , nodesize = c(1, 2) # T, F or numeric
@@ -76,7 +76,7 @@
                        , best_run = FALSE
                        , metrics_df = envSDM::sdm_metrics
                        , use_metrics = c("auc_po", "CBI_rescale", "IMAE")
-                       , do_gc = TRUE
+                       , do_gc = FALSE
                        , force_new = FALSE
                        , ...
                        ) {
@@ -129,8 +129,12 @@
 
       this_taxa <- prep$this_taxa
 
+      if(any(algo == "all")) algo <- c("maxnet", "envelope", "rf")
+
       message("tuning "
               , this_taxa
+              , " with algorithms: "
+              , stringr::str_flatten_comma(algo)
               , "\nout_dir is "
               , out_dir
               )
@@ -645,7 +649,8 @@
         if(nrow(tunes) > 0) {
 
           keeps <- c("algo", "spatial", "tune_args", "tunes"
-                     , "fc", "rm", "treshold", "trees", "nodesize"
+                     , "fc", "rm"
+                     , "trees", "nodesize", "mtry"
                      )
 
           metrics_df <- metrics_df %>%
@@ -655,11 +660,14 @@
           stats <- if(any(!metrics_df$is_thresh[metrics_df$summary_mets])) {
 
             tunes %>%
-              dplyr::mutate(stats = purrr::map(e
-                                              , "stats"
+              dplyr::mutate(tr = purrr::map(e
+                                              , "thresholds"
                                               )
+                            , stats = purrr::map(e
+                                                 , "stats"
+                                                 )
                             ) %>%
-              tidyr::unnest(cols = c(stats)) %>%
+              tidyr::unnest(cols = c(stats, tr)) %>%
               dplyr::group_by(dplyr::across(tidyselect::any_of(keeps))) %>%
               dplyr::mutate(k = as.factor(k)) %>%
               dplyr::summarise(dplyr::across(dplyr::where(is.numeric), mean)
@@ -667,56 +675,37 @@
                                ) %>%
               dplyr::ungroup()
 
-          } else tibble::tibble(algo = unique(tunes$algo))
+          }
 
-          ## threshold stats-----
-          tr_stats <- if(any(metrics_df$is_thresh[metrics_df$summary_mets])) {
+          if(nrow(stats)) {
 
-            tunes %>%
-              dplyr::mutate(stats = purrr::map(e
-                                              , "tr_stats"
-                                              )
+            tune$tune_mean <- stats %>%
+              dplyr::mutate(combo = purrr::pmap_dbl(dplyr::across(tidyselect::any_of(metrics_df$metric[metrics_df$summary_mets]))
+                                                    , prod
+                                                    )
+                            ) |>
+              dplyr::mutate(best = combo == max(combo)) |>
+              dplyr::select(tidyselect::any_of(keeps)
+                            , tidyselect::any_of(metrics_df$metric)
+                            , combo, best
                             ) %>%
-              tidyr::unnest(cols = c(stats)) %>%
-              dplyr::group_by(dplyr::across(tidyselect::any_of(keeps))) %>%
-              dplyr::mutate(k = as.factor(k)) %>%
-              dplyr::summarise(dplyr::across(dplyr::where(is.numeric), mean)) %>%
-              dplyr::ungroup()
-
-          } else tibble::tibble(algo = unique(tunes$algo))
-
-
-          res_df <- tr_stats %>%
-            dplyr::left_join(stats)
-
-
-          if(nrow(res_df)) {
-
-            ## thresholds----
-            thresholds <- tunes %>%
-              dplyr::mutate(stats = purrr::map(e
-                                               , "thresholds"
-                                               )
-                            ) %>%
-              tidyr::unnest(cols = c(stats)) %>%
-              dplyr::group_by(dplyr::across(tidyselect::any_of(keeps))) %>%
-              dplyr::mutate(k = as.factor(k)) %>%
-              dplyr::summarise(dplyr::across(dplyr::where(is.numeric), mean)) %>%
-              dplyr::ungroup()
-
-            tune$tune_mean <- res_df %>%
-              envFunc::make_metric_df(mets_df = metrics_df
-                                      , context = keeps
-                                      , mets_col = "summary_mets"
-                                      , best_thresh = 1
-                                      )  %>%
-              dplyr::select(tidyselect::any_of(keeps), metric, value, combo, best) %>%
               dplyr::distinct() %>%
-              tidyr::pivot_wider(names_from = "metric"
-                                 , values_from = "value"
-                                 ) %>%
-              dplyr::arrange(desc(combo)) %>%
-              dplyr::left_join(thresholds)
+              dplyr::arrange(desc(combo))
+
+          }
+
+          if(!best_run) {
+
+            readr::write_lines(paste0("based on the product of metrics: "
+                                      , stringr::str_flatten_comma(metrics_df$metric[metrics_df$summary_mets])
+                                      , "\n the best model is "
+                                      , tune$tune_mean$algo[tune$tune_mean$best]
+                                      , " with tune arguments "
+                                      , tune$tune_mean$tune_args[tune$tune_mean$best]
+                                      )
+                               , file = log_file
+                               , append = TRUE
+                               )
 
           }
 
