@@ -822,11 +822,11 @@
 
               rm(to_split)
 
-              readr::write_lines(paste0("test/training split\n"
+              readr::write_lines(paste0("test/training split\n "
                                         , nrow(prep$testing), " test data, including "
-                                        , sum(prep$testing$pa == 1), "presences\n "
+                                        , sum(prep$testing$pa == 1), " presences\n "
                                         , nrow(prep$training), " training data, including "
-                                        , sum(prep$training$pa == 1), "presences\n"
+                                        , sum(prep$training$pa == 1), " presences\n"
                                         )
                                  , file = log_file
                                  , append = TRUE
