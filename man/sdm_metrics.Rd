@@ -5,8 +5,8 @@
 \alias{sdm_metrics}
 \title{Lookup for metrics relevant to evaluating SDMs}
 \format{
-A data frame with 14 rows and
-6 variables:
+A data frame with 18 rows and
+5 variables:
 \describe{
 \item{metric}{Character. Short name of metric used in outputs}
 \item{high_good}{Logical. Do high values of metric correlate with a good model?}

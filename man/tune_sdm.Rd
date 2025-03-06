@@ -12,7 +12,7 @@ tune_sdm(
   fc = "auto_feature",
   limit_p = FALSE,
   rm = seq(1, 6, 0.5),
-  trees = c(500, 1000, 2000),
+  trees = c(999),
   mtry = TRUE,
   limit_spat_mtry = 4,
   nodesize = c(1, 2),
@@ -20,7 +20,7 @@ tune_sdm(
   best_run = FALSE,
   metrics_df = envSDM::sdm_metrics,
   use_metrics = c("auc_po", "CBI_rescale", "IMAE"),
-  do_gc = TRUE,
+  do_gc = FALSE,
   force_new = FALSE,
   ...
 )
@@ -126,6 +126,7 @@ Tune, and evaluate, species distribution models
                               , mtry = c(1:3)
                               , nodesize = c(1, 2, 3)
                               , limit_p = 3
+                              , use_metrics = c("auc_po", "CBI_rescale", "IMAE", "or10")
                               # , force_new = TRUE
                               )
               )
