@@ -783,28 +783,54 @@
 
             prep$testing <- tibble::tibble(pa = NA)
             counter <- 0
+            hold_prop_adj <- hold_prop
 
             # Try to get min_fold_n presences within prep$testing
-            while(any(sum(prep$testing$pa == 1, na.rm = TRUE) <= min_fold_n, counter <= 10)) {
+            while(all(sum(prep$testing$pa == 1, na.rm = TRUE) < min_fold_n, counter <= 10)) {
 
               prep$testing <- to_split %>%
-                dplyr::slice_sample(prop = hold_prop, by = pa)
+                dplyr::slice_sample(prop = hold_prop_adj, by = pa)
 
               counter <- counter + 1
+              hold_prop_adj <- hold_prop_adj + 0.01
+
+
+            }
+
+            if(hold_prop_adj > hold_prop) {
+
+              m <- paste0("Warning. hold_prop adjusted up to "
+                          , hold_prop_adj
+                          , " (from "
+                          , hold_prop
+                          , ") to acheive min_fold_n of "
+                          , min_fold_n
+                          , " presences in the testing (holdout) data"
+                          )
+
+              message(m)
+
+              readr::write_lines(m
+                                 , file = log_file
+                                 , append = TRUE
+                                 )
 
             }
 
             # If still not enough presences in test - abandon
-            if(sum(prep$testing$pa == 1, na.rm = TRUE) <= min_fold_n) {
+            if(sum(prep$testing$pa == 1, na.rm = TRUE) < min_fold_n) {
 
-              readr::write_lines(paste0("ERROR: not enough presences ("
-                                        , n_p
-                                        , ") to acheive min_fold_n ("
-                                        , min_fold_n
-                                        , ") in the test split with hold_prop of "
-                                        , hold_prop
-                                        , ". Try increasing hold_prop?"
-                                        )
+              m <- paste0("ERROR: not enough presences ("
+                          , n_p
+                          , ") to acheive min_fold_n ("
+                          , min_fold_n
+                          , ") in the test split with hold_prop of "
+                          , hold_prop
+                          )
+
+              message(m)
+
+              readr::write_lines(m
                                  , file = log_file
                                  , append = TRUE
                                  )
