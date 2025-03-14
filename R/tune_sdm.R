@@ -559,7 +559,7 @@
             safe_rf <- purrr::safely(randomForest::randomForest)
 
             tune_rf <- start_df %>%
-              dplyr::mutate(data_train = purrr::map(data_train, \(x) x[names(x) %in% preds$maxnet])) |>
+              dplyr::mutate(data_train = purrr::map(data_train, \(x) x[names(x) %in% preds$rf])) |>
               dplyr::cross_join(tibble::tibble(trees = use_trees)) %>%
               dplyr::cross_join(tibble::tibble(mtry = use_mtry)) %>%
               dplyr::cross_join(tibble::tibble(nodesize = use_nodesize)) %>%
