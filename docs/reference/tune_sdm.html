@@ -18,7 +18,7 @@
       <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
-<li class="nav-item"><a class="external-link nav-link" href="https://github.com/acanthiza/envSDM/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/dew-landscapes/envSDM/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
       </ul></div>
 
 
@@ -28,7 +28,7 @@
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Tune, and evaluate, species distribution models</h1>
-      <small class="dont-index">Source: <a href="https://github.com/acanthiza/envSDM/blob/HEAD/R/tune_sdm.R" class="external-link"><code>R/tune_sdm.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/dew-landscapes/envSDM/blob/HEAD/R/tune_sdm.R" class="external-link"><code>R/tune_sdm.R</code></a></small>
       <div class="d-none name"><code>tune_sdm.Rd</code></div>
     </div>
 
@@ -42,7 +42,8 @@
 <span>  <span class="va">prep</span>,</span>
 <span>  out_dir <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  return_val <span class="op">=</span> <span class="st">"path"</span>,</span>
-<span>  algo <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"all"</span>, <span class="st">"maxnet"</span>, <span class="st">"bioclim"</span>, <span class="st">"envelope"</span>, <span class="st">"rf"</span><span class="op">)</span>,</span>
+<span>  algo <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"all"</span>, <span class="st">"maxnet"</span>, <span class="st">"envelope"</span>, <span class="st">"rf"</span><span class="op">)</span>,</span>
+<span>  max_corr <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>maxnet <span class="op">=</span> <span class="fl">0.7</span>, envelope <span class="op">=</span> <span class="fl">0.9</span>, rf <span class="op">=</span> <span class="fl">0.99</span><span class="op">)</span>,</span>
 <span>  fc <span class="op">=</span> <span class="st">"auto_feature"</span>,</span>
 <span>  limit_p <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  rm <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">6</span>, <span class="fl">0.5</span><span class="op">)</span>,</span>
@@ -84,6 +85,12 @@ to "object" if <code>out_dir</code> is FALSE.</p></dd>
 
 <dt id="arg-algo">algo<a class="anchor" aria-label="anchor" href="#arg-algo"></a></dt>
 <dd><p>Character. Name of algorithm to use.</p></dd>
+
+
+<dt id="arg-max-corr">max_corr<a class="anchor" aria-label="anchor" href="#arg-max-corr"></a></dt>
+<dd><p>Named list. Names of list elements must match algorithms
+being used. For each pair of predictor variables correlated at or above
+<code>max_corr</code> one will be dropped using <code><a href="https://rdrr.io/pkg/caret/man/findCorrelation.html" class="external-link">caret::findCorrelation()</a></code>.</p></dd>
 
 
 <dt id="arg-fc">fc<a class="anchor" aria-label="anchor" href="#arg-fc"></a></dt>
@@ -206,12 +213,12 @@ elements:</p>
 <span class="r-in"><span>              <span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [[1]]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [[1]]$tune_file</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> C:/temp/nige/RtmpmMrwnw/temp_libpath1c6456707c5d/envSDM/examples/acaule/tune.rds</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> C:/temp/nige/Rtmp2TCjlU/temp_libpathc3471653349/envSDM/examples/acaule/tune.rds</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [[2]]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [[2]]$tune_file</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> C:/temp/nige/RtmpmMrwnw/temp_libpath1c6456707c5d/envSDM/examples/bradypus/tune.rds</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> C:/temp/nige/Rtmp2TCjlU/temp_libpathc3471653349/envSDM/examples/bradypus/tune.rds</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span></span></span>
@@ -227,8 +234,8 @@ elements:</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 2 × 8</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   taxa     algo   tune_args             combo auc_po  IMAE   CBI max_spec_sens</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                 <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> acaule   maxnet fc: lq. rm: 3         0.392  0.977 0.914 0.912         0.327</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> bradypus rf     tr: 500. mt: 1. ns: 3 0.138  0.722 0.699 0.901         0.311</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> acaule   maxnet fc: lq. rm: 3         0.298  0.922 0.851 0.898         0.311</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> bradypus rf     tr: 500. mt: 1. ns: 2 0.106  0.728 0.712 0.891         0.257</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>  <span class="co"># or best tune args choosing on just auc_po?</span></span></span>
 <span class="r-in"><span>  <span class="va">data</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
@@ -242,10 +249,10 @@ elements:</p>
 <span class="r-in"><span>    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">ungroup</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
 <span class="r-in"><span>    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">taxa</span>, <span class="va">algo</span>, <span class="va">tune_args</span>, <span class="va">auc_po</span>, <span class="va">IMAE</span>, <span class="va">CBI</span>, <span class="va">max_spec_sens</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 2 × 7</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   taxa     algo  tune_args             auc_po  IMAE   CBI max_spec_sens</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> acaule   rf    tr: 500. mt: 1. ns: 1  0.982 0.918 0.927         0.338</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> bradypus rf    tr: 500. mt: 1. ns: 1  0.731 0.702 0.917         0.316</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   taxa     algo   tune_args             auc_po  IMAE   CBI max_spec_sens</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> acaule   rf     tr: 500. mt: 1. ns: 3  0.961 0.875 0.828         0.300</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> bradypus maxnet fc: lq. rm: 2          0.751 0.641 0.902         0.471</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

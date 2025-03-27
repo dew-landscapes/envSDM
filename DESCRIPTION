@@ -23,7 +23,7 @@ Description: The goal of envSDM is to help automate the creation, validation,
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
-BugReports: https://github.com/acanthiza/envSDM/issues
+BugReports: https://github.com/dew-landscapes/envSDM/issues
 RoxygenNote: 7.3.2
 Imports:
     MASS,
@@ -51,8 +51,8 @@ Imports:
     magrittr,
     rlang
 Remotes:
-    github::acanthiza/envFunc,
-    github::acanthiza/envRaster,
+    github::dew-landscapes/envFunc,
+    github::dew-landscapes/envRaster,
     sjevelazco/flexsdm
-URL: https://acanthiza.github.io/envSDM/
+URL: https://dew-landscapes.github.io/envSDM/
 Roxygen: list(markdown = TRUE)
