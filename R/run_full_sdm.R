@@ -88,27 +88,50 @@
     if(run) {
 
       # tune_args------
-      tune_args <- tune$tune_mean %>%
-        dplyr::filter(!!rlang::ensym(use_metric) == max(!!rlang::ensym(use_metric), na.rm = TRUE))
+      row_id <- 1
 
-      if(length(tune_args)) {
+      tune_args <- tune$tune_mean %>%
+        dplyr::filter(tunes == max(tunes)) |>
+        dplyr::arrange(desc(!!rlang::ensym(use_metric)))
+
+      full_run_tune <- NULL
+
+      if(nrow(tune_args)) {
 
         # mod --------
 
-        full_run_tune <- tune_sdm(prep = prep
-                                  , out_dir = out_dir
-                                  , return_val = "object"
-                                  , algo = tune_args$algo
-                                  , fc = tune_args$fc
-                                  , rm = tune_args$rm
-                                  , trees = tune_args$trees
-                                  , mtry = tune_args$mtry
-                                  , nodesize = tune_args$nodesize
-                                  , keep_model = TRUE
-                                  , best_run = TRUE
-                                  , do_gc = do_gc
-                                  , ...
-                                  )
+        while(is.null(full_run_tune$tune_mean)) {
+
+          full_run_tune <- tune_sdm(prep = prep
+                                    , out_dir = out_dir
+                                    , return_val = "object"
+                                    , algo = tune_args$algo[[row_id]]
+                                    , fc = tune_args$fc[[row_id]]
+                                    , rm = tune_args$rm[[row_id]]
+                                    , trees = tune_args$trees[[row_id]]
+                                    , mtry = tune_args$mtry[[row_id]]
+                                    , nodesize = tune_args$nodesize[[row_id]]
+                                    , keep_model = TRUE
+                                    , best_run = TRUE
+                                    , do_gc = do_gc
+                                    , force_new = TRUE
+                                    #, ...
+                                    )
+
+          if(is.null(full_run_tune$tune_mean)) row_id = row_id + 1
+
+        }
+
+        if(row_id > 2) {
+
+          message("error using tune arguments: "
+                  , tune_args$tune_args[row_id - 1]
+                  , ". trying arguments with next best "
+                  , use_metric
+                  , " value"
+                  )
+
+        }
 
         full_run <- c(full_run, full_run_tune)
 
