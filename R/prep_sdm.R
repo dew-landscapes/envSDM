@@ -797,10 +797,10 @@
 
             }
 
-            if(hold_prop_adj > hold_prop) {
+            if(hold_prop_adj > hold_prop + 0.01) {
 
               m <- paste0("Warning. hold_prop adjusted up to "
-                          , hold_prop_adj
+                          , hold_prop_adj - 0.01
                           , " (from "
                           , hold_prop
                           , ") to acheive min_fold_n of "
