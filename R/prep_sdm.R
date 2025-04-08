@@ -64,6 +64,11 @@
 #' @param spatial_folds Logical. Use spatial folds? Even if `TRUE`, can resort
 #' to non-spatial cv if presences per fold do not meet `min_fold_n` or there are
 #' not enough presences to support more than one fold.
+#' @param block_div Numeric. The square root of the predict area is divided
+#' by this value before being passed to the `block_dist` argument of
+#' `blockCV::cv_spatial()`. If running repeated cross validation (by repeated
+#' calls to `prep_sdm()`), adjust this value to ensure different blocks between
+#' repeats.
 #' @param min_fold_n Numeric. Sets both minimum number of presences, and,
 #' by default, the minimum number of presences required for a model.
 #' @param stretch_value Numeric. Stretch the density raster to this value.
@@ -142,6 +147,7 @@
                        , many_p_prop = 2
                        , folds = 5
                        , spatial_folds = TRUE
+                       , block_div = 6
                        , min_fold_n = 8
                        , hold_prop = 0.3
                        , stretch_value = 10
@@ -899,7 +905,7 @@
                 sf::st_area() %>%
                 as.numeric() %>%
                 sqrt() %>%
-                `/` (6)
+                `/` (block_div)
               # for a square MCP, this would give 6 blocks by 6 blocks
 
               blocks <- safe_cv_spatial(x
