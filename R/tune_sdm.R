@@ -742,7 +742,7 @@
               dplyr::group_by(dplyr::across(tidyselect::any_of(keeps))) %>%
               dplyr::summarise(dplyr::across(dplyr::where(is.numeric), mean)
                                , tunes = dplyr::n()
-                               , reps = dplyr::n_distinct(repeats)
+                               , reps = dplyr::n_distinct(rep)
                                ) %>%
               dplyr::ungroup()
 
