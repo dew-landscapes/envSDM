@@ -27,6 +27,8 @@ prep_sdm(
   many_p_prop = 2,
   folds = 5,
   spatial_folds = TRUE,
+  repeats = 1,
+  block_div = seq(5, by = 1, length.out = repeats),
   min_fold_n = 8,
   hold_prop = 0.3,
   stretch_value = 10,
@@ -108,6 +110,13 @@ adjusted downwards if number of presences do not support \code{folds * min_fold_
 \item{spatial_folds}{Logical. Use spatial folds? Even if \code{TRUE}, can resort
 to non-spatial cv if presences per fold do not meet \code{min_fold_n} or there are
 not enough presences to support more than one fold.}
+
+\item{repeats}{Numeric. Number of repeated cross validations.}
+
+\item{block_div}{Numeric. The square root of the predict area is divided
+by this value before being passed to the \code{block_dist} argument of
+\code{blockCV::cv_spatial()}. If using repeated cross validation, \code{block_div}
+must be of the same length as \code{1:repeats}.}
 
 \item{min_fold_n}{Numeric. Sets both minimum number of presences, and,
 by default, the minimum number of presences required for a model.}
@@ -259,6 +268,8 @@ data might be generated from other sites where birds were recorded but
                                                , is_env_pred = FALSE
                                                , pred_limit = d
                                                , limit_buffer = 10000
+                                               , folds = 5
+                                               , repeats = 5
                                                , dens_res = 1000 # ignored as decimal degrees preds
                                                , reduce_env_thresh_corr = 0.95
                                                , reduce_env_quant_rf_imp = 0.2
@@ -297,7 +308,7 @@ data might be generated from other sites where birds were recorded but
 
     m
 
-    presences <- prep$blocks \%>\%
+    presences <- prep$pa_ras |>
       dplyr::filter(pa == 1) \%>\%
       sf::st_as_sf(coords = c("x", "y")
                    , crs = 4326
@@ -305,15 +316,23 @@ data might be generated from other sites where birds were recorded but
 
     m +
       tm_shape(presences) +
-        tm_dots(col = "blue")
+        tm_dots(col = "pa"
+                , palette = "viridis"
+                )
 
   }
 
   # Background points
   if(require("tmap")) {
 
-    blocks <- prep$blocks \%>\%
-      dplyr::mutate(blocks = factor(block)) \%>\% # for map
+    blocks <- prep$bg_points \%>\%
+      dplyr::inner_join(prep$training |>
+                         dplyr::select(rep, training) |>
+                         tidyr::unnest(cols = c(training))
+                       ) |>
+      dplyr::mutate(block = factor(block) # for map
+                    , rep = paste0("rep: ", rep)
+                    ) \%>\%
       sf::st_as_sf(coords = c("x", "y")
                    , crs = sf::st_crs(terra::rast(env_dat[[1]]))
                    )
@@ -325,6 +344,7 @@ data might be generated from other sites where birds were recorded but
       tm_dots(title = "Background points\n coloured by block"
               , col = "block"
               ) +
+      tm_facets(by = "rep") +
       tm_legend(outside = TRUE) +
       tm_compass() +
       tm_scale_bar() +

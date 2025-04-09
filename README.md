@@ -30,6 +30,7 @@ Preparation includes generating:
 - spatially thickened (Vollering et al. 2019) background points against
   density raster
 - balanced spatial folds from the presences and background points
+- ability to run repeated spatial cross validation
 - environmental data for presences and background points
 - ensuring the environmental variables used are not correlated beyond a
   threshold, per taxa
@@ -64,7 +65,8 @@ devtools::install_github("dew-landscapes/envSDM")
 
 # References
 
-<div id="refs" class="references csl-bib-body hanging-indent">
+<div id="refs" class="references csl-bib-body hanging-indent"
+entry-spacing="0">
 
 <div id="ref-RN4592" class="csl-entry">
 

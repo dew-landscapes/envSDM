@@ -2,13 +2,14 @@
 
 bradypus
 best_run = FALSE
-tune start 2025-03-06 14:26:24.350631
+tune start 2025-04-09 13:03:42.415741
 4 out of 9 variables will be used for maxnet
 7 out of 9 variables will be used for envelope
 8 out of 9 variables will be used for rf
-maxnet tune finished in: 0.06 minutes
-envelope tune finished in: 0 minutes
-rf tune finished in: 0.13 minutes
+maxnet tune finished in: 0.35 minutes
+envelope tune finished in: 0.02 minutes
+rf tune finished in: 0.87 minutes
 based on the product of metrics: auc_po, or10, CBI_rescale, IMAE
- the best model is rf with tune arguments tr: 500. mt: 1. ns: 2
+ the best model is rf with tune arguments tr: 500. mt: 1. ns: 3
+tune abandoned
 tune abandoned

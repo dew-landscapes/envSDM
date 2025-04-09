@@ -2,8 +2,6 @@
 
 bradypus
 best_run = TRUE
-tune start 2025-03-06 14:26:59.068108
+tune start 2025-04-09 13:09:21.079967
 4 out of 9 variables will be used for maxnet
-7 out of 9 variables will be used for envelope
-8 out of 9 variables will be used for rf
 maxnet tune finished in: 0.01 minutes

@@ -1,6 +1,6 @@
 
 acaule
-prep start at 2025-03-06 14:08:37.554622.
+prep start at 2025-04-09 12:56:35.599237.
 1082 rows in 'presence'
 9 predictors
 24 presences required for 3 sets of min_fold_n (which is 8):
@@ -10,12 +10,33 @@ prep start at 2025-03-06 14:08:37.554622.
 subsetting predictors done in 0 minutes
 density raster done in 0.02 minutes
 10000 background points attempted. Completed in: 0 minutes
-env data extracted in: 0.32 minutes.
-5586 background points with env values.
-test/training split
- 1994 test data, including 319 presences
- 4657 training data, including 746 presences
+env data extracted in: 0.01 minutes.
+5580 background points with env values.
+repeat: 1. test/training split
+ 1993 test data, including 319 presences
+ 4652 training data, including 746 presences
 
-spatial folds = TRUE. Folds = 5. Folds done in 0.18 minutes
-reduce_env completed in: 0.07 minutes. Original 9 variables reduced to 6
-prep completed. elapsed time: 0.61 minutes
+repeat: 2. test/training split
+ 1993 test data, including 319 presences
+ 4652 training data, including 746 presences
+
+repeat: 3. test/training split
+ 1993 test data, including 319 presences
+ 4652 training data, including 746 presences
+
+repeat: 4. test/training split
+ 1993 test data, including 319 presences
+ 4652 training data, including 746 presences
+
+repeat: 5. test/training split
+ 1993 test data, including 319 presences
+ 4652 training data, including 746 presences
+
+repeat: 1, spatial folds = TRUE. Folds = 5
+repeat: 2, spatial folds = TRUE. Folds = 5
+repeat: 3, spatial folds = TRUE. Folds = 5
+repeat: 4, spatial folds = TRUE. Folds = 5
+repeat: 5, spatial folds = TRUE. Folds = 5.
+Folds done in 0.77 minutes
+reduce_env completed in: 0.04 minutes. Original 9 variables reduced to 6
+prep completed. elapsed time: 0.85 minutes

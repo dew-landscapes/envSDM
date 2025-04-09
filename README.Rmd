@@ -44,6 +44,7 @@ presences to limit the rest of the process (predict boundary)
 * density raster of presences
 * spatially thickened [@RN4592] background points against density raster
 * balanced spatial folds from the presences and background points
+* ability to run repeated spatial cross validation
 * environmental data for presences and background points
 * ensuring the environmental variables used are not correlated beyond a
 threshold, per taxa

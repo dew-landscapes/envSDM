@@ -51,6 +51,8 @@
                                                , is_env_pred = FALSE
                                                , pred_limit = d
                                                , limit_buffer = 10000
+                                               , folds = 5
+                                               , repeats = 5
                                                , dens_res = 1000 # ignored as decimal degrees preds
                                                , reduce_env_thresh_corr = 0.95
                                                , reduce_env_quant_rf_imp = 0.2
@@ -89,7 +91,7 @@
 
     m
 
-    presences <- prep$blocks %>%
+    presences <- prep$pa_ras |>
       dplyr::filter(pa == 1) %>%
       sf::st_as_sf(coords = c("x", "y")
                    , crs = 4326
@@ -97,15 +99,23 @@
 
     m +
       tm_shape(presences) +
-        tm_dots(col = "blue")
+        tm_dots(col = "pa"
+                , palette = "viridis"
+                )
 
   }
 
   # Background points
   if(require("tmap")) {
 
-    blocks <- prep$blocks %>%
-      dplyr::mutate(blocks = factor(block)) %>% # for map
+    blocks <- prep$bg_points %>%
+      dplyr::inner_join(prep$training |>
+                         dplyr::select(rep, training) |>
+                         tidyr::unnest(cols = c(training))
+                       ) |>
+      dplyr::mutate(block = factor(block) # for map
+                    , rep = paste0("rep: ", rep)
+                    ) %>%
       sf::st_as_sf(coords = c("x", "y")
                    , crs = sf::st_crs(terra::rast(env_dat[[1]]))
                    )
@@ -117,6 +127,7 @@
       tm_dots(title = "Background points\n coloured by block"
               , col = "block"
               ) +
+      tm_facets(by = "rep") +
       tm_legend(outside = TRUE) +
       tm_compass() +
       tm_scale_bar() +

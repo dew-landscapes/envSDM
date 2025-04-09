@@ -5,9 +5,11 @@
 <url><loc>https://acanthiza.github.io/envSDM/LICENSE-text.html</loc></url>
 <url><loc>https://acanthiza.github.io/envSDM/LICENSE.html</loc></url>
 <url><loc>https://acanthiza.github.io/envSDM/reference/evaluate_sdm.html</loc></url>
+<url><loc>https://acanthiza.github.io/envSDM/reference/fix_blocks.html</loc></url>
 <url><loc>https://acanthiza.github.io/envSDM/reference/index.html</loc></url>
 <url><loc>https://acanthiza.github.io/envSDM/reference/make_mcp.html</loc></url>
 <url><loc>https://acanthiza.github.io/envSDM/reference/make_predict_boundary.html</loc></url>
+<url><loc>https://acanthiza.github.io/envSDM/reference/non_spatial_blocks.html</loc></url>
 <url><loc>https://acanthiza.github.io/envSDM/reference/pipe.html</loc></url>
 <url><loc>https://acanthiza.github.io/envSDM/reference/png_from_preds.html</loc></url>
 <url><loc>https://acanthiza.github.io/envSDM/reference/png_from_tif.html</loc></url>
