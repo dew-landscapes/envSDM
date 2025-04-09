@@ -92,7 +92,9 @@
 
       tune_args <- tune$tune_mean %>%
         dplyr::filter(tunes == max(tunes)) |>
-        dplyr::arrange(desc(!!rlang::ensym(use_metric)))
+        dplyr::arrange(desc(!!rlang::ensym(use_metric))) |>
+        dplyr::slice(1)
+
 
       full_run_tune <- NULL
 

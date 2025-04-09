@@ -144,7 +144,7 @@
               )
 
       # tune -----
-      if(exists("blocks", where = prep)) {
+      if(exists("training", where = prep)) {
 
         # start timer ------
         start_time <- Sys.time()
@@ -163,19 +163,35 @@
 
         ## setup ------
 
-        nobs <- nrow(prep$blocks[prep$blocks$pa == 1,])
+        prep$training <- prep$training |>
+          dplyr::mutate(nobs = purrr::map_int(training
+                                              , \(x) x |>
+                                                dplyr::filter(pa == 1) |>
+                                                nrow()
+                                              )
+                        )
 
         ## start data frame -----
 
         if(best_run) {
 
-          old_prep_block <- prep$blocks$block
-
-          prep$blocks$block <- 1
+          prep$training <- prep$training |>
+            dplyr::slice_sample(n = 1) |>
+            dplyr::mutate(training = purrr::map(training
+                                                , \(x) x |>
+                                                  dplyr::mutate(old_block = block
+                                                                , block = 1
+                                                                )
+                                                )
+                          )
 
         }
 
-        single_block <- if(length(unique(prep$blocks[prep$blocks$pa == 1,]$block)) == 1) TRUE else FALSE
+        prep$training <- prep$training |>
+          dplyr::mutate(single_block = purrr::map_lgl(training
+                                                      , \(x) if(length(unique(x$block[x$pa == 1])) == 1) TRUE else FALSE
+                                                      )
+                        )
 
         # correlation -------
         if(!is.null(max_corr)) {
@@ -189,6 +205,8 @@
                                                        )
                               ) |>
             purrr::map(\(x) prep$reduce_env$env_cols[! prep$reduce_env$env_cols %in% x])
+
+          preds <- preds[names(preds) %in% algo]
 
         } else {
 
@@ -213,32 +231,49 @@
                            , append = TRUE
                            )
 
-        p <- prep$blocks$pa
-
-        data <- prep$blocks %>%
-          dplyr::select(tidyselect::any_of(prep$reduce_env$env_cols))
-
-        # start_df --------
-        start_df <- tibble::tibble(k = sort(unique(prep$blocks$block))) %>%
-          dplyr::mutate(ids = if(any(best_run, single_block)) purrr::map(k, ~prep$blocks$block == .) else purrr::map(k, ~ prep$blocks$block != .)
-                        , pa_train = purrr::map(ids, \(a) p[a])
-                        , data_train = purrr::map(ids, \(a) data[a,])
-                        , p_data_test = purrr::map(k
-                                                   , \(a) prep$blocks %>%
-                                                     dplyr::filter(p == 1
-                                                                   , block == a
-                                                                   ) %>%
-                                                     dplyr::select(tidyselect::any_of(prep$reduce_env$env_cols)) %>%
-                                                     as.data.frame()
+        start_df <- prep$training |>
+          dplyr::mutate(used_block = purrr::map(training
+                                                 , \(x) unique(x$block)
+                                                 )
+                        ) |>
+          tidyr::unnest(cols = c(used_block)) |>
+          dplyr::mutate(p = purrr::map(training
+                                       , \(x) x$pa
+                                       )
+                        , data = purrr::map(training
+                                            , \(x) x |>
+                                              dplyr::select(tidyselect::any_of(prep$reduce_env$env_cols))
+                                            )
+                        , ids = purrr::pmap(list(used_block
+                                                 , training
+                                                 , single_block
+                                                 )
+                                            , \(x, y, z) if(!z) y$block != x else y$block == x
+                                            )
+                        , pa_train = purrr::map2(ids
+                                                 , p
+                                                 , \(a, b) b[a]
+                                                 )
+                        , data_train = purrr::map2(ids
+                                                   , data
+                                                   , \(a, b) b[a,]
                                                    )
-                        , a_data_test = purrr::map(k
-                                                   , \(a) prep$blocks %>%
-                                                     dplyr::filter(p == 0
-                                                                   , block == a
-                                                                   ) %>%
-                                                     dplyr::select(tidyselect::any_of(prep$reduce_env$env_cols)) %>%
-                                                     as.data.frame()
+                        , p_data_test = purrr::map2(training
+                                                    , used_block
+                                                    , \(a, b) a %>%
+                                                      dplyr::filter(pa == 1
+                                                                    , block == b
+                                                                    ) |>
+                                                      as.data.frame()
                                                    )
+                        , a_data_test = purrr::map2(training
+                                                    , used_block
+                                                    , \(a, b) a %>%
+                                                      dplyr::filter(pa == 0
+                                                                    , block == b
+                                                                    ) |>
+                                                      as.data.frame()
+                                                    )
                         , n_p_test = purrr::map_dbl(p_data_test
                                                     , nrow
                                                     )
@@ -258,20 +293,21 @@
         if(best_run) {
 
           # testing set --------
-          start_df <- start_df %>%
-            dplyr::mutate(p_data_test = list(prep$testing %>%
-                                               dplyr::filter(pa == 1) %>%
-                                               dplyr::select(tidyselect::any_of(prep$reduce_env$env_cols)) %>%
-                                               as.data.frame()
-                                             )
-                          , a_data_test = list(prep$testing %>%
-                                                 dplyr::filter(pa == 0) %>%
-                                                 dplyr::select(tidyselect::any_of(prep$reduce_env$env_cols)) %>%
-                                                 as.data.frame()
-                                               )
-                          , n_a_train = sum(prep$testing$pa == 1)
+          start_df <- start_df |>
+            dplyr::left_join(prep$testing) |>
+            dplyr::mutate(p_data_test = purrr::map(testing
+                                                   , \(x) x %>%
+                                                     dplyr::filter(pa == 1) %>%
+                                                     dplyr::select(tidyselect::any_of(prep$reduce_env$env_cols)) %>%
+                                                     as.data.frame()
+                                                   )
+                          , a_data_test = purrr::map(testing
+                                                   , \(x) x %>%
+                                                     dplyr::filter(pa == 0) %>%
+                                                     dplyr::select(tidyselect::any_of(prep$reduce_env$env_cols)) %>%
+                                                     as.data.frame()
+                                                   )
                           )
-
 
         }
 
@@ -291,6 +327,8 @@
             if (any(c(fc == "auto_feature", c("Q", "P", "T", "H") %in% fc))) {
 
               if(any(grepl("auto_feature", fc))) fc <- c("L", "Q", "H", "LQ", "QH", "LQP", "QHP", "LQHP")
+
+              nobs <- min(start_df$nobs)
 
               # set fc based on number of obs
               if (nobs <= 10) {
@@ -365,6 +403,7 @@
                                                                                                      )
                                                                         , regmult = d
                                                                         )
+                                            , .progress = "tune maxnet"
                                             )
                             )
 
@@ -401,6 +440,7 @@
                                                                       , ...
                                                                       , do_gc = do_gc
                                                                       )
+                                            , .progress = "evaluate maxnet"
                                             )
                             )
 
@@ -517,7 +557,7 @@
             ### mtry ------
             use_mtry <- if(isTRUE(mtry)) {
 
-              if(!prep$spatial_folds_used) {
+              if(! all(prep$training$spatial_folds)) {
 
                 # rf default for classification
                 seq(1, floor(sqrt(length(preds$rf))), 1)
@@ -584,6 +624,7 @@
                                                                           , nodesize = e
                                                                           , mtry = f
                                                                           )
+                                            , .progress = "tune rf"
                                             )
                             )
 
@@ -602,12 +643,12 @@
                                                         , b
                                                         , ": "
                                                         , as.character(a)
-                              )
-                              , file = log_file
-                              , append = TRUE
-                              )
+                                                        )
+                                                 , file = log_file
+                                                 , append = TRUE
+                                                 )
                             }
-                )
+                            )
 
               }
 
@@ -624,6 +665,7 @@
                                                                       , ...
                                                                       , do_gc = do_gc
                                                                       )
+                                            , .progress = "evaluate rf"
                                             )
                             ) %>%
               {if(keep_model) (.) %>%
@@ -640,12 +682,6 @@
             )
 
           }
-
-        }
-
-        if(best_run) {
-
-          prep$blocks$block <- old_prep_block
 
         }
 
@@ -704,9 +740,9 @@
                             ) %>%
               tidyr::unnest(cols = c(stats, tr)) %>%
               dplyr::group_by(dplyr::across(tidyselect::any_of(keeps))) %>%
-              dplyr::mutate(k = as.factor(k)) %>%
               dplyr::summarise(dplyr::across(dplyr::where(is.numeric), mean)
                                , tunes = dplyr::n()
+                               , reps = dplyr::n_distinct(repeats)
                                ) %>%
               dplyr::ungroup()
 

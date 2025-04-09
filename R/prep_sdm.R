@@ -64,11 +64,11 @@
 #' @param spatial_folds Logical. Use spatial folds? Even if `TRUE`, can resort
 #' to non-spatial cv if presences per fold do not meet `min_fold_n` or there are
 #' not enough presences to support more than one fold.
+#' @param repeats Numeric. Number of repeated cross validations.
 #' @param block_div Numeric. The square root of the predict area is divided
 #' by this value before being passed to the `block_dist` argument of
-#' `blockCV::cv_spatial()`. If running repeated cross validation (by repeated
-#' calls to `prep_sdm()`), adjust this value to ensure different blocks between
-#' repeats.
+#' `blockCV::cv_spatial()`. If using repeated cross validation, `block_div`
+#' must be of the same length as `1:repeats`.
 #' @param min_fold_n Numeric. Sets both minimum number of presences, and,
 #' by default, the minimum number of presences required for a model.
 #' @param stretch_value Numeric. Stretch the density raster to this value.
@@ -147,7 +147,8 @@
                        , many_p_prop = 2
                        , folds = 5
                        , spatial_folds = TRUE
-                       , block_div = 6
+                       , repeats = 1
+                       , block_div = seq(5, by = 1, length.out = repeats)
                        , min_fold_n = 8
                        , hold_prop = 0.3
                        , stretch_value = 10
@@ -272,18 +273,14 @@
                                        ) %>%
         terra::xyFromCell(prep_preds, .) %>%
         tibble::as_tibble() %>%
-        {if(pres_col %in% names(presence)) (.) %>% dplyr::bind_cols(presence) else (.)} %>%
+        {if(pres_col %in% names(presence)) (.) %>% dplyr::bind_cols(presence) else (.) |> dplyr::mutate(!!rlang::ensym(pres_col) := pres_val)} %>%
         stats::na.omit()
 
       ## raster presence ------
       # not limited to raster yet though
-      prep$presence_ras <- if(pres_col %in% names(prep$pa_ras)) {
-
-        prep$pa_ras |>
-          dplyr::filter(!!rlang::ensym(pres_col) == pres_val) |>
-          dplyr::select(- !!rlang::ensym(pres_col))
-
-      } else prep$pa_ras
+      prep$presence_ras <- prep$pa_ras |>
+        dplyr::filter(!!rlang::ensym(pres_col) == pres_val) |>
+        dplyr::select(- !!rlang::ensym(pres_col))
 
 
       # predict_boundary -------
@@ -293,6 +290,9 @@
       if(isTRUE(pred_limit)) {
 
         prep$predict_boundary <- prep$presence_ras %>%
+          dplyr::rename(!!rlang::ensym(pres_x) := x
+                        , !!rlang::ensym(pres_y) := y
+                        ) |>
           dplyr::distinct(!!rlang::ensym(pres_x), !!rlang::ensym(pres_y)) %>%
           sf::st_as_sf(coords = c(pres_x, pres_y)
                        , crs = pres_crs
@@ -675,6 +675,7 @@
             dplyr::anti_join(prep$presence_ras) %>% # background not on presences
             sf::st_as_sf(coords = c("x", "y")
                          , crs = sf::st_crs(target_density)
+                         , remove = FALSE
                          ) %>%
             # filter back to only those within predict_boundary
             sf::st_filter(prep$predict_boundary)
@@ -698,347 +699,305 @@
 
         } else {
 
-        target_density <- terra::rast(density_file)
-
-      }
-
-
-        # env--------
-
-      run <- if(exists("blocks", prep)) force_new else TRUE
-
-      if(run) {
-
-        start_env <- Sys.time()
-
-        spp_pa <- dplyr::bind_rows(prep$presence_ras %>%
-                                     tibble::as_tibble() %>%
-                                     sf::st_as_sf(coords = c("x", "y")
-                                                  , crs = sf::st_crs(prep_preds[[1]])
-                                                  ) %>%
-                                     dplyr::mutate(pa = 1)
-                                   , prep$bg_points %>%
-                                     dplyr::mutate(pa = 0) %>%
-                                     dplyr::select(pa)
-                                   ) %>%
-          sf::st_buffer(terra::res(prep_preds)[[1]] / 100)
-
-        prep$env <- exactextractr::exact_extract(prep_preds
-                                                   , y = spp_pa
-                                                   , include_cols = "pa"
-                                                   , include_cell = TRUE
-                                                   , max_cells_in_memory = max_cells_in_memory
-                                                   ) %>%
-          dplyr::bind_rows() %>%
-          stats::na.omit() %>%
-          dplyr::select(-coverage_fraction) %>%
-          dplyr::bind_cols(terra::xyFromCell(prep_preds
-                                             , .$cell
-                                             )
-                           )
-
-        if(!is.null(cat_preds)) {
-
-          prep$env <- prep$env %>%
-            dplyr::mutate(dplyr::across(tidyselect::any_of(cat_preds), as.factor))
+          target_density <- terra::rast(density_file)
 
         }
 
-        readr::write_lines(paste0("env data extracted in: "
-                                  , round(difftime(Sys.time(), start_bg, units = "mins"), 2)
-                                  , " minutes.\n"
-                                  , nrow(prep$env[prep$env$pa != 1,])
-                                  , " background points with env values."
-                                  )
-                           , file = log_file
-                           , append = TRUE
-                           )
-
-      }
-
-      # Abandon if too few presences with env data
-      if(nrow(prep$env[prep$env$pa == 1,]) < needed_p) {
-
-        readr::write_lines(paste0("warning: too few presences ("
-                                  , nrow(prep$env[prep$env$pa == 1,])
-                                  , ") with environmental variables. SDM abandoned"
-                                  )
-                           , file = log_file
-                           , append = TRUE
-                           )
-
-        prep$abandoned <- TRUE
-
-      }
-
-
-      # folds------
-
-      if(!prep$abandoned) {
+        # env--------
 
         run <- if(exists("blocks", prep)) force_new else TRUE
 
         if(run) {
 
-          start_blocks <- Sys.time()
+          start_env <- Sys.time()
 
-          if(hold_prop > 0) {
+          spp_pa <- dplyr::bind_rows(prep$presence_ras %>%
+                                       tibble::as_tibble() %>%
+                                       sf::st_as_sf(coords = c("x", "y")
+                                                    , crs = sf::st_crs(prep_preds[[1]])
+                                                    , remove = FALSE
+                                                    ) %>%
+                                       dplyr::mutate(pa = 1)
+                                     , prep$bg_points %>%
+                                       dplyr::mutate(pa = 0)
+                                     )
 
-            to_split <- prep$env |>
-              dplyr::mutate(id = dplyr::row_number())
+          prep$env <- terra::extract(prep_preds
+                                     , y = terra::vect(spp_pa)
+                                     , include_cols = "pa"
+                                     , ID = FALSE
+                                     , bind = TRUE
+                                     ) %>%
+            tibble::as_tibble() |>
+            na.omit()
 
-            prep$testing <- tibble::tibble(pa = NA)
-            counter <- 0
-            hold_prop_adj <- hold_prop
+          if(!is.null(cat_preds)) {
 
-            # Try to get min_fold_n presences within prep$testing
-            while(all(sum(prep$testing$pa == 1, na.rm = TRUE) < min_fold_n, counter <= 10)) {
-
-              prep$testing <- to_split %>%
-                dplyr::slice_sample(prop = hold_prop_adj, by = pa)
-
-              counter <- counter + 1
-              hold_prop_adj <- hold_prop_adj + 0.01
-
-
-            }
-
-            if(hold_prop_adj > hold_prop + 0.01) {
-
-              m <- paste0("Warning. hold_prop adjusted up to "
-                          , hold_prop_adj - 0.01
-                          , " (from "
-                          , hold_prop
-                          , ") to acheive min_fold_n of "
-                          , min_fold_n
-                          , " presences in the testing (holdout) data"
-                          )
-
-              message(m)
-
-              readr::write_lines(m
-                                 , file = log_file
-                                 , append = TRUE
-                                 )
-
-            }
-
-            # If still not enough presences in test - abandon
-            if(sum(prep$testing$pa == 1, na.rm = TRUE) < min_fold_n) {
-
-              m <- paste0("ERROR: not enough presences ("
-                          , n_p
-                          , ") to acheive min_fold_n ("
-                          , min_fold_n
-                          , ") in the test split with hold_prop of "
-                          , hold_prop
-                          )
-
-              message(m)
-
-              readr::write_lines(m
-                                 , file = log_file
-                                 , append = TRUE
-                                 )
-
-              prep$abandoned <- TRUE
-
-            }
-
-            if(!prep$abandoned) {
-
-              prep$training <- to_split %>%
-                dplyr::anti_join(prep$testing
-                                 , by = "id"
-                                 )
-
-              rm(to_split)
-
-              readr::write_lines(paste0("test/training split\n "
-                                        , nrow(prep$testing), " test data, including "
-                                        , sum(prep$testing$pa == 1), " presences\n "
-                                        , nrow(prep$training), " training data, including "
-                                        , sum(prep$training$pa == 1), " presences\n"
-                                        )
-                                 , file = log_file
-                                 , append = TRUE
-                                 )
-
-            }
-
-          } else {
-
-            prep$training <- prep$env
-            prep$testing <- prep$env
-
-            readr::write_lines(paste0("WARNING: no test/training split\n"
-                                      , " full model will be tested against the same data that was used to train it!"
-                                      )
-                               , file = log_file
-                               , append = TRUE
-                               )
+            prep$env <- prep$env %>%
+              dplyr::mutate(dplyr::across(tidyselect::any_of(cat_preds), as.factor))
 
           }
 
-          if(!prep$abandoned) {
-
-            if(!all(spatial_folds, k_folds > 1)) {
-
-              spatial_folds <- FALSE
-
-            } else {
-
-              ## spatial ------
-
-              safe_cv_spatial <- purrr::safely(blockCV::cv_spatial)
-
-              x <- prep$training %>%
-                dplyr::select(x, y, pa) %>%
-                sf::st_as_sf(coords = c("x", "y")
-                             , crs = sf::st_crs(prep_preds[[1]])
+          readr::write_lines(paste0("env data extracted in: "
+                                    , round(difftime(Sys.time(), start_bg, units = "mins"), 2)
+                                    , " minutes.\n"
+                                    , nrow(prep$env[prep$env$pa != 1,])
+                                    , " background points with env values."
+                                    )
+                             , file = log_file
+                             , append = TRUE
                              )
 
-              block_dist <- prep$predict_boundary %>%
-                sf::st_as_sf() %>%
-                dplyr::summarise() %>%
-                sf::st_convex_hull() %>%
-                sf::st_area() %>%
-                as.numeric() %>%
-                sqrt() %>%
-                `/` (block_div)
-              # for a square MCP, this would give 6 blocks by 6 blocks
+        }
 
-              blocks <- safe_cv_spatial(x
-                                        , column = "pa"
-                                        #, r = prep_preds[[1]] # hashed out 2024-09-17
-                                        , k = k_folds
-                                        , size = block_dist
-                                        , iteration = 200
-                                        , selection = "random"
-                                        , extend = 0.5
-                                        , progress = FALSE
-                                        , report = FALSE
-                                        , plot = FALSE
-                                        )
+        # Abandon if too few presences with env data
+        if(nrow(prep$env[prep$env$pa == 1,]) < needed_p) {
 
-              if(!is.null(blocks$error)) {
+          readr::write_lines(paste0("warning: too few presences ("
+                                    , nrow(prep$env[prep$env$pa == 1,])
+                                    , ") with environmental variables. SDM abandoned"
+                                    )
+                             , file = log_file
+                             , append = TRUE
+                             )
 
-                readr::write_lines(paste0("error: "
-                                          , as.character(blocks$error)
-                                          , ". spatial_folds set to FALSE"
+          prep$abandoned <- TRUE
+
+        }
+
+
+        # blocks------
+
+        if(!prep$abandoned) {
+
+          run <- if(exists("blocks", prep)) force_new else TRUE
+
+          if(run) {
+
+            start_blocks <- Sys.time()
+
+            if(hold_prop > 0) {
+
+              # testing/training split ----------
+              to_split <- prep$env |>
+                dplyr::mutate(id = dplyr::row_number())
+
+              prep$testing <- tibble::tibble(rep = 1:repeats, testing = list(tibble::tibble(pa = 0)))
+              counter <- 0
+              hold_prop_adj <- hold_prop
+
+              # Try to get min_fold_n presences within prep$testing
+              while(all(prep$testing$testing |> purrr::map(\(x) sum(x$pa == 1)) < min_fold_n) | hold_prop_adj > 0.5) {
+
+                prep$testing <- prep$testing |>
+                  dplyr::mutate(testing = purrr::map(1:repeats
+                                                     , \(x) to_split %>%
+                                                       dplyr::slice_sample(prop = hold_prop_adj, by = pa)
+                                                     )
+                                )
+
+                counter <- counter + 1
+                hold_prop_adj <- hold_prop_adj + 0.01
+
+
+              }
+
+              if(hold_prop_adj > hold_prop + 0.01) {
+
+                m <- paste0("Warning. hold_prop adjusted up to "
+                            , hold_prop_adj - 0.01
+                            , " (from "
+                            , hold_prop
+                            , ") to acheive min_fold_n of "
+                            , min_fold_n
+                            , " presences in the testing (holdout) data"
+                            )
+
+                message(m)
+
+                readr::write_lines(m
+                                   , file = log_file
+                                   , append = TRUE
+                                   )
+
+              }
+
+              # remove any tests that didn't reach min_fold_n
+              if(any(prep$testing$testing |> purrr::map(\(x) sum(x$pa == 1)) < min_fold_n)) {
+
+                prep$testing <- prep$testing |>
+                  dplyr::filter(purrr::map_lgl(testing, \(x) sum(x$pa == 1) > min_fold_n))
+
+              }
+
+              # If never enough presences in test - abandon
+              if(all(prep$testing$testing |> purrr::map(\(x) sum(x$pa == 1)) < min_fold_n)) {
+
+                m <- paste0("ERROR: not enough presences ("
+                            , n_p
+                            , ") to acheive min_fold_n ("
+                            , min_fold_n
+                            , ") in the test split with hold_prop of "
+                            , hold_prop_adj - 0.01
+                            , " (adjusted up from "
+                            , hold_prop
+                            , ")"
+                            )
+
+                message(m)
+
+                readr::write_lines(m
+                                   , file = log_file
+                                   , append = TRUE
+                                   )
+
+                prep$abandoned <- TRUE
+
+              }
+
+              if(!prep$abandoned) {
+
+                prep$training <- prep$testing |>
+                  dplyr::mutate(training = purrr::map(testing, \(x) to_split |> dplyr::anti_join(x))) |>
+                  dplyr::select(rep, training)
+
+                rm(to_split)
+
+                readr::write_lines(paste0("repeat: "
+                                          , 1:repeats
+                                          , ". test/training split\n "
+                                          , purrr::map_chr(prep$testing$testing, \(x) as.character(nrow(x)))
+                                          , " test data, including "
+                                          , purrr::map_chr(prep$testing$testing, \(x) as.character(sum(x$pa == 1)))
+                                          , " presences\n "
+                                          , purrr::map_chr(prep$training$training, \(x) as.character(nrow(x)))
+                                          , " training data, including "
+                                          , purrr::map_chr(prep$training$training, \(x) as.character(sum(x$pa == 1)))
+                                          , " presences\n"
                                           )
                                    , file = log_file
                                    , append = TRUE
                                    )
 
-                spatial_folds <- FALSE
-
-                blocks <- NULL
-
-              } else {
-
-                blocks <- blocks$result$folds_ids %>%
-                  tibble::enframe(name = NULL, value = "fold_ids")
-
               }
 
-              if(!is.null(blocks)) {
+            } else {
 
-                blocks_p <- blocks[prep$training$pa == 1,]
+              prep$training <- prep$env
+              prep$testing <- prep$env
 
-                if(any(c(table(blocks_p$fold_ids) < min_fold_n), length(setdiff(1:k_folds, unique(blocks_p$fold_ids))) > 0)) {
-
-                  how_many_below_thresh <- sum(purrr::map_dbl(1:k_folds, ~ sum(blocks_p$fold_ids == .)) < min_fold_n)
-
-                  old_k_folds <- k_folds
-
-                  k_folds <- old_k_folds - how_many_below_thresh
-
-                  blocks_adj <- tibble::tibble(fold_ids = 1:old_k_folds) %>%
-                    dplyr::mutate(n = purrr::map_dbl(fold_ids, ~ sum(blocks_p$fold_ids == .))) %>%
-                    dplyr::mutate(fold_ids_adj = forcats::fct_lump_n(as.factor(fold_ids), k_folds - 1, w = n)) %>%
-                    dplyr::mutate(fold_ids_adj = as.numeric(fold_ids_adj)) %>%
-                    dplyr::distinct()
-
-                  blocks <- blocks %>%
-                    dplyr::left_join(blocks_adj) %>%
-                    dplyr::mutate(fold_ids = fold_ids_adj) %>%
-                    dplyr::select(-fold_ids_adj, -n)
-
-                  k_folds <- length(unique(blocks$fold_ids))
-
-                  failed_blocks <- max(blocks_adj$fold_ids) - max(blocks_adj$fold_ids_adj)
-
-                  if(max(blocks_adj$fold_ids_adj) == 1) {
-
-                    note <- paste0(failed_blocks
-                                   , " out of "
-                                   , nrow(blocks_adj)
-                                   , " blocks failed to reach "
-                                   , min_fold_n
-                                   , " presences, leaving only 1 block. Reverting to non-spatial cv"
-                                   )
-
-                    spatial_folds <- FALSE
-
-                  } else {
-
-                    note <- paste0(failed_blocks
-                                   , " out of "
-                                   , nrow(blocks_adj)
-                                   , " blocks failed to reach "
-                                   , min_fold_n
-                                   , " presences. These were lumped until every block reached "
-                                   , min_fold_n
-                                   , " presences."
-                                   )
-
-                  }
-
-                  readr::write_lines(paste0("warning: ", note)
-                                     , file = log_file
-                                     , append = TRUE
-                                     )
-
-                }
-
-              }
+              readr::write_lines(paste0("WARNING: no test/training split\n"
+                                        , " full model will be tested against the same data that was used to train it!"
+                                        )
+                                 , file = log_file
+                                 , append = TRUE
+                                 )
 
             }
 
-          if(any(!spatial_folds, k_folds == 1)) {
+            if(!prep$abandoned) {
 
-            ## non-spatial -------
+              ## spatial ------
+              safe_cv_spatial <- purrr::safely(blockCV::cv_spatial)
 
-            blocks <- tibble::tibble(fold_ids = c(sample(1:k_folds_adj
-                                                         , sum(prep$training$pa == 1)
-                                                         , replace = TRUE
-                                                         , prob = rep(1 / k_folds_adj, k_folds_adj)
+              prep$training <- prep$training |>
+                dplyr::mutate(point_sf = purrr::map(training
+                                                    , \(x) x |>
+                                                      dplyr::select(x, y, pa) %>%
+                                                      sf::st_as_sf(coords = c("x", "y")
+                                                                   , crs = sf::st_crs(prep_preds[[1]])
+                                                                   )
+                                                    )
+                              , block_div = block_div
+                              , block_dist = purrr::map_dbl(block_div
+                                                            , \(x) prep$predict_boundary %>%
+                                                              sf::st_area() %>%
+                                                              as.numeric() %>%
+                                                              sqrt() %>%
+                                                              `/` (x)
+                                                            )
+                              , cv_spatial = purrr::map2(point_sf
+                                                         , block_dist
+                                                         , \(x, y) safe_cv_spatial(x
+                                                                                   , column = "pa"
+                                                                                   , k = k_folds
+                                                                                   , size = block_dist
+                                                                                   , iteration = 200
+                                                                                   , selection = "random"
+                                                                                   , extend = 0.5
+                                                                                   , progress = FALSE
+                                                                                   , report = FALSE
+                                                                                   , plot = FALSE
+                                                                                   )
                                                          )
-                                                  , sample(1:k_folds_adj
-                                                           , sum(prep$training$pa == 0)
-                                                           , replace = TRUE
-                                                           , prob = rep(1 / k_folds_adj, k_folds_adj)
-                                                           )
-                                                  )
-                                     )
+                              , error = purrr::map(cv_spatial, "error")
+                              )
+
+              if(any(purrr::map_lgl(prep$training$error, \(x) !is.null(x)))) {
+
+                errs <- prep$training |>
+                  dplyr::filter(purrr::map_lgl(error, \(x) !is.null(x)))
+
+                readr::write_lines(paste0("error: repeat"
+                                          , errs$rep
+                                          , ". "
+                                          , as.character(errs$error)
+                                          )
+                                   , file = log_file
+                                   , append = TRUE
+                                   )
+
+              }
+
+              prep$training <- prep$training |>
+                dplyr::filter(purrr::map_lgl(error, \(x) is.null(x))) |>
+                dplyr::mutate(blocks = purrr::map(cv_spatial, \(x) x$result$folds_ids)
+                              , blocks = purrr::map2(blocks, training
+                                                     , \(x, y) fix_blocks(x, y$pa, min_fold_n)
+                                                     )
+                              , spatial_folds = purrr::map_lgl(blocks
+                                                               , \(x) length(unique(x)) > 1
+                                                               )
+                              )
+
+
+            }
 
           }
 
-          prep$blocks <- prep$training %>%
-            dplyr::mutate(block = blocks$fold_ids) %>%
-            dplyr::filter(dplyr::if_any(.cols = names(prep_preds)
-                                        , .fns = \(x) !is.na(x) & !is.infinite(x)
-                                        )
+          if(any(!prep$training$spatial_folds, k_folds == 1)) {
+
+            ## non-spatial -------
+            prep$training <- prep$training |>
+              dplyr::mutate(blocks = dplyr::if_else(spatial_folds
+                                                    , blocks
+                                                    , purrr::map(training
+                                                                 , \(x) non_spatial_blocks(k_folds
+                                                                                           , x
+                                                                                           )
+                                                                 )
+                                                    )
+                            )
+
+          }
+
+          prep$training <- prep$training |>
+            dplyr::mutate(training = purrr::map2(training
+                                                 , blocks
+                                                 , \(x, y) x |>
+                                                   dplyr::bind_cols(tibble::tibble(block = y))
+                                                 )
                           )
 
-          prep$spatial_folds_used <- spatial_folds
-
-          readr::write_lines(paste0("spatial folds = "
-                                    , spatial_folds
-                                    , ". Folds = "
-                                    , length(unique(blocks$fold_ids))
-                                    , ". Folds done in "
+          readr::write_lines(paste0(paste0("repeat: "
+                                           , prep$training$rep
+                                           , ", spatial folds = "
+                                           , prep$training$spatial_folds
+                                           , ". Folds = "
+                                           , length(unique(prep$training$blocks))
+                                           , collapse = "\n"
+                                           )
+                                    , ".\nFolds done in "
                                     , round(difftime(Sys.time(), start_blocks, units = "mins"), 2)
                                     , " minutes"
                                     )
@@ -1046,46 +1005,42 @@
                              , append = TRUE
                              )
 
+        }
+
+
+        # reduce env -------
+
+        if(!prep$abandoned) {
+
+          run <- if(exists("reduce_env", prep)) force_new else TRUE
+
+          if(run) {
+
+            start_reduce_env <- Sys.time()
+
+            prep$reduce_env <- envModel::reduce_env(env_df = prep$env
+                                                    , env_cols = names(prep_preds)
+                                                    , y_col = "pa"
+                                                    , imp_col = "1"
+                                                    , thresh_corr = reduce_env_thresh_corr
+                                                    , quant_rf_imp = reduce_env_quant_rf_imp
+                                                    , remove_always = c(pres_x, pres_y, "x", "y", "pa", "block", "cell", "id")
+                                                    )
+
+            readr::write_lines(paste0("reduce_env completed in: "
+                                      , round(difftime(Sys.time(), start_reduce_env, units = "mins"), 2)
+                                      , " minutes. Original "
+                                      , length(names(prep_preds))
+                                      , " variables reduced to "
+                                      , length(prep$reduce_env$keep)
+                                      )
+                               , file = log_file
+                               , append = TRUE
+                               )
+
           }
 
         }
-
-      }
-
-
-      # reduce env -------
-
-      if(!prep$abandoned) {
-
-        run <- if(exists("reduce_env", prep)) force_new else TRUE
-
-        if(run) {
-
-          start_reduce_env <- Sys.time()
-
-          prep$reduce_env <- envModel::reduce_env(env_df = prep$blocks
-                                                  , env_cols = names(prep_preds)
-                                                  , y_col = "pa"
-                                                  , imp_col = "1"
-                                                  , thresh_corr = reduce_env_thresh_corr
-                                                  , quant_rf_imp = reduce_env_quant_rf_imp
-                                                  , remove_always = c(pres_x, pres_y, "x", "y", "pa", "block", "cell", "id")
-                                                  )
-
-          readr::write_lines(paste0("reduce_env completed in: "
-                                    , round(difftime(Sys.time(), start_reduce_env, units = "mins"), 2)
-                                    , " minutes. Original "
-                                    , length(names(prep_preds))
-                                    , " variables reduced to "
-                                    , length(prep$reduce_env$keep)
-                                    )
-                             , file = log_file
-                             , append = TRUE
-                             )
-
-        }
-
-      }
 
         # end timer ------
         readr::write_lines(paste0("prep completed. elapsed time: "
