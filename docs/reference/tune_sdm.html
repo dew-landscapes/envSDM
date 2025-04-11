@@ -213,12 +213,12 @@ elements:</p>
 <span class="r-in"><span>              <span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [[1]]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [[1]]$tune_file</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> C:/temp/nige/RtmpCgmoKf/temp_libpath38f01ca24da9/envSDM/examples/acaule/tune.rds</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> C:/temp/nige/RtmpW6DYu5/temp_libpath55407ac74cf2/envSDM/examples/acaule/tune.rds</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [[2]]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [[2]]$tune_file</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> C:/temp/nige/RtmpCgmoKf/temp_libpath38f01ca24da9/envSDM/examples/bradypus/tune.rds</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> C:/temp/nige/RtmpW6DYu5/temp_libpath55407ac74cf2/envSDM/examples/bradypus/tune.rds</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span></span></span>
@@ -232,10 +232,10 @@ elements:</p>
 <span class="r-in"><span>    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">best</span><span class="op">)</span> <span class="op"><a href="pipe.html">%&gt;%</a></span> <span class="co"># used 'combo' to determine 'best' as default in tune_sdm</span></span></span>
 <span class="r-in"><span>    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">taxa</span>, <span class="va">algo</span>, <span class="va">tune_args</span>, <span class="va">combo</span>, <span class="va">auc_po</span>, <span class="va">IMAE</span>, <span class="va">CBI</span>, <span class="va">max_spec_sens</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 2 × 8</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   taxa     algo  tune_args             combo auc_po  IMAE   CBI max_spec_sens</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                 <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> acaule   rf    tr: 500. mt: 3. ns: 3 0.302  0.981 0.915 0.880         0.284</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> bradypus rf    tr: 500. mt: 1. ns: 3 0.106  0.720 0.673 0.846         0.333</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   taxa     algo   tune_args     combo auc_po  IMAE   CBI max_spec_sens</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> acaule   maxnet fc: lq. rm: 3 0.239  0.928 0.838 0.833         0.252</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> bradypus maxnet fc: lq. rm: 3 0.111  0.727 0.621 0.852         0.449</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>  <span class="co"># or best tune args choosing on just auc_po?</span></span></span>
 <span class="r-in"><span>  <span class="va">data</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
@@ -251,8 +251,8 @@ elements:</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 2 × 7</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   taxa     algo   tune_args             auc_po  IMAE   CBI max_spec_sens</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> acaule   rf     tr: 500. mt: 1. ns: 1  0.982 0.902 0.878         0.257</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> bradypus maxnet fc: lq. rm: 3          0.752 0.612 0.815         0.543</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> acaule   rf     tr: 500. mt: 1. ns: 2  0.973 0.871 0.832         0.250</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> bradypus maxnet fc: lq. rm: 3          0.727 0.621 0.852         0.449</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

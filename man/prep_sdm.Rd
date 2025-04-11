@@ -19,7 +19,6 @@ prep_sdm(
   pred_clip = NULL,
   predictors,
   is_env_pred = TRUE,
-  max_cells_in_memory = 3e+07,
   terra_options = NULL,
   cat_preds = NULL,
   num_bg = 10000,
@@ -28,7 +27,7 @@ prep_sdm(
   folds = 5,
   spatial_folds = TRUE,
   repeats = 1,
-  block_div = seq(5, by = 1, length.out = repeats),
+  block_div = seq(3, by = 2, length.out = repeats),
   min_fold_n = 8,
   hold_prop = 0.3,
   stretch_value = 10,
@@ -82,12 +81,6 @@ prevent prediction into ocean).}
 
 \item{is_env_pred}{Logical. Does the naming of the directory and files in
 \code{predictors} follow the pattern required by \code{envRaster::parse_env_tif()}?}
-
-\item{max_cells_in_memory}{Numeric passed to \code{exactextractr::exactextract()}
-argument with the same name. \code{prep_sdm()} will be quicker with larger values,
-but if running on many cores, memory issues are likely. The default of
-30000000 is the default for \code{exactextractr::exactextract()} at the time of
-writing.}
 
 \item{terra_options}{Passed to \code{terra::terraOptions()}. e.g. list(memfrac =
 0.6)}
@@ -206,8 +199,7 @@ The background sampling includes code based on a
 by user \href{https://gis.stackexchange.com/users/865/spacedman}{Spacedman}.
 }
 \details{
-Options for managing memory are \code{terra_options}, \code{max_cells_in_memory} and
-\code{do_gc}.
+If memory is an issue, try adjusting \code{terra_options} and/or \code{do_gc}.
 
 To help build the density raster for assigning background points, 'absence'
 data can be supplied in \code{presence} as \code{0} values. e.g. For a bird, absence
@@ -270,6 +262,7 @@ data might be generated from other sites where birds were recorded but
                                                , limit_buffer = 10000
                                                , folds = 5
                                                , repeats = 5
+                                               , hold_prop = 0
                                                , dens_res = 1000 # ignored as decimal degrees preds
                                                , reduce_env_thresh_corr = 0.95
                                                , reduce_env_quant_rf_imp = 0.2

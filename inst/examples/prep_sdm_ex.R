@@ -53,6 +53,7 @@
                                                , limit_buffer = 10000
                                                , folds = 5
                                                , repeats = 5
+                                               , hold_prop = 0
                                                , dens_res = 1000 # ignored as decimal degrees preds
                                                , reduce_env_thresh_corr = 0.95
                                                , reduce_env_quant_rf_imp = 0.2
