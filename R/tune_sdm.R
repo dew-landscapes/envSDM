@@ -176,7 +176,7 @@
         if(best_run) {
 
           prep$training <- prep$training |>
-            dplyr::slice_sample(n = 1) |>
+            dplyr::slice(1) |>
             dplyr::mutate(training = purrr::map(training
                                                 , \(x) x |>
                                                   dplyr::mutate(old_block = block

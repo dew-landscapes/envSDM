@@ -6,8 +6,7 @@
 #' [answer](https://gis.stackexchange.com/a/224347)
 #' by user [Spacedman](https://gis.stackexchange.com/users/865/spacedman).
 #'
-#' Options for managing memory are `terra_options`, `max_cells_in_memory` and
-#' `do_gc`.
+#' If memory is an issue, try adjusting `terra_options` and/or `do_gc`.
 #'
 #' To help build the density raster for assigning background points, 'absence'
 #' data can be supplied in `presence` as `0` values. e.g. For a bird, absence
@@ -45,11 +44,6 @@
 #' @param is_env_pred Logical. Does the naming of the directory and files in
 #' `predictors` follow the pattern required by `envRaster::parse_env_tif()`?
 #' @param cat_preds Character. Vector of predictor names that are character.
-#' @param max_cells_in_memory Numeric passed to `exactextractr::exactextract()`
-#' argument with the same name. `prep_sdm()` will be quicker with larger values,
-#' but if running on many cores, memory issues are likely. The default of
-#' 30000000 is the default for `exactextractr::exactextract()` at the time of
-#' writing.
 #' @param terra_options Passed to `terra::terraOptions()`. e.g. list(memfrac =
 #' 0.6)
 #' @param num_bg Numeric. How many background points?
@@ -139,7 +133,6 @@
                        , pred_clip = NULL
                        , predictors
                        , is_env_pred = TRUE
-                       , max_cells_in_memory = 3e+07
                        , terra_options = NULL
                        , cat_preds = NULL
                        , num_bg = 10000
@@ -148,7 +141,7 @@
                        , folds = 5
                        , spatial_folds = TRUE
                        , repeats = 1
-                       , block_div = seq(5, by = 1, length.out = repeats)
+                       , block_div = seq(3, by = 2, length.out = repeats)
                        , min_fold_n = 8
                        , hold_prop = 0.3
                        , stretch_value = 10
@@ -273,7 +266,7 @@
                                        ) %>%
         terra::xyFromCell(prep_preds, .) %>%
         tibble::as_tibble() %>%
-        {if(pres_col %in% names(presence)) (.) %>% dplyr::bind_cols(presence) else (.) |> dplyr::mutate(!!rlang::ensym(pres_col) := pres_val)} %>%
+        {if(pres_col %in% names(presence)) (.) %>% dplyr::mutate(pa = presence$pa) else (.) |> dplyr::mutate(!!rlang::ensym(pres_col) := pres_val)} %>%
         stats::na.omit()
 
       ## raster presence ------
@@ -776,17 +769,17 @@
 
             start_blocks <- Sys.time()
 
+            # testing/training split ----------
+            to_split <- prep$env |>
+              dplyr::mutate(id = dplyr::row_number())
+
+            prep$testing <- tibble::tibble(rep = 1:repeats, testing = list(tibble::tibble(pa = 0)))
+            counter <- 0
+            hold_prop_adj <- hold_prop
+
+            # Try to get min_fold_n presences within prep$testing
             if(hold_prop > 0) {
 
-              # testing/training split ----------
-              to_split <- prep$env |>
-                dplyr::mutate(id = dplyr::row_number())
-
-              prep$testing <- tibble::tibble(rep = 1:repeats, testing = list(tibble::tibble(pa = 0)))
-              counter <- 0
-              hold_prop_adj <- hold_prop
-
-              # Try to get min_fold_n presences within prep$testing
               while(all(prep$testing$testing |> purrr::map(\(x) sum(x$pa == 1)) < min_fold_n) | hold_prop_adj > 0.5) {
 
                 prep$testing <- prep$testing |>
@@ -802,91 +795,107 @@
 
               }
 
-              if(hold_prop_adj > hold_prop + 0.01) {
+            } else {
 
-                m <- paste0("Warning. hold_prop adjusted up to "
-                            , hold_prop_adj - 0.01
-                            , " (from "
-                            , hold_prop
-                            , ") to acheive min_fold_n of "
-                            , min_fold_n
-                            , " presences in the testing (holdout) data"
-                            )
+              prep$testing <- prep$testing |>
+                dplyr::slice(1) |>
+                dplyr::mutate(testing = list(to_split))
 
-                message(m)
+            }
 
-                readr::write_lines(m
-                                   , file = log_file
-                                   , append = TRUE
-                                   )
+            if(hold_prop_adj > hold_prop + 0.01) {
 
-              }
+              m <- paste0("Warning. hold_prop adjusted up to "
+                          , hold_prop_adj - 0.01
+                          , " (from "
+                          , hold_prop
+                          , ") to acheive min_fold_n of "
+                          , min_fold_n
+                          , " presences in the testing (holdout) data"
+                          )
 
-              # remove any tests that didn't reach min_fold_n
-              if(any(prep$testing$testing |> purrr::map(\(x) sum(x$pa == 1)) < min_fold_n)) {
+              message(m)
 
-                prep$testing <- prep$testing |>
-                  dplyr::filter(purrr::map_lgl(testing, \(x) sum(x$pa == 1) > min_fold_n))
+              readr::write_lines(m
+                                 , file = log_file
+                                 , append = TRUE
+                                 )
 
-              }
+            }
 
-              # If never enough presences in test - abandon
-              if(all(prep$testing$testing |> purrr::map(\(x) sum(x$pa == 1)) < min_fold_n)) {
+            # remove any tests that didn't reach min_fold_n
+            if(any(prep$testing$testing |> purrr::map(\(x) sum(x$pa == 1)) < min_fold_n)) {
 
-                m <- paste0("ERROR: not enough presences ("
-                            , n_p
-                            , ") to acheive min_fold_n ("
-                            , min_fold_n
-                            , ") in the test split with hold_prop of "
-                            , hold_prop_adj - 0.01
-                            , " (adjusted up from "
-                            , hold_prop
-                            , ")"
-                            )
+              prep$testing <- prep$testing |>
+                dplyr::filter(purrr::map_lgl(testing, \(x) sum(x$pa == 1) > min_fold_n))
 
-                message(m)
+            }
 
-                readr::write_lines(m
-                                   , file = log_file
-                                   , append = TRUE
-                                   )
+            # If never enough presences in test - abandon
+            if(all(prep$testing$testing |> purrr::map(\(x) sum(x$pa == 1)) < min_fold_n)) {
 
-                prep$abandoned <- TRUE
+              m <- paste0("ERROR: not enough presences ("
+                          , n_p
+                          , ") to acheive min_fold_n ("
+                          , min_fold_n
+                          , ") in the test split with hold_prop of "
+                          , hold_prop_adj - 0.01
+                          , " (adjusted up from "
+                          , hold_prop
+                          , ")"
+                          )
 
-              }
+              message(m)
 
-              if(!prep$abandoned) {
+              readr::write_lines(m
+                                 , file = log_file
+                                 , append = TRUE
+                                 )
+
+              prep$abandoned <- TRUE
+
+            }
+
+            if(!prep$abandoned) {
+
+              if(hold_prop > 0) {
 
                 prep$training <- prep$testing |>
                   dplyr::mutate(training = purrr::map(testing, \(x) to_split |> dplyr::anti_join(x))) |>
                   dplyr::select(rep, training)
 
-                rm(to_split)
+              } else {
 
-                readr::write_lines(paste0("repeat: "
-                                          , 1:repeats
-                                          , ". test/training split\n "
-                                          , purrr::map_chr(prep$testing$testing, \(x) as.character(nrow(x)))
-                                          , " test data, including "
-                                          , purrr::map_chr(prep$testing$testing, \(x) as.character(sum(x$pa == 1)))
-                                          , " presences\n "
-                                          , purrr::map_chr(prep$training$training, \(x) as.character(nrow(x)))
-                                          , " training data, including "
-                                          , purrr::map_chr(prep$training$training, \(x) as.character(sum(x$pa == 1)))
-                                          , " presences\n"
-                                          )
-                                   , file = log_file
-                                   , append = TRUE
-                                   )
+                prep$training <- tibble::tibble(rep = 1:repeats) |>
+                  dplyr::cross_join(prep$testing |>
+                                      dplyr::select(- rep, training = testing)
+                                    )
 
               }
 
-            } else {
+              rm(to_split)
 
-              prep$training <- prep$env
-              prep$testing <- prep$env
+              readr::write_lines(paste0("repeat: "
+                                        , 1:repeats
+                                        , ". test/training split\n "
+                                        , purrr::map_chr(prep$testing$testing, \(x) as.character(nrow(x)))
+                                        , " test data, including "
+                                        , purrr::map_chr(prep$testing$testing, \(x) as.character(sum(x$pa == 1)))
+                                        , " presences\n "
+                                        , purrr::map_chr(prep$training$training, \(x) as.character(nrow(x)))
+                                        , " training data, including "
+                                        , purrr::map_chr(prep$training$training, \(x) as.character(sum(x$pa == 1)))
+                                        , " presences\n"
+                                        )
+                                 , file = log_file
+                                 , append = TRUE
+                                 )
 
-              readr::write_lines(paste0("WARNING: no test/training split\n"
+            }
+
+            if(hold_prop == 0) {
+
+              readr::write_lines(paste0("WARNING: no holdout data\n"
                                         , " full model will be tested against the same data that was used to train it!"
                                         )
                                  , file = log_file
@@ -995,6 +1004,14 @@
                                            , prep$training$spatial_folds
                                            , ". Folds = "
                                            , length(unique(prep$training$blocks))
+                                           , " with n presences = "
+                                           , purrr::map(prep$training$training
+                                                        , \(x) x |>
+                                                          dplyr::count(block, pa) |>
+                                                          dplyr::filter(pa == 1) |>
+                                                          dplyr::pull(n) |>
+                                                          stringr::str_flatten_comma()
+                                                        )
                                            , collapse = "\n"
                                            )
                                     , ".\nFolds done in "
