@@ -152,6 +152,14 @@
                        , force_new = FALSE
                        ) {
 
+    # start presences -------
+    start_presences <- if(pres_col %in% names(presence)) {
+
+      sum(presence[pres_col] == pres_val)
+
+    } else  nrow(presence)
+
+
     # setup -------
     return_val <- if(any(isFALSE(out_dir), return_val == "object")) "prep" else "prep_file"
 
@@ -191,7 +199,7 @@
 
     if(!exists("prep", inherits = FALSE)) prep <- list(abandoned = FALSE, finished = FALSE)
 
-    if(nrow(presence) == 0) prep$abandoned <- TRUE
+    if(start_presences < min_fold_n) prep$abandoned <- TRUE
 
     run <- if(any(prep$abandoned, prep$finished)) force_new else TRUE
 
