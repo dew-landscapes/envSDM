@@ -1,7 +1,7 @@
 
 
 bradypus
-predict process started at 2025-04-11 17:10:53.166354
+predict process started at 2025-04-29 18:43:52.012246
 predict window for bradypus
 predict window created in 0 minutes
 predict for bradypus from maxnet model with arguments: fc = lq, rm = 3
@@ -9,4 +9,4 @@ predict for bradypus from maxnet model with arguments: fc = lq, rm = 3
 predict finished in 0 minutes
 predict mask for bradypus
 predict mask created in 0 minutes
-predict process finished. elapsed time: 0.02 minutes
+predict process finished. elapsed time: 0.03 minutes
