@@ -92,8 +92,7 @@
 
       tune_args <- tune$tune_mean %>%
         dplyr::filter(tunes == max(tunes)) |>
-        dplyr::arrange(desc(!!rlang::ensym(use_metric))) |>
-        dplyr::slice(1)
+        dplyr::arrange(desc(!!rlang::ensym(use_metric)))
 
 
       full_run_tune <- NULL
@@ -117,7 +116,7 @@
                                     , best_run = TRUE
                                     , do_gc = do_gc
                                     , force_new = TRUE
-                                    #, ...
+                                    , ...
                                     )
 
           if(is.null(full_run_tune$tune_mean)) row_id = row_id + 1
