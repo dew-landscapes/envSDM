@@ -80,15 +80,13 @@
       tm_shape(clip) +
       tm_borders() +
       tm_shape(dens_ras) +
-      tm_raster(title = "Background point density"
-                , breaks = c(0, 2, 4, 6, 8, 10)
+      tm_raster(col.legend = "Background point density"
+                , col.scale = c(0, 2, 4, 6, 8, 10)
                 , drop.levels = TRUE
-                , colorNA = NULL
                 ) +
-      tm_legend(outside = TRUE) +
       tm_compass() +
-      tm_scale_bar() +
-      tm_layout(main.title = paste0("Background point density for ",  prep$this_taxa))
+      tm_scalebar() +
+      tm_title(paste0("Background point density for ",  prep$this_taxa))
 
     m
 
@@ -100,9 +98,7 @@
 
     m +
       tm_shape(presences) +
-        tm_dots(col = "pa"
-                , palette = "viridis"
-                )
+        tm_dots(fill = "pa")
 
   }
 

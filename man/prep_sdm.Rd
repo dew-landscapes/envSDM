@@ -27,7 +27,7 @@ prep_sdm(
   folds = 5,
   spatial_folds = TRUE,
   repeats = 1,
-  block_div = seq(3, by = 2, length.out = repeats),
+  block_div = seq(5, by = 2, length.out = repeats),
   min_fold_n = 8,
   hold_prop = 0.3,
   stretch_value = 10,
@@ -289,15 +289,13 @@ data might be generated from other sites where birds were recorded but
       tm_shape(clip) +
       tm_borders() +
       tm_shape(dens_ras) +
-      tm_raster(title = "Background point density"
-                , breaks = c(0, 2, 4, 6, 8, 10)
+      tm_raster(col.legend = "Background point density"
+                , col.scale = c(0, 2, 4, 6, 8, 10)
                 , drop.levels = TRUE
-                , colorNA = NULL
                 ) +
-      tm_legend(outside = TRUE) +
       tm_compass() +
-      tm_scale_bar() +
-      tm_layout(main.title = paste0("Background point density for ",  prep$this_taxa))
+      tm_scalebar() +
+      tm_title(paste0("Background point density for ",  prep$this_taxa))
 
     m
 
@@ -309,9 +307,7 @@ data might be generated from other sites where birds were recorded but
 
     m +
       tm_shape(presences) +
-        tm_dots(col = "pa"
-                , palette = "viridis"
-                )
+        tm_dots(fill = "pa")
 
   }
 
