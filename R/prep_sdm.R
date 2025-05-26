@@ -141,7 +141,7 @@
                        , folds = 5
                        , spatial_folds = TRUE
                        , repeats = 1
-                       , block_div = seq(3, by = 2, length.out = repeats)
+                       , block_div = seq(5, by = 2, length.out = repeats)
                        , min_fold_n = 8
                        , hold_prop = 0.3
                        , stretch_value = 10
@@ -388,13 +388,12 @@
         purrr::set_names(c("x", "y"))
 
       n_p <- nrow(prep$presence_ras)
-      needed_p <- 3 * min_fold_n
+      needed_p <- min_fold_n
 
       readr::write_lines(paste0(needed_p
-                                , " presences required for "
-                                , "3 sets of min_fold_n (which is "
+                                , " presences required for a single fold of "
                                 , min_fold_n
-                                , "):\n  * 2 as cross folds\n  * 1 as holdout\n"
+                                , ". "
                                 , n_p
                                 , " presences in predict_boundary and on env rasters"
                                 )
@@ -459,9 +458,11 @@
           readr::write_lines(paste0("WARNING: there are only "
                                     , n_p
                                     , " presences. This is not enough to support the bare minimum"
-                                    , " of three sets (one hold out and 2 for cross-fold tuning) with "
+                                    , " of "
+                                    , needed_p
+                                    , " for a single fold with "
                                     , min_fold_n
-                                    , " presences in each set. SDM abandoned"
+                                    , " presences. SDM abandoned"
                                     )
                              , file = log_file
                              , append = TRUE
@@ -883,18 +884,23 @@
 
               rm(to_split)
 
-              readr::write_lines(paste0("repeat: "
-                                        , 1:repeats
-                                        , ". test/training split\n "
-                                        , purrr::map_chr(prep$testing$testing, \(x) as.character(nrow(x)))
-                                        , " test data, including "
-                                        , purrr::map_chr(prep$testing$testing, \(x) as.character(sum(x$pa == 1)))
-                                        , " presences\n "
-                                        , purrr::map_chr(prep$training$training, \(x) as.character(nrow(x)))
-                                        , " training data, including "
-                                        , purrr::map_chr(prep$training$training, \(x) as.character(sum(x$pa == 1)))
-                                        , " presences\n"
-                                        )
+              text_one <- paste0("test/training split\n "
+                                 , purrr::map_chr(prep$testing$testing, \(x) as.character(nrow(x)))
+                                 , " test data, including "
+                                 , purrr::map_chr(prep$testing$testing, \(x) as.character(sum(x$pa == 1)))
+                                 , " presences\n "
+                                 )
+
+              text_two <- paste0("repeat: "
+                                 , 1:repeats
+                                 , ": "
+                                 , purrr::map_chr(prep$training$training, \(x) as.character(nrow(x)))
+                                 , " training data, including "
+                                 , purrr::map_chr(prep$training$training, \(x) as.character(sum(x$pa == 1)))
+                                 , " presences\n "
+                                 )
+
+              readr::write_lines(c(text_one, text_two)
                                  , file = log_file
                                  , append = TRUE
                                  )
@@ -950,6 +956,7 @@
                               , error = purrr::map(cv_spatial, "error")
                               )
 
+              ### spatial cv errors -------
               if(any(purrr::map_lgl(prep$training$error, \(x) !is.null(x)))) {
 
                 errs <- prep$training |>
@@ -966,6 +973,20 @@
 
               }
 
+              ### spatial cv identical --------
+              prep_block_corr <- stats::cor(tibble::as_tibble(prep$training$blocks, .name_repair = "unique"))
+
+              change_to_non_spatial <- caret::findCorrelation(prep_block_corr
+                                                              , cutoff = 0.999999999
+                                                              )
+
+              if(sum(change_to_non_spatial, na.rm = TRUE)) {
+
+                prep$training$spatial_folds[change_to_non_spatial] <- FALSE
+
+              }
+
+              ### too few p --------
               prep$training <- prep$training |>
                 dplyr::filter(purrr::map_lgl(error, \(x) is.null(x))) |>
                 dplyr::mutate(blocks = purrr::map(cv_spatial, \(x) x$result$folds_ids)
@@ -976,7 +997,6 @@
                                                                , \(x) length(unique(x)) > 1
                                                                )
                               )
-
 
             }
 
@@ -1011,7 +1031,12 @@
                                            , ", spatial folds = "
                                            , prep$training$spatial_folds
                                            , ". Folds = "
-                                           , length(unique(prep$training$blocks))
+                                           , purrr::map(prep$training$blocks
+                                                        , \(x) x |>
+                                                          unique() |>
+                                                          length() |>
+                                                          stringr::str_flatten_comma()
+                                                        )
                                            , " with n presences = "
                                            , purrr::map(prep$training$training
                                                         , \(x) x |>
