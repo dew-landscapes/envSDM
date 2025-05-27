@@ -387,12 +387,17 @@
         tibble::as_tibble() %>%
         purrr::set_names(c("x", "y"))
 
+      # n_p / needed_p ---------
       n_p <- nrow(prep$presence_ras)
-      needed_p <- min_fold_n
+      needed_p <- min_fold_n * ((hold_prop > 0) + 1)
 
       readr::write_lines(paste0(needed_p
                                 , " presences required for a single fold of "
                                 , min_fold_n
+                                , if(hold_prop > 0) paste0(" plus another fold of "
+                                                           , min_fold_n
+                                                           , " for holdout data"
+                                                           )
                                 , ". "
                                 , n_p
                                 , " presences in predict_boundary and on env rasters"
@@ -403,10 +408,8 @@
 
       if(n_p > needed_p) {
 
-        # subset predictors? ------
+        # subset predictors ------
         if(pred_limit) {
-
-          start_subset <- Sys.time()
 
           if(!is.null(terra_options)) {
 
@@ -417,14 +420,6 @@
           }
 
           terra::window(prep_preds) <- terra::ext(terra::vect(prep$predict_boundary))
-
-          readr::write_lines(paste0("subsetting predictors done in "
-                                    , round(difftime(Sys.time(), start_subset, units = "mins"), 2)
-                                    , " minutes"
-                                    )
-                             , file = log_file
-                             , append = TRUE
-                             )
 
         }
 
@@ -453,24 +448,24 @@
 
         }
 
-        if(k_folds < 2) {
-
-          readr::write_lines(paste0("WARNING: there are only "
-                                    , n_p
-                                    , " presences. This is not enough to support the bare minimum"
-                                    , " of "
-                                    , needed_p
-                                    , " for a single fold with "
-                                    , min_fold_n
-                                    , " presences. SDM abandoned"
-                                    )
-                             , file = log_file
-                             , append = TRUE
-                             )
-
-          prep$abandoned <- TRUE
-
-        }
+        # if(n_p < needed_p) {
+        #
+        #   readr::write_lines(paste0("WARNING: there are only "
+        #                             , n_p
+        #                             , " presences. This is not enough to support the bare minimum"
+        #                             , " of "
+        #                             , needed_p
+        #                             , " for a single fold with "
+        #                             , min_fold_n
+        #                             , " presences. SDM abandoned"
+        #                             )
+        #                      , file = log_file
+        #                      , append = TRUE
+        #                      )
+        #
+        #   prep$abandoned <- TRUE
+        #
+        # }
 
 
         k_folds_adj <- k_folds
