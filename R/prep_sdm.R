@@ -860,52 +860,118 @@
 
             }
 
-            if(!prep$abandoned) {
+          }
 
-              if(hold_prop > 0) {
+        }
 
-                prep$training <- prep$testing |>
-                  dplyr::mutate(training = purrr::map(testing, \(x) to_split |> dplyr::anti_join(x))) |>
-                  dplyr::select(rep, training)
 
-              } else {
 
-                prep$training <- tibble::tibble(rep = 1:repeats) |>
-                  dplyr::cross_join(prep$testing |>
-                                      dplyr::select(- rep, training = testing)
-                                    )
+        if(!prep$abandoned) {
 
-              }
+          if(hold_prop > 0) {
 
-              rm(to_split)
+            prep$training <- prep$testing |>
+              dplyr::mutate(training = purrr::map(testing, \(x) to_split |> dplyr::anti_join(x))) |>
+              dplyr::select(rep, training)
 
-              text_one <- paste0("test/training split\n "
-                                 , purrr::map_chr(prep$testing$testing, \(x) as.character(nrow(x)))
-                                 , " test data, including "
-                                 , purrr::map_chr(prep$testing$testing, \(x) as.character(sum(x$pa == 1)))
-                                 , " presences\n "
-                                 )
+          } else {
 
-              text_two <- paste0("repeat: "
-                                 , 1:repeats
-                                 , ": "
-                                 , purrr::map_chr(prep$training$training, \(x) as.character(nrow(x)))
-                                 , " training data, including "
-                                 , purrr::map_chr(prep$training$training, \(x) as.character(sum(x$pa == 1)))
-                                 , " presences\n "
-                                 )
+            prep$training <- tibble::tibble(rep = 1:repeats) |>
+              dplyr::cross_join(prep$testing |>
+                                  dplyr::select(- rep, training = testing)
+                                )
 
-              readr::write_lines(c(text_one, text_two)
-                                 , file = log_file
-                                 , append = TRUE
-                                 )
+          }
 
-            }
+          prep$training <- prep$training |>
+            dplyr::mutate(spatial_folds = dplyr::if_else(k_folds == 1, FALSE, spatial_folds))
 
-            if(hold_prop == 0) {
+          rm(to_split)
 
-              readr::write_lines(paste0("WARNING: no holdout data\n"
-                                        , " full model will be tested against the same data that was used to train it!"
+          text_one <- paste0("test/training split\n "
+                             , purrr::map_chr(prep$testing$testing, \(x) as.character(nrow(x)))
+                             , " test data, including "
+                             , purrr::map_chr(prep$testing$testing, \(x) as.character(sum(x$pa == 1)))
+                             , " presences."
+                             )
+
+          text_two <- paste0("repeat: "
+                             , 1:repeats
+                             , ". "
+                             , purrr::map_chr(prep$training$training, \(x) as.character(nrow(x)))
+                             , " training data, including "
+                             , purrr::map_chr(prep$training$training, \(x) as.character(sum(x$pa == 1)))
+                             , " presences."
+                             )
+
+          readr::write_lines(c(text_one, text_two)
+                             , file = log_file
+                             , append = TRUE
+                             )
+
+          if(hold_prop == 0) {
+
+            readr::write_lines(paste0("WARNING: no holdout data\n"
+                                      , " full model will be tested against the same data that was used to train it!"
+                                      )
+                               , file = log_file
+                               , append = TRUE
+                               )
+
+          }
+
+        }
+
+        if(!prep$abandoned) {
+
+          if(k_folds > 1) {
+
+            ## spatial ------
+            safe_cv_spatial <- purrr::safely(blockCV::cv_spatial)
+
+            prep$training <- prep$training |>
+              dplyr::mutate(point_sf = purrr::map(training
+                                                  , \(x) x |>
+                                                    dplyr::select(x, y, pa) %>%
+                                                    sf::st_as_sf(coords = c("x", "y")
+                                                                 , crs = sf::st_crs(prep_preds[[1]])
+                                                                 )
+                                                  )
+                            , block_div = block_div
+                            , block_dist = purrr::map_dbl(block_div
+                                                          , \(x) prep$predict_boundary %>%
+                                                            sf::st_area() %>%
+                                                            as.numeric() %>%
+                                                            sqrt() %>%
+                                                            `/` (x)
+                                                          )
+                            , cv_spatial = purrr::map2(point_sf
+                                                       , block_dist
+                                                       , \(x, y) safe_cv_spatial(x
+                                                                                 , column = "pa"
+                                                                                 , k = k_folds
+                                                                                 , size = block_dist
+                                                                                 , iteration = 200
+                                                                                 , selection = "random"
+                                                                                 , extend = 0.5
+                                                                                 , progress = FALSE
+                                                                                 , report = FALSE
+                                                                                 , plot = FALSE
+                                                                                 )
+                                                       )
+                            , error = purrr::map(cv_spatial, "error")
+                            )
+
+            ### spatial cv errors -------
+            if(any(purrr::map_lgl(prep$training$error, \(x) !is.null(x)))) {
+
+              errs <- prep$training |>
+                dplyr::filter(purrr::map_lgl(error, \(x) !is.null(x)))
+
+              readr::write_lines(paste0("error: repeat"
+                                        , errs$rep
+                                        , ". "
+                                        , as.character(errs$error)
                                         )
                                  , file = log_file
                                  , append = TRUE
@@ -913,87 +979,30 @@
 
             }
 
-            if(!prep$abandoned) {
+            ### spatial cv identical --------
+            prep_block_corr <- stats::cor(tibble::as_tibble(prep$training$blocks, .name_repair = "unique"))
 
-              ## spatial ------
-              safe_cv_spatial <- purrr::safely(blockCV::cv_spatial)
-
-              prep$training <- prep$training |>
-                dplyr::mutate(point_sf = purrr::map(training
-                                                    , \(x) x |>
-                                                      dplyr::select(x, y, pa) %>%
-                                                      sf::st_as_sf(coords = c("x", "y")
-                                                                   , crs = sf::st_crs(prep_preds[[1]])
-                                                                   )
-                                                    )
-                              , block_div = block_div
-                              , block_dist = purrr::map_dbl(block_div
-                                                            , \(x) prep$predict_boundary %>%
-                                                              sf::st_area() %>%
-                                                              as.numeric() %>%
-                                                              sqrt() %>%
-                                                              `/` (x)
+            change_to_non_spatial <- caret::findCorrelation(prep_block_corr
+                                                            , cutoff = 0.999999999
                                                             )
-                              , cv_spatial = purrr::map2(point_sf
-                                                         , block_dist
-                                                         , \(x, y) safe_cv_spatial(x
-                                                                                   , column = "pa"
-                                                                                   , k = k_folds
-                                                                                   , size = block_dist
-                                                                                   , iteration = 200
-                                                                                   , selection = "random"
-                                                                                   , extend = 0.5
-                                                                                   , progress = FALSE
-                                                                                   , report = FALSE
-                                                                                   , plot = FALSE
-                                                                                   )
-                                                         )
-                              , error = purrr::map(cv_spatial, "error")
-                              )
 
-              ### spatial cv errors -------
-              if(any(purrr::map_lgl(prep$training$error, \(x) !is.null(x)))) {
+            if(sum(change_to_non_spatial, na.rm = TRUE)) {
 
-                errs <- prep$training |>
-                  dplyr::filter(purrr::map_lgl(error, \(x) !is.null(x)))
-
-                readr::write_lines(paste0("error: repeat"
-                                          , errs$rep
-                                          , ". "
-                                          , as.character(errs$error)
-                                          )
-                                   , file = log_file
-                                   , append = TRUE
-                                   )
-
-              }
-
-              ### spatial cv identical --------
-              prep_block_corr <- stats::cor(tibble::as_tibble(prep$training$blocks, .name_repair = "unique"))
-
-              change_to_non_spatial <- caret::findCorrelation(prep_block_corr
-                                                              , cutoff = 0.999999999
-                                                              )
-
-              if(sum(change_to_non_spatial, na.rm = TRUE)) {
-
-                prep$training$spatial_folds[change_to_non_spatial] <- FALSE
-
-              }
-
-              ### too few p --------
-              prep$training <- prep$training |>
-                dplyr::filter(purrr::map_lgl(error, \(x) is.null(x))) |>
-                dplyr::mutate(blocks = purrr::map(cv_spatial, \(x) x$result$folds_ids)
-                              , blocks = purrr::map2(blocks, training
-                                                     , \(x, y) fix_blocks(x, y$pa, min_fold_n)
-                                                     )
-                              , spatial_folds = purrr::map_lgl(blocks
-                                                               , \(x) length(unique(x)) > 1
-                                                               )
-                              )
+              prep$training$spatial_folds[change_to_non_spatial] <- FALSE
 
             }
+
+            ### too few p --------
+            prep$training <- prep$training |>
+              dplyr::filter(purrr::map_lgl(error, \(x) is.null(x))) |>
+              dplyr::mutate(blocks = purrr::map(cv_spatial, \(x) x$result$folds_ids)
+                            , blocks = purrr::map2(blocks, training
+                                                   , \(x, y) fix_blocks(x, y$pa, min_fold_n)
+                                                   )
+                            , spatial_folds = purrr::map_lgl(blocks
+                                                             , \(x) length(unique(x)) > 1
+                                                             )
+                            )
 
           }
 
@@ -1001,14 +1010,15 @@
 
             ## non-spatial -------
             prep$training <- prep$training |>
-              dplyr::mutate(blocks = dplyr::if_else(spatial_folds
-                                                    , blocks
-                                                    , purrr::map(training
-                                                                 , \(x) non_spatial_blocks(k_folds
-                                                                                           , x
-                                                                                           )
-                                                                 )
-                                                    )
+              dplyr::mutate(nsb = purrr::map(training
+                                             , \(x) non_spatial_blocks(k_folds
+                                                                       , x
+                                                                       )
+                                             )
+                            , blocks = ifelse(spatial_folds
+                                                      , blocks
+                                                      , nsb
+                                                      )
                             )
 
           }
@@ -1053,7 +1063,7 @@
         }
 
 
-        # reduce env -------
+            # reduce env -------
 
         if(!prep$abandoned) {
 
