@@ -203,18 +203,21 @@
 
     run <- if(any(prep$abandoned, prep$finished)) force_new else TRUE
 
+    if(is.null(this_taxa)) this_taxa <- basename(out_dir)
+
+    prep$this_taxa <- this_taxa
+
+    message(paste0("prep for "
+                   , this_taxa
+                   , "\nout_dir is "
+                   , out_dir
+                   , ".\n "
+                   , start_presences
+                   , " incoming presences"
+                   )
+            )
+
     if(run) {
-
-      if(is.null(this_taxa)) this_taxa <- basename(out_dir)
-
-      prep$this_taxa <- this_taxa
-
-      message(paste0("prep for "
-                     , this_taxa
-                     , "\nout_dir is "
-                     , out_dir
-                     )
-              )
 
       ## start timer -----
       start_time <- Sys.time()
@@ -1120,11 +1123,6 @@
 
       }
 
-      # save / clean up-------
-      # export before gc()
-      prep$finished <- TRUE
-      prep$log <- if(file.exists(log_file)) readr::read_lines(log_file) else NULL
-
       if(delete_out) {
 
         fs::dir_delete(out_dir)
@@ -1149,6 +1147,11 @@
       }
 
     }
+
+    # save / clean up-------
+    # export before gc()
+    prep$finished <- TRUE
+    prep$log <- if(file.exists(log_file)) readr::read_lines(log_file) else NULL
 
     res <- if(return_val == "prep") get("prep") else list(prep_file = get("prep_file"))
 
