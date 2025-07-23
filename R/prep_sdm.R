@@ -1129,6 +1129,8 @@
 
       } else {
 
+        prep$finished <- TRUE
+        prep$log <- if(file.exists(log_file)) readr::read_lines(log_file) else NULL
         rio::export(prep, prep_file)
 
       }
@@ -1146,13 +1148,25 @@
 
       }
 
+    } else {
+
+      # too few presences -------
+      readr::write_lines(paste0("Only "
+                                , start_presences
+                                , " presences in supplied data which is below min_fold_n of "
+                                , min_fold_n
+                                , ". SDM abandoned"
+                                )
+                         , file = log_file
+                         , append = TRUE
+                         )
+
+      prep$finished <- TRUE
+      prep$log <- readr::read_lines(log_file)
+
     }
 
-    # save / clean up-------
-    # export before gc()
-    prep$finished <- TRUE
-    prep$log <- if(file.exists(log_file)) readr::read_lines(log_file) else NULL
-
+    # return-------
     res <- if(return_val == "prep") get("prep") else list(prep_file = get("prep_file"))
 
     return(res)
