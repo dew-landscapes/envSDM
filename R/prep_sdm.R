@@ -1109,6 +1109,9 @@
                            , append = TRUE
                            )
 
+        prep$finished <- TRUE
+        prep$log <- if(file.exists(log_file)) readr::read_lines(log_file) else NULL
+
       } else {
 
         prep$abandoned <- TRUE
@@ -1129,8 +1132,6 @@
 
       } else {
 
-        prep$finished <- TRUE
-        prep$log <- if(file.exists(log_file)) readr::read_lines(log_file) else NULL
         rio::export(prep, prep_file)
 
       }
