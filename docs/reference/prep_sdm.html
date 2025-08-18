@@ -320,10 +320,10 @@ data might be generated from other sites where birds were recorded but
 <span class="r-in"><span>  <span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://purrr.tidyverse.org/reference/pmap.html" class="external-link">pwalk</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">data</span><span class="op">$</span><span class="va">presence</span></span></span>
 <span class="r-in"><span>                   , <span class="va">data</span><span class="op">$</span><span class="va">out_mcp</span></span></span>
 <span class="r-in"><span>                   <span class="op">)</span></span></span>
-<span class="r-in"><span>              , \<span class="op">(</span><span class="va">x</span>, <span class="va">y</span><span class="op">)</span> <span class="fu"><a href="make_mcp.html">make_mcp</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, pres_x <span class="op">=</span> <span class="st">"lon"</span></span></span>
-<span class="r-in"><span>                                 , clip <span class="op">=</span> <span class="va">clip</span></span></span>
-<span class="r-in"><span>                                 <span class="op">)</span></span></span>
-<span class="r-in"><span>              <span class="op">)</span></span></span>
+<span class="r-in"><span>               , \<span class="op">(</span><span class="va">x</span>, <span class="va">y</span><span class="op">)</span> <span class="fu">envDistribution</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/envDistribution/man/make_mcp.html" class="external-link">make_mcp</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, pres_x <span class="op">=</span> <span class="st">"lon"</span></span></span>
+<span class="r-in"><span>                                                   , clip <span class="op">=</span> <span class="va">clip</span></span></span>
+<span class="r-in"><span>                                                   <span class="op">)</span></span></span>
+<span class="r-in"><span>               <span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>  <span class="co"># prep -----------</span></span></span>
@@ -352,6 +352,12 @@ data might be generated from other sites where birds were recorded but
 <span class="r-in"><span>                                               <span class="co">#, force_new = TRUE</span></span></span>
 <span class="r-in"><span>                                               <span class="op">)</span></span></span>
 <span class="r-in"><span>               <span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> prep for acaule</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> out_dir is C:/temp/nige/Rtmpym4e8O/temp_libpath7d0030503607/envSDM/examples/acaule.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>  1082 incoming presences</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> prep for bradypus</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> out_dir is C:/temp/nige/Rtmpym4e8O/temp_libpath7d0030503607/envSDM/examples/bradypus.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>  116 incoming presences</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>  <span class="co"># example of 'prep'</span></span></span>
 <span class="r-in"><span>  <span class="va">prep</span> <span class="op">&lt;-</span> <span class="fu">rio</span><span class="fu">::</span><span class="fu"><a href="http://gesistsa.github.io/rio/reference/import.html" class="external-link">import</a></span><span class="op">(</span><span class="fu">fs</span><span class="fu">::</span><span class="fu"><a href="https://fs.r-lib.org/reference/path.html" class="external-link">path</a></span><span class="op">(</span><span class="va">data</span><span class="op">$</span><span class="va">taxa_dir</span><span class="op">[[</span><span class="fl">2</span><span class="op">]</span><span class="op">]</span>, <span class="st">"prep.rds"</span><span class="op">)</span>, trust <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
@@ -364,7 +370,7 @@ data might be generated from other sites where birds were recorded but
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>  <span class="co"># env variables to remove prior to SDM</span></span></span>
 <span class="r-in"><span>  <span class="va">prep</span><span class="op">$</span><span class="va">reduce_env</span><span class="op">$</span><span class="va">remove</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [1] "bio1"  "bio8"  "block" "cell"  "id"    "lat"   "lon"   "pa"    "x"    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [1] "bio1"  "bio9"  "block" "cell"  "id"    "lat"   "lon"   "pa"    "x"    </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [10] "y"    </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>  <span class="co"># Density raster</span></span></span>

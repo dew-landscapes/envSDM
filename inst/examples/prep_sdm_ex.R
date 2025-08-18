@@ -28,10 +28,10 @@
   purrr::pwalk(list(data$presence
                    , data$out_mcp
                    )
-              , \(x, y) make_mcp(x, y, pres_x = "lon"
-                                 , clip = clip
-                                 )
-              )
+               , \(x, y) envDistribution::make_mcp(x, y, pres_x = "lon"
+                                                   , clip = clip
+                                                   )
+               )
 
 
   # prep -----------

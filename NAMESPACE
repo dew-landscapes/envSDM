@@ -3,7 +3,6 @@
 export("%>%")
 export(evaluate_sdm)
 export(fix_blocks)
-export(make_mcp)
 export(make_predict_boundary)
 export(non_spatial_blocks)
 export(png_from_preds)
