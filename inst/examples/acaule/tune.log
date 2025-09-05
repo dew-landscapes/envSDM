@@ -2,13 +2,13 @@
 
 acaule
 best_run = FALSE
-tune start 2025-05-27 19:35:53.720706
+tune start 2025-09-05 16:31:55.87901
 3 out of 9 variables will be used for maxnet
 4 out of 9 variables will be used for envelope
 8 out of 9 variables will be used for rf
-maxnet tune finished in: 6.57 minutes
+maxnet tune finished in: 7.28 minutes
 envelope tune finished in: 0.03 minutes
-rf tune finished in: 2.94 minutes
+rf tune finished in: 3.19 minutes
 based on the product of metrics: auc_po, or10, CBI_rescale, IMAE
  the best model is rf with tune arguments tr: 500. mt: 3. ns: 3
 tune abandoned

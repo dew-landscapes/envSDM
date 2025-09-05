@@ -1,27 +1,27 @@
 
 acaule
-prep start at 2025-05-27 19:33:47.78922.
+prep start at 2025-09-05 16:29:59.53886.
 1082 rows in 'presence'
 9 predictors
-8 presences required for a single fold of 8. 1065 presences in predict_boundary and on env rasters
+8 presences required for a single fold of 8. 1062 presences in predict_boundary and on env rasters
 density raster done in 0.01 minutes
 10000 background points attempted. Completed in: 0 minutes
 env data extracted in: 0.01 minutes.
-5609 background points with env values.
+5114 background points with env values.
 test/training split
- 6674 test data, including 1065 presences.
-repeat: 1. 6674 training data, including 1065 presences.
-repeat: 2. 6674 training data, including 1065 presences.
-repeat: 3. 6674 training data, including 1065 presences.
-repeat: 4. 6674 training data, including 1065 presences.
-repeat: 5. 6674 training data, including 1065 presences.
+ 6176 test data, including 1062 presences.
+repeat: 1. 6176 training data, including 1062 presences.
+repeat: 2. 6176 training data, including 1062 presences.
+repeat: 3. 6176 training data, including 1062 presences.
+repeat: 4. 6176 training data, including 1062 presences.
+repeat: 5. 6176 training data, including 1062 presences.
 WARNING: no holdout data
  full model will be tested against the same data that was used to train it!
-repeat: 1, spatial folds = TRUE. Folds = 5 with n presences = 401, 328, 48, 194, 94
-repeat: 2, spatial folds = TRUE. Folds = 4 with n presences = 328, 398, 194, 145
-repeat: 3, spatial folds = TRUE. Folds = 5 with n presences = 96, 194, 49, 398, 328
-repeat: 4, spatial folds = TRUE. Folds = 4 with n presences = 194, 399, 331, 141
-repeat: 5, spatial folds = TRUE. Folds = 5 with n presences = 399, 194, 328, 96, 48.
-Folds done in 1.28 minutes
-reduce_env completed in: 0.04 minutes. Original 9 variables reduced to 6
-prep completed. elapsed time: 1.35 minutes
+repeat: 1, spatial folds = TRUE. Folds = 5 with n presences = 141, 173, 133, 308, 307
+repeat: 2, spatial folds = TRUE. Folds = 5 with n presences = 306, 308, 17, 175, 256
+repeat: 3, spatial folds = TRUE. Folds = 5 with n presences = 134, 307, 173, 308, 140
+repeat: 4, spatial folds = TRUE. Folds = 5 with n presences = 306, 140, 175, 307, 134
+repeat: 5, spatial folds = TRUE. Folds = 5 with n presences = 174, 307, 133, 308, 140.
+Folds done in 1.13 minutes
+reduce_env completed in: 0.07 minutes. Original 9 variables reduced to 6
+prep completed. elapsed time: 1.24 minutes
