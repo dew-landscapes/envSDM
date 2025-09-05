@@ -7,8 +7,8 @@
 \usage{
 make_predict_boundary(
   poly_list,
-  out_file,
-  buffer_metres = 0,
+  buffer_list = NULL,
+  out_file = tempfile(),
   col_name = "taxa",
   col_name_val = "boundary",
   clip = NULL,
@@ -18,11 +18,13 @@ make_predict_boundary(
 )
 }
 \arguments{
-\item{poly_list}{List of paths or list of sf}
+\item{poly_list}{List of paths or list of sf.}
+
+\item{buffer_list}{List, of length 1 or the same length as \code{poly_list},
+specifying the distance to buffer each incoming element of \code{poly_list}.
+Buffering occurs after transformation to \code{out_crs}.}
 
 \item{out_file}{Character name of file to save}
-
-\item{buffer_metres}{Numeric. Distance in metres to buffer the mcp}
 
 \item{col_name}{Name of column to create in the resulting mcp}
 
@@ -42,9 +44,8 @@ If \code{return_poly}, sf, else \code{out_file}. .parquet mcp written to
 }
 \description{
 Primary use is to create a predict boundary for \code{prep_sdm()}, merging (an
-existing) minimum convex polygon around points with other sources of taxa
-distribution. Optionally, applying a buffer around the resulting mcp; and
+existing) minimum convex polygon with other sources of taxa distribution and
 clipping to a (usually coastal) boundary. The predict boundary is then used
 for generation of background points and for masking the 'full' predict (to
-the full extent of the environmental variables.
+the extent of the environmental variables.
 }

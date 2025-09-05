@@ -3,16 +3,16 @@
 #' (mcp)
 #'
 #' Primary use is to create a predict boundary for `prep_sdm()`, merging (an
-#' existing) minimum convex polygon around points with other sources of taxa
-#' distribution. Optionally, applying a buffer around the resulting mcp; and
+#' existing) minimum convex polygon with other sources of taxa distribution and
 #' clipping to a (usually coastal) boundary. The predict boundary is then used
 #' for generation of background points and for masking the 'full' predict (to
-#' the full extent of the environmental variables.
+#' the extent of the environmental variables.
 #'
-#'
-#' @param poly_list List of paths or list of sf
+#' @param poly_list List of paths or list of sf.
+#' @param buffer_list List, of length 1 or the same length as `poly_list`,
+#' specifying the distance to buffer each incoming element of `poly_list`.
+#' Buffering occurs after transformation to `out_crs`.
 #' @param out_file Character name of file to save
-#' @param buffer_metres Numeric. Distance in metres to buffer the mcp
 #' @param col_name Name of column to create in the resulting mcp
 #' @param col_name_val Value to provide in the column in the resulting mcp
 #' @param clip sf. Clip the resulting mcp back to this.
@@ -26,8 +26,8 @@
 #'
 #' @examples
 make_predict_boundary <- function(poly_list
-                                  , out_file
-                                  , buffer_metres = 0
+                                  , buffer_list = NULL
+                                  , out_file = tempfile()
                                   , col_name = "taxa"
                                   , col_name_val = "boundary"
                                   , clip = NULL
@@ -50,8 +50,8 @@ make_predict_boundary <- function(poly_list
         safe_read_parquet <- purrr::safely(sfarrow::st_read_parquet)
 
         polys <- purrr::map(poly_list
-                            , \(x) safe_read_parquet(x)
-                            )
+                             , \(x) safe_read_parquet(x)
+                             )
 
         polys <- purrr::map(polys
                             , \(x) if(is.null(x$error)) x$result else tibble::tibble()
@@ -69,16 +69,15 @@ make_predict_boundary <- function(poly_list
 
         fs::dir_create(dirname(out_file))
 
-        mcp <- polys %>%
-          purrr::map(\(x) sf::st_geometry(x) %>%
-                       sf::st_as_sf() %>%
-                       sf::st_transform(crs = out_crs)
-                     ) %>%
-          dplyr::bind_rows() %>%
-          sf::st_cast("MULTIPOINT") %>%
-          dplyr::summarise() %>%
-          sf::st_convex_hull() %>%
-          sf::st_buffer(buffer_metres) %>%
+        mcp <- purrr::map2(polys
+                           , buffer_list
+                           , \(x, y) sf::st_geometry(x) |>
+                             sf::st_as_sf() %>%
+                             sf::st_transform(crs = out_crs) |>
+                             sf::st_buffer(dist = y)
+                           ) %>%
+          dplyr::bind_rows() |>
+          dplyr::summarise() |>
           dplyr::mutate(!!rlang::ensym(col_name) := col_name_val)
 
         if(!is.null(clip)) {
@@ -87,7 +86,6 @@ make_predict_boundary <- function(poly_list
             sf::st_transform(crs = out_crs)
 
           mcp <- sf::st_intersection(mcp, clip)
-
 
         }
 
