@@ -1164,6 +1164,7 @@
 
       prep$finished <- TRUE
       prep$log <- readr::read_lines(log_file)
+      rio::export(prep, prep_file)
 
     }
 
