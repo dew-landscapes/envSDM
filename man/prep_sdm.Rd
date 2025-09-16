@@ -28,6 +28,7 @@ prep_sdm(
   spatial_folds = TRUE,
   repeats = 1,
   block_div = seq(5, by = 2, length.out = repeats),
+  max_block_corr = 0.8,
   min_fold_n = 8,
   hold_prop = 0.3,
   stretch_value = 10,
@@ -110,6 +111,10 @@ not enough presences to support more than one fold.}
 by this value before being passed to the \code{block_dist} argument of
 \code{blockCV::cv_spatial()}. If using repeated cross validation, \code{block_div}
 must be of the same length as \code{1:repeats}.}
+
+\item{max_block_corr}{Numeric. Maximum correlation allowed between the folds
+of any two spatial blocks before one of the correlated blocks will be set to
+non-spatial and the folds reallocated.}
 
 \item{min_fold_n}{Numeric. Sets both minimum number of presences, and,
 by default, the minimum number of presences required for a model.}

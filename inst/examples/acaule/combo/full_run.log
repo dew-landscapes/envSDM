@@ -2,6 +2,6 @@
 
 acaule
 best_run = TRUE
-tune start 2025-09-16 18:33:16.762772
+tune start 2025-09-17 07:11:05.39054
 8 out of 9 variables will be used for rf
-rf tune finished in: 0.02 minutes
+rf tune finished in: 0.04 minutes
