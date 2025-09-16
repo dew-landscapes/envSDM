@@ -189,7 +189,15 @@
 
         if(file.exists(prep_file)) {
 
-          prep <- rio::import(prep_file, trust = TRUE)
+          safe_import <- purrr::safely(rio::import)
+
+          prep <- safe_import(prep_file, trust = TRUE)
+
+          if(is.null(prep$error)) prep <- prep$result else {
+
+            stop("Unable to import existing prep file.")
+
+          }
 
         }
 
