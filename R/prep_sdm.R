@@ -63,6 +63,9 @@
 #' by this value before being passed to the `block_dist` argument of
 #' `blockCV::cv_spatial()`. If using repeated cross validation, `block_div`
 #' must be of the same length as `1:repeats`.
+#' @param max_block_corr Numeric. Maximum correlation allowed between the folds
+#' of any two spatial blocks before one of the correlated blocks will be set to
+#' non-spatial and the folds reallocated.
 #' @param min_fold_n Numeric. Sets both minimum number of presences, and,
 #' by default, the minimum number of presences required for a model.
 #' @param stretch_value Numeric. Stretch the density raster to this value.
@@ -142,6 +145,7 @@
                        , spatial_folds = TRUE
                        , repeats = 1
                        , block_div = seq(5, by = 2, length.out = repeats)
+                       , max_block_corr = 0.8
                        , min_fold_n = 8
                        , hold_prop = 0.3
                        , stretch_value = 10
@@ -990,19 +994,6 @@
 
             }
 
-            ### spatial cv identical --------
-            prep_block_corr <- stats::cor(tibble::as_tibble(prep$training$blocks, .name_repair = "unique"))
-
-            change_to_non_spatial <- caret::findCorrelation(prep_block_corr
-                                                            , cutoff = 0.999999999
-                                                            )
-
-            if(sum(change_to_non_spatial, na.rm = TRUE)) {
-
-              prep$training$spatial_folds[change_to_non_spatial] <- FALSE
-
-            }
-
             ### too few p --------
             prep$training <- prep$training |>
               dplyr::filter(purrr::map_lgl(error, \(x) is.null(x))) |>
@@ -1014,6 +1005,19 @@
                                                              , \(x) length(unique(x)) > 1
                                                              )
                             )
+
+            ### spatial cv identical --------
+            prep_block_corr <- stats::cor(tibble::as_tibble(prep$training$blocks, .name_repair = "unique"))
+
+            change_to_non_spatial <- caret::findCorrelation(prep_block_corr
+                                                            , cutoff = max_block_corr
+                                                            )
+
+            if(sum(change_to_non_spatial, na.rm = TRUE)) {
+
+              prep$training$spatial_folds[change_to_non_spatial] <- FALSE
+
+            }
 
           }
 
