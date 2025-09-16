@@ -24,7 +24,7 @@
 #' @param ... Passed to `tune_sdm()`
 #'
 #' @return If `return_val` is "object" a named list. If `return_val` is "path"
-#' a named list `list(prep = out_dir)`. If `out_dir` is a valid path, the 'full
+#' a path to the saved file. If `out_dir` is a valid path, the 'full
 #' result' (irrespective of `return_val`) is also saved to
 #' `fs::path(out_dir, "prep.rds")`. The 'full result' is a named list with
 #' elements:
@@ -157,7 +157,7 @@
 
     }
 
-    res <- if(return_val == "full_run") get("full_run") else list(full_run_file = get("full_run_file"))
+    res <- if(return_val == "full_run") full_run else full_run_file
 
     return(res)
 

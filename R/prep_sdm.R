@@ -82,7 +82,7 @@
 #' @param force_new Logical. If outputs already exist, should they be remade?
 #'
 #' @return If `return_val` is "object" a named list. If `return_val` is "path"
-#' a named list `list(prep = out_dir)`. If `out_dir` is a valid path, the 'full
+#' a path to the saved file. If `out_dir` is a valid path, the 'full
 #' result' (irrespective of `return_val`) is also saved to
 #' `fs::path(out_dir, "prep.rds")`. The 'full result' is a named list with
 #' elements:
@@ -1169,7 +1169,7 @@
     }
 
     # return-------
-    res <- if(return_val == "prep") get("prep") else list(prep_file = get("prep_file"))
+    res <- if(return_val == "prep") prep else prep_file
 
     return(res)
 

@@ -23,7 +23,8 @@
 #' `terra::rast()` and delete them if they do. Useful after a crash during
 #' pred_file.
 #'
-#' @return List. `list(thresh = thresh_file)` and corresponding file written.
+#' @return Character path to threshold file, usually 'thresh.tif'. Output .tif
+#' and .log, written to `out_dir`.
 #'
 #' @export
 #'
@@ -162,7 +163,7 @@ thresh_sdm <- function(pred_file
               , " already exists"
               )
 
-      res <- list(thresh = thresh_file)
+      res <- thresh_file
 
     }
 

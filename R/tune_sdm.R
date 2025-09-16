@@ -56,7 +56,7 @@
 #' `predicts::pa_evaluate()` will be limited to the values in `tr`).
 #'
 #' @return If `return_val` is "object" a named list. If `return_val` is "path"
-#' a named list `list(prep = out_dir)`. If `out_dir` is a valid path, the 'full
+#' a path to the saved file. If `out_dir` is a valid path, the 'full
 #' result' (irrespective of `return_val`) is also saved to
 #' `fs::path(out_dir, "prep.rds")`. The 'full result' is a named list with
 #' elements:
@@ -807,7 +807,7 @@
 
     }
 
-    res <- if(return_val == "tune") get("tune") else list(tune_file = get("tune_file"))
+    res <- if(return_val == "tune") tune else tune_file
 
     return(res)
 

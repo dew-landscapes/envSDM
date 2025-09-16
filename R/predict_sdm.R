@@ -38,8 +38,8 @@
 #' `envSDM::predict_sdm` process. Used to provide additional arguments to
 #' `terra::writeRaster`.
 #'
-#' @return Named list of created .tif files, usually 'pred.tif' and
-#' 'thresh.tif'. Output .tif(s) and .log, written to `out_dir`.
+#' @return Character path to predicted file, usually 'pred.tif'. Output .tif
+#' and .log, written to `out_dir`.
 #'
 #' @export
 #'
@@ -361,7 +361,7 @@ predict_sdm <- function(prep
 
   }
 
-  res <- if(file.exists(pred_file)) list(pred = pred_file) else NULL
+  res <- if(file.exists(pred_file)) pred_file else NULL
 
   return(res)
 
