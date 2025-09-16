@@ -138,7 +138,7 @@ thresh_sdm <- function(pred_file
 
         }
 
-        res <- list(thresh = thresh_file)
+        res <- thresh_file
 
       } else {
 
