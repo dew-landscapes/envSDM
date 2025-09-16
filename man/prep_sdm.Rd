@@ -138,7 +138,7 @@ parallel.}
 }
 \value{
 If \code{return_val} is "object" a named list. If \code{return_val} is "path"
-a named list \code{list(prep = out_dir)}. If \code{out_dir} is a valid path, the 'full
+a path to the saved file. If \code{out_dir} is a valid path, the 'full
 result' (irrespective of \code{return_val}) is also saved to
 \code{fs::path(out_dir, "prep.rds")}. The 'full result' is a named list with
 elements:

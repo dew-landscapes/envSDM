@@ -45,7 +45,8 @@ especially if done in parallel.}
 pred_file.}
 }
 \value{
-List. \code{list(thresh = thresh_file)} and corresponding file written.
+Character path to threshold file, usually 'thresh.tif'. Output .tif
+and .log, written to \code{out_dir}.
 }
 \description{
 Threshold a previously predicted SDM

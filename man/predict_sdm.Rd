@@ -67,8 +67,8 @@ predict.}
 \code{terra::writeRaster}.}
 }
 \value{
-Named list of created .tif files, usually 'pred.tif' and
-'thresh.tif'. Output .tif(s) and .log, written to \code{out_dir}.
+Character path to predicted file, usually 'pred.tif'. Output .tif
+and .log, written to \code{out_dir}.
 }
 \description{
 The resulting \code{pred.tif} is masked to the boundary provided to the
