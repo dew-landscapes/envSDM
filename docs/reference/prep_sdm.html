@@ -71,7 +71,7 @@ by user <a href="https://gis.stackexchange.com/users/865/spacedman" class="exter
 <span>  spatial_folds <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  repeats <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  block_div <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">5</span>, by <span class="op">=</span> <span class="fl">2</span>, length.out <span class="op">=</span> <span class="va">repeats</span><span class="op">)</span>,</span>
-<span>  max_block_corr <span class="op">=</span> <span class="fl">0.8</span>,</span>
+<span>  max_block_corr <span class="op">=</span> <span class="fl">0.9</span>,</span>
 <span>  min_fold_n <span class="op">=</span> <span class="fl">8</span>,</span>
 <span>  hold_prop <span class="op">=</span> <span class="fl">0.3</span>,</span>
 <span>  stretch_value <span class="op">=</span> <span class="fl">10</span>,</span>
@@ -206,7 +206,7 @@ must be of the same length as <code>1:repeats</code>.</p></dd>
 <dt id="arg-max-block-corr">max_block_corr<a class="anchor" aria-label="anchor" href="#arg-max-block-corr"></a></dt>
 <dd><p>Numeric. Maximum correlation allowed between the folds
 of any two spatial blocks before one of the correlated blocks will be set to
-non-spatial and the folds reallocated.</p></dd>
+non-spatial and the folds reallocated. Correlation tested on presences only.</p></dd>
 
 
 <dt id="arg-min-fold-n">min_fold_n<a class="anchor" aria-label="anchor" href="#arg-min-fold-n"></a></dt>
@@ -360,25 +360,27 @@ data might be generated from other sites where birds were recorded but
 <span class="r-in"><span>                                               <span class="op">)</span></span></span>
 <span class="r-in"><span>               <span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> prep for acaule</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> out_dir is C:/temp/nige/Rtmpchaxcc/temp_libpath3f1c398f59ad/envSDM/examples/acaule.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> out_dir is C:/temp/nige/Rtmpwv8ujT/temp_libpath2aac35ea21d/envSDM/examples/acaule.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>  1082 incoming presences</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> prep skipped 2025-09-18 09:09:20.851858 as force_new was FALSE; prep$abandoned was FALSE; and prep$finished was TRUE</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> prep for bradypus</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> out_dir is C:/temp/nige/Rtmpchaxcc/temp_libpath3f1c398f59ad/envSDM/examples/bradypus.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> out_dir is C:/temp/nige/Rtmpwv8ujT/temp_libpath2aac35ea21d/envSDM/examples/bradypus.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>  116 incoming presences</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> prep skipped 2025-09-18 09:09:21.509879 as force_new was FALSE; prep$abandoned was FALSE; and prep$finished was TRUE</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>  <span class="co"># example of 'prep'</span></span></span>
 <span class="r-in"><span>  <span class="va">prep</span> <span class="op">&lt;-</span> <span class="fu">rio</span><span class="fu">::</span><span class="fu"><a href="http://gesistsa.github.io/rio/reference/import.html" class="external-link">import</a></span><span class="op">(</span><span class="fu">fs</span><span class="fu">::</span><span class="fu"><a href="https://fs.r-lib.org/reference/path.html" class="external-link">path</a></span><span class="op">(</span><span class="va">data</span><span class="op">$</span><span class="va">taxa_dir</span><span class="op">[[</span><span class="fl">2</span><span class="op">]</span><span class="op">]</span>, <span class="st">"prep.rds"</span><span class="op">)</span>, trust <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">prep</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [1] "abandoned"        "finished"         "this_taxa"        "original"        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [5] "pa_ras"           "presence_ras"     "predict_boundary" "bg_points"       </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [9] "env"              "testing"          "training"         "reduce_env"      </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [13] "log"             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [1] "abandoned"        "finished"         "log"              "this_taxa"       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [5] "original"         "pa_ras"           "presence_ras"     "predict_boundary"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [9] "bg_points"        "env"              "testing"          "training"        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [13] "prep_block_corr"  "reduce_env"      </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>  <span class="co"># env variables to remove prior to SDM</span></span></span>
 <span class="r-in"><span>  <span class="va">prep</span><span class="op">$</span><span class="va">reduce_env</span><span class="op">$</span><span class="va">remove</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [1] "bio1"  "bio17" "bio9"  "block" "cell"  "id"    "lat"   "lon"   "pa"   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [10] "x"     "y"    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [1] "bio1"  "bio9"  "block" "cell"  "id"    "lat"   "lon"   "pa"    "x"    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [10] "y"    </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>  <span class="co"># Density raster</span></span></span>
 <span class="r-in"><span>  <span class="va">dens_ras</span> <span class="op">&lt;-</span> <span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rspatial.github.io/terra/reference/rast.html" class="external-link">rast</a></span><span class="op">(</span><span class="fu">fs</span><span class="fu">::</span><span class="fu"><a href="https://fs.r-lib.org/reference/path.html" class="external-link">path</a></span><span class="op">(</span><span class="va">data</span><span class="op">$</span><span class="va">taxa_dir</span><span class="op">[[</span><span class="fl">2</span><span class="op">]</span><span class="op">]</span>, <span class="st">"density.tif"</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
