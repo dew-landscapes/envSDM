@@ -91,11 +91,6 @@
 
     if(isFALSE(out_dir)) out_dir <- tempfile()
 
-    ## log file ------
-    log_file <- fs::path(out_dir
-                         , if(!best_run) "tune.log" else "full_run.log"
-                         )
-
     ## out_dir ------
     if(is.character(out_dir)) {
 
@@ -121,7 +116,7 @@
     if(! "list" %in% class(prep)) prep <- rio::import(prep, trust = TRUE)
 
     ## tune ---------
-    if(!exists("tune", inherits = FALSE)) tune <- list(finished = FALSE)
+    if(!exists("tune", inherits = FALSE)) tune <- list(finished = FALSE, log = NULL)
 
     # run?-----
     run <- all(!prep$abandoned
@@ -149,17 +144,14 @@
         # start timer ------
         start_time <- Sys.time()
 
-        readr::write_lines(paste0("\n\n"
-                                  , this_taxa
-                                  , "\nbest_run = "
-                                  , best_run
-                                  , "\ntune start "
-                                  , start_time
-                                  )
-                           , file = log_file
-                           , append = TRUE
+        tune$log <- paste0(tune$log
+                           , "\n"
+                           , this_taxa
+                           , "\nbest_run = "
+                           , best_run
+                           , "\ntune start "
+                           , start_time
                            )
-
 
         ## setup ------
 
@@ -217,18 +209,19 @@
 
         }
 
-        readr::write_lines(paste0(purrr::imap(preds
-                                              , \(x, idx) paste0(length(x)
-                                                                 , " out of "
-                                                                 , length(prep$reduce_env$env_cols)
-                                                                 , " variables will be used for "
-                                                                 , idx
-                                                                 )
-                                              )
-                                  , collapse = "\n"
-                                  )
-                           , file = log_file
-                           , append = TRUE
+        m <- paste0(purrr::imap(preds
+                                , \(x, idx) paste0(length(x)
+                                                   , " out of "
+                                                   , length(prep$reduce_env$env_cols)
+                                                   , " variables will be used for "
+                                                   , idx
+                                                   )
+                                )
+                    , collapse = "\n"
+                    )
+
+        tune$log <- paste0(tune$log
+                           , m
                            )
 
         start_df <- prep$training |>
@@ -320,6 +313,7 @@
           if(run) {
 
             message("maxnet tune")
+
             start_maxnet <- Sys.time()
 
             ### fc --------
@@ -413,19 +407,23 @@
 
             if(nrow(probs)) {
 
-              purrr::map2(probs$err
-                          , probs$tune_args
-                          , \(a, b) {
-                            readr::write_lines(paste0("error with tune_args "
-                                                      , b
-                                                      , ": "
-                                                      , as.character(a)
-                                                      )
-                                               , file = log_file
-                                               , append = TRUE
-                                               )
-                            }
-                         )
+              m <- purrr::map2(probs$err
+                               , probs$tune_args
+                               , \(a, b) {
+                                 paste0("error with tune_args "
+                                        , b
+                                        , ": "
+                                        , as.character(a)
+                                        )
+                                 }
+                               )
+
+              message(m)
+
+              prep$log <- paste0(prep$log
+                                 , "\n"
+                                 , m
+                                 )
 
             }
 
@@ -451,7 +449,7 @@
               null_e_tune <- envFunc::vec_to_sentence(unique(tune$tune_maxnet$tune_args[null_e]))
               blocks <- envFunc::vec_to_sentence(unique(tune$tune_maxnet$k[null_e]))
 
-              readr::write_lines(paste0("warning. tune_args: "
+              m <- paste0("warning. tune_args: "
                                         , null_e_tune
                                         , " failed to predict ("
                                         , sum(null_e)
@@ -460,9 +458,13 @@
                                         , " total tunes) in block(s) "
                                         , blocks
                                         )
-                               , file = log_file
-                               , append = TRUE
-                               )
+
+              message(m)
+
+              prep$log <- paste0(prep$log
+                                 , "\n"
+                                 , m
+                                 )
 
             }
 
@@ -470,12 +472,11 @@
               dplyr::filter(purrr::map_lgl(e, \(x) ! is.null(x))) %>%
               {if(keep_model) (.) %>% dplyr::select(! dplyr::where(is.list), m, e) else (.) %>% dplyr::select(! dplyr::where(is.list), e)}
 
-            readr::write_lines(paste0("maxnet tune finished in: "
-                                      , round(difftime(Sys.time(), start_maxnet, units = "mins"), 2)
-                                      , " minutes"
-                                      )
-                               , file = log_file
-                               , append = TRUE
+            prep$log <- paste0(prep$log
+                               , "\n"
+                               , "maxnet tune finished in: "
+                               , round(difftime(Sys.time(), start_maxnet, units = "mins"), 2)
+                               , " minutes"
                                )
 
           }
@@ -515,12 +516,11 @@
                             ) %>%
               {if(keep_model) (.) %>% dplyr::select(! dplyr::where(is.list), m, e) else (.) %>% dplyr::select(! dplyr::where(is.list), e)}
 
-            readr::write_lines(paste0("envelope tune finished in: "
-                                      , round(difftime(Sys.time(), start_envelope, units = "mins"), 2)
-                                      , " minutes"
-                                      )
-                               , file = log_file
-                               , append = TRUE
+            prep$log <- paste0(prep$log
+                               , "\n"
+                               , "envelope tune finished in: "
+                               , round(difftime(Sys.time(), start_envelope, units = "mins"), 2)
+                               , " minutes"
                                )
 
           }
@@ -634,23 +634,21 @@
 
             if(nrow(probs)) {
 
-              if(nrow(probs)) {
+              m <- purrr::map2(probs$e
+                               , probs$tune_args
+                               , \(a, b) paste0("error with tune_args "
+                                                , b
+                                                , ": "
+                                                , as.character(a)
+                                                )
+                               )
 
-                purrr::map2(probs$e
-                            , probs$tune_args
-                            , \(a, b) {
-                              readr::write_lines(paste0("error with tune_args "
-                                                        , b
-                                                        , ": "
-                                                        , as.character(a)
-                                                        )
-                                                 , file = log_file
-                                                 , append = TRUE
-                                                 )
-                            }
-                            )
+              message(m)
 
-              }
+              prep$log <- paste0(prep$log
+                                 , "\n"
+                                 , m
+                                 )
 
             }
 
@@ -671,15 +669,14 @@
               {if(keep_model) (.) %>%
                   dplyr::select(! dplyr::where(is.list), m, e) else (.) %>%
                   dplyr::select(! dplyr::where(is.list), e)
-                }
+              }
 
-            readr::write_lines(paste0("rf tune finished in: "
-                                      , round(difftime(Sys.time(), start_rf, units = "mins"), 2)
-                                      , " minutes"
-            )
-            , file = log_file
-            , append = TRUE
-            )
+            prep$log <- paste0(prep$log
+                               , "\n"
+                               , "rf tune finished in: "
+                               , round(difftime(Sys.time(), start_rf, units = "mins"), 2)
+                               , " minutes"
+                               )
 
           }
 
@@ -693,9 +690,9 @@
 
     } else {
 
-      readr::write_lines("tune abandoned"
-                         , file = log_file
-                         , append = TRUE
+      prep$log <- paste0(prep$log
+                         , "\n"
+                         , "tune abandoned"
                          )
 
     }
@@ -767,15 +764,14 @@
 
           if(!best_run) {
 
-            readr::write_lines(paste0("based on the product of metrics: "
-                                      , stringr::str_flatten_comma(metrics_df$metric[metrics_df$summary_mets])
-                                      , "\n the best model is "
-                                      , tune$tune_mean$algo[tune$tune_mean$best]
-                                      , " with tune arguments "
-                                      , tune$tune_mean$tune_args[tune$tune_mean$best]
-                                      )
-                               , file = log_file
-                               , append = TRUE
+            prep$log <- paste0(prep$log
+                               , "\n"
+                               , "based on the product of metrics: "
+                               , stringr::str_flatten_comma(metrics_df$metric[metrics_df$summary_mets])
+                               , "\n the best model is "
+                               , tune$tune_mean$algo[tune$tune_mean$best]
+                               , " with tune arguments "
+                               , tune$tune_mean$tune_args[tune$tune_mean$best]
                                )
 
           }
@@ -789,7 +785,6 @@
     # save -------
     # export before gc()
     tune$finished <- TRUE
-    tune$log <- if(file.exists(log_file)) readr::read_lines(log_file) else NULL
 
     rio::export(tune, tune_file)
 

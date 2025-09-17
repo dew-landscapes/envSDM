@@ -65,7 +65,7 @@
 #' must be of the same length as `1:repeats`.
 #' @param max_block_corr Numeric. Maximum correlation allowed between the folds
 #' of any two spatial blocks before one of the correlated blocks will be set to
-#' non-spatial and the folds reallocated.
+#' non-spatial and the folds reallocated. Correlation tested on presences only.
 #' @param min_fold_n Numeric. Sets both minimum number of presences, and,
 #' by default, the minimum number of presences required for a model.
 #' @param stretch_value Numeric. Stretch the density raster to this value.
@@ -145,7 +145,7 @@
                        , spatial_folds = TRUE
                        , repeats = 1
                        , block_div = seq(5, by = 2, length.out = repeats)
-                       , max_block_corr = 0.8
+                       , max_block_corr = 0.9
                        , min_fold_n = 8
                        , hold_prop = 0.3
                        , stretch_value = 10
@@ -179,8 +179,6 @@
 
     }
 
-    log_file <- fs::path(out_dir, "prep.log")
-
     if(is.character(out_dir)) {
 
       fs::dir_create(out_dir)
@@ -191,7 +189,7 @@
                               , "prep.rds"
                               )
 
-        if(file.exists(prep_file)) {
+        if(all(file.exists(prep_file), ! force_new)) {
 
           safe_import <- purrr::safely(rio::import)
 
@@ -209,7 +207,7 @@
 
     }
 
-    if(!exists("prep", inherits = FALSE)) prep <- list(abandoned = FALSE, finished = FALSE)
+    if(!exists("prep", inherits = FALSE)) prep <- list(abandoned = FALSE, finished = FALSE, log = NULL)
 
     if(start_presences < min_fold_n) prep$abandoned <- TRUE
 
@@ -234,22 +232,20 @@
       ## start timer -----
       start_time <- Sys.time()
 
-      readr::write_lines(paste0("\n"
-                                , this_taxa
-                                , "\nprep start at "
-                                , start_time
-                                , ".\n"
-                                , nrow(presence)
-                                , " rows in 'presence'"
-                                , if(pres_col %in% names(presence)) paste0("\n of which "
-                                                                           , presence |>
-                                                                             dplyr::filter(!!rlang::ensym(pres_col) == pres_val) |>
-                                                                             nrow()
-                                                                           , " are presences."
-                                                                           )
-                                )
-                         , log_file
-                         , append = TRUE
+      prep$log <- paste0(prep$log
+                         , "\n"
+                         , this_taxa
+                         , "\nprep start at "
+                         , start_time
+                         , ".\n"
+                         , nrow(presence)
+                         , " rows in 'presence'"
+                         , if(pres_col %in% names(presence)) paste0("\n of which "
+                                                                    , presence |>
+                                                                      dplyr::filter(!!rlang::ensym(pres_col) == pres_val) |>
+                                                                      nrow()
+                                                                    , " are presences."
+                                                                    )
                          )
 
       ## predictors -----
@@ -267,11 +263,10 @@
 
       }
 
-      readr::write_lines(paste0(length(names(prep_preds))
-                                , " predictors"
-                                )
-                         , file = log_file
-                         , append = TRUE
+      prep$log <- paste0(prep$log
+                         , "\n"
+                         , length(names(prep_preds))
+                         , " predictors"
                          )
 
       # presence --------
@@ -406,19 +401,18 @@
       n_p <- nrow(prep$presence_ras)
       needed_p <- min_fold_n * ((hold_prop > 0) + 1)
 
-      readr::write_lines(paste0(needed_p
-                                , " presences required for a single fold of "
-                                , min_fold_n
-                                , if(hold_prop > 0) paste0(" plus another fold of "
-                                                           , min_fold_n
-                                                           , " for holdout data"
-                                                           )
-                                , ". "
-                                , n_p
-                                , " presences in predict_boundary and on env rasters"
-                                )
-                         , file = log_file
-                         , append = TRUE
+      prep$log <- paste0(prep$log
+                         , "\n"
+                         , needed_p
+                         , " presences required for a single fold of "
+                         , min_fold_n
+                         , if(hold_prop > 0) paste0(" plus another fold of "
+                                                    , min_fold_n
+                                                    , " for holdout data"
+                                                    )
+                         , ". "
+                         , n_p
+                         , " presences in predict_boundary and on env rasters"
                          )
 
       if(n_p > needed_p) {
@@ -452,39 +446,16 @@
 
         if(k_folds < folds) {
 
-          readr::write_lines(paste0("warning: too few records to support original folds ("
-                                    , folds
-                                    , "). Folds reduced to "
-                                    , k_folds
-                                    )
-                             , file = log_file
-                             , append = TRUE
+          prep$log <- paste0(prep$log
+                             , "\n"
+                             , "warning: too few records to support original folds ("
+                             , folds
+                             , "). Folds reduced to "
+                             , k_folds
                              )
-
         }
 
-        # if(n_p < needed_p) {
-        #
-        #   readr::write_lines(paste0("WARNING: there are only "
-        #                             , n_p
-        #                             , " presences. This is not enough to support the bare minimum"
-        #                             , " of "
-        #                             , needed_p
-        #                             , " for a single fold with "
-        #                             , min_fold_n
-        #                             , " presences. SDM abandoned"
-        #                             )
-        #                      , file = log_file
-        #                      , append = TRUE
-        #                      )
-        #
-        #   prep$abandoned <- TRUE
-        #
-        # }
-
-
-        k_folds_adj <- k_folds
-        # use k_folds_adj if need to revert to non-spatial cv later (see folds/non-spatial)
+        k_folds_adj <- k_folds # use k_folds_adj if need to revert to non-spatial cv later (see folds/non-spatial)
 
         # num_bg adj------
 
@@ -645,12 +616,11 @@
                              , overwrite = TRUE
                              )
 
-          readr::write_lines(paste0("density raster done in "
-                                    , round(difftime(Sys.time(), start_dens_ras, units = "mins"), 2)
-                                    , " minutes"
-                                    )
-                             , file = log_file
-                             , append = TRUE
+          prep$log <- paste0(prep$log
+                             , "\n"
+                             , "density raster done in "
+                             , round(difftime(Sys.time(), start_dens_ras, units = "mins"), 2)
+                             , " minutes"
                              )
 
         }
@@ -699,15 +669,13 @@
 
           }
 
-          readr::write_lines(paste0(num_bg
-                                    , " background points attempted. Completed in: "
-                                    , round(difftime(Sys.time(), start_bg, units = "mins"), 2)
-                                    , " minutes"
-                                    )
-                             , file = log_file
-                             , append = TRUE
+          prep$log <- paste0(prep$log
+                             , "\n"
+                             , num_bg
+                             , " background points attempted. Completed in: "
+                             , round(difftime(Sys.time(), start_bg, units = "mins"), 2)
+                             , " minutes"
                              )
-
 
         } else {
 
@@ -750,14 +718,13 @@
 
           }
 
-          readr::write_lines(paste0("env data extracted in: "
-                                    , round(difftime(Sys.time(), start_bg, units = "mins"), 2)
-                                    , " minutes.\n"
-                                    , nrow(prep$env[prep$env$pa != 1,])
-                                    , " background points with env values."
-                                    )
-                             , file = log_file
-                             , append = TRUE
+          prep$log <- paste0(prep$log
+                             , "\n"
+                             , "env data extracted in: "
+                             , round(difftime(Sys.time(), start_bg, units = "mins"), 2)
+                             , " minutes.\n"
+                             , nrow(prep$env[prep$env$pa != 1,])
+                             , " background points with env values."
                              )
 
         }
@@ -765,18 +732,16 @@
         # Abandon if too few presences with env data
         if(nrow(prep$env[prep$env$pa == 1,]) < needed_p) {
 
-          readr::write_lines(paste0("warning: too few presences ("
-                                    , nrow(prep$env[prep$env$pa == 1,])
-                                    , ") with environmental variables. SDM abandoned"
-                                    )
-                             , file = log_file
-                             , append = TRUE
+          prep$log <- paste0(prep$log
+                             , "\n"
+                             , "warning: too few presences ("
+                             , nrow(prep$env[prep$env$pa == 1,])
+                             , ") with environmental variables. SDM abandoned"
                              )
 
           prep$abandoned <- TRUE
 
         }
-
 
         # blocks------
 
@@ -835,9 +800,9 @@
 
               message(m)
 
-              readr::write_lines(m
-                                 , file = log_file
-                                 , append = TRUE
+              prep$log <- paste0(prep$log
+                                 , "\n"
+                                 , m
                                  )
 
             }
@@ -866,9 +831,9 @@
 
               message(m)
 
-              readr::write_lines(m
-                                 , file = log_file
-                                 , append = TRUE
+              prep$log <- paste0(prep$log
+                                 , "\n"
+                                 , m
                                  )
 
               prep$abandoned <- TRUE
@@ -878,8 +843,6 @@
           }
 
         }
-
-
 
         if(!prep$abandoned) {
 
@@ -910,7 +873,7 @@
                              , " presences."
                              )
 
-          text_two <- paste0("repeat: "
+          text_two <- paste0(" repeat: "
                              , 1:repeats
                              , ". "
                              , purrr::map_chr(prep$training$training, \(x) as.character(nrow(x)))
@@ -919,18 +882,19 @@
                              , " presences."
                              )
 
-          readr::write_lines(c(text_one, text_two)
-                             , file = log_file
-                             , append = TRUE
+          text <- paste0(c(text_one, text_two), collapse = "\n")
+
+          prep$log <- paste0(prep$log
+                             , "\n"
+                             , text
                              )
 
           if(hold_prop == 0) {
 
-            readr::write_lines(paste0("WARNING: no holdout data\n"
-                                      , " full model will be tested against the same data that was used to train it!"
-                                      )
-                               , file = log_file
-                               , append = TRUE
+            prep$log <- paste0(prep$log
+                               , "\n"
+                               , "WARNING: no holdout data\n"
+                               , " full model will be tested against the same data that was used to train it!"
                                )
 
           }
@@ -983,33 +947,30 @@
               errs <- prep$training |>
                 dplyr::filter(purrr::map_lgl(error, \(x) !is.null(x)))
 
-              readr::write_lines(paste0("error: repeat"
-                                        , errs$rep
-                                        , ". "
-                                        , as.character(errs$error)
-                                        )
-                                 , file = log_file
-                                 , append = TRUE
+              prep$log <- paste0(prep$log
+                                 , "\n"
+                                 , "error: repeat"
+                                 , errs$rep
+                                 , ". "
+                                 , as.character(errs$error)
                                  )
 
             }
 
-            ### too few p --------
+            ## extract blocks from cv_spatial
             prep$training <- prep$training |>
-              dplyr::filter(purrr::map_lgl(error, \(x) is.null(x))) |>
-              dplyr::mutate(blocks = purrr::map(cv_spatial, \(x) x$result$folds_ids)
-                            , blocks = purrr::map2(blocks, training
-                                                   , \(x, y) fix_blocks(x, y$pa, min_fold_n)
-                                                   )
-                            , spatial_folds = purrr::map_lgl(blocks
-                                                             , \(x) length(unique(x)) > 1
-                                                             )
-                            )
+              dplyr::filter(purrr::map_lgl(error, \(x) is.null(x))) |> # remove errors
+              dplyr::mutate(blocks = purrr::map(cv_spatial, \(x) x$result$folds_ids))
 
-            ### spatial cv identical --------
-            if(length(prep$training$blocks) > 1) {
+            ### spatial cv correlation --------
+            if(nrow(prep$training) > 1) {
 
-              prep_block_corr <- stats::cor(tibble::as_tibble(prep$training$blocks, .name_repair = "unique"))
+              check_pres_corr <- purrr::map2(prep$training$blocks
+                                             , prep$training$training
+                                             , \(x, y) x[y$pa == 1]
+                                             )
+
+              prep_block_corr <- stats::cor(tibble::as_tibble(check_pres_corr, .name_repair = "unique"))
 
               change_to_non_spatial <- caret::findCorrelation(prep_block_corr
                                                               , cutoff = max_block_corr
@@ -1025,22 +986,33 @@
 
           }
 
-          if(any(!prep$training$spatial_folds, k_folds == 1)) {
+          ## non-spatial option -------
+          prep$training <- prep$training |>
+            dplyr::mutate(nsb = purrr::map(training
+                                           , \(x) non_spatial_blocks(k_folds
+                                                                     , x
+                                                                     )
+                                           )
+                          , blocks = ifelse(spatial_folds
+                                            , blocks
+                                            , nsb
+                                            )
+                          )
 
-            ## non-spatial -------
-            prep$training <- prep$training |>
-              dplyr::mutate(nsb = purrr::map(training
-                                             , \(x) non_spatial_blocks(k_folds
-                                                                       , x
-                                                                       )
-                                             )
-                            , blocks = ifelse(spatial_folds
-                                                      , blocks
-                                                      , nsb
-                                                      )
-                            )
-
-          }
+          ### too few p --------
+          prep$training <- prep$training |>
+            dplyr::mutate(blocks = purrr::map2(blocks, training
+                                                 , \(x, y) fix_blocks(x, y$pa, min_fold_n)
+                                                 )
+                          , single_fold = purrr::map_lgl(blocks
+                                                         , \(x) length(unique(x)) == 1
+                                                         )
+                          # again, if only one fold, go to non-spatial
+                          , blocks = ifelse(! single_fold
+                                            , blocks
+                                            , nsb
+                                            )
+                          )
 
           prep$training <- prep$training |>
             dplyr::mutate(training = purrr::map2(training
@@ -1050,94 +1022,110 @@
                                                  )
                           )
 
-          readr::write_lines(paste0(paste0("repeat: "
-                                           , prep$training$rep
-                                           , ", spatial folds = "
-                                           , prep$training$spatial_folds
-                                           , ". Folds = "
-                                           , purrr::map(prep$training$blocks
-                                                        , \(x) x |>
-                                                          unique() |>
-                                                          length() |>
-                                                          stringr::str_flatten_comma()
-                                                        )
-                                           , " with n presences = "
-                                           , purrr::map(prep$training$training
-                                                        , \(x) x |>
-                                                          dplyr::count(block, pa) |>
-                                                          dplyr::filter(pa == 1) |>
-                                                          dplyr::pull(n) |>
-                                                          stringr::str_flatten_comma()
-                                                        )
-                                           , collapse = "\n"
+          # Find correlation for log
+          if(length(prep$training$blocks) > 1) {
+
+            check_pres_corr <- purrr::map2(prep$training$blocks
+                                           , prep$training$training
+                                           , \(x, y) x[y$pa == 1]
                                            )
-                                    , ".\nFolds done in "
-                                    , round(difftime(Sys.time(), start_blocks, units = "mins"), 2)
-                                    , " minutes"
-                                    )
-                             , file = log_file
-                             , append = TRUE
-                             )
 
-        }
+            prep$prep_block_corr <- stats::cor(tibble::as_tibble(check_pres_corr, .name_repair = "unique"))
 
+            block_corr <- prep$prep_block_corr
 
-            # reduce env -------
+            diag(block_corr) <- NA
 
-        if(!prep$abandoned) {
-
-          run <- if(exists("reduce_env", prep)) force_new else TRUE
-
-          if(run) {
-
-            start_reduce_env <- Sys.time()
-
-            prep$reduce_env <- envModel::reduce_env(env_df = prep$env
-                                                    , env_cols = names(prep_preds)
-                                                    , y_col = "pa"
-                                                    , imp_col = "1"
-                                                    , thresh_corr = reduce_env_thresh_corr
-                                                    , quant_rf_imp = reduce_env_quant_rf_imp
-                                                    , remove_always = c(pres_x, pres_y, "x", "y", "pa", "block", "cell", "id")
-                                                    )
-
-            readr::write_lines(paste0("reduce_env completed in: "
-                                      , round(difftime(Sys.time(), start_reduce_env, units = "mins"), 2)
-                                      , " minutes. Original "
-                                      , length(names(prep_preds))
-                                      , " variables reduced to "
-                                      , length(prep$reduce_env$keep)
-                                      )
-                               , file = log_file
-                               , append = TRUE
-                               )
+            max_corr <- max(block_corr, na.rm = TRUE)
 
           }
 
-        }
+          prep$log <- paste0(prep$log
+                             , "\n"
+                             , paste0("repeat: "
+                                      , prep$training$rep
+                                      , ", spatial folds = "
+                                      , prep$training$spatial_folds
+                                      , ". Folds = "
+                                      , purrr::map(prep$training$blocks
+                                                   , \(x) x |>
+                                                     unique() |>
+                                                     length() |>
+                                                     stringr::str_flatten_comma()
+                                                   )
+                                      , " with n presences = "
+                                      , purrr::map(prep$training$training
+                                                   , \(x) x |>
+                                                     dplyr::count(block, pa) |>
+                                                     dplyr::filter(pa == 1) |>
+                                                     dplyr::pull(n) |>
+                                                     stringr::str_flatten_comma()
+                                                   )
+                                      , collapse = "\n"
+                                      )
+                             , if(length(prep$training$blocks) > 1) paste0("\n Maximum correlation between repeats (presences only): "
+                                                                           , round(max_corr, 3)
+                                                                           )
+                             , ".\nFolds done in "
+                             , round(difftime(Sys.time(), start_blocks, units = "mins"), 2)
+                             , " minutes"
+                             )
 
-        # end timer ------
-        readr::write_lines(paste0("prep completed. elapsed time: "
-                                  , round(difftime(Sys.time(), start_time, units = "mins"), 2)
-                                  , " minutes"
-                                  )
-                           , file = log_file
-                           , append = TRUE
-                           )
+          # reduce env -------
 
-        prep$finished <- TRUE
-        prep$log <- if(file.exists(log_file)) readr::read_lines(log_file) else NULL
+          if(!prep$abandoned) {
 
-      } else {
+            run <- if(exists("reduce_env", prep)) force_new else TRUE
+
+            if(run) {
+
+              start_reduce_env <- Sys.time()
+
+              prep$reduce_env <- envModel::reduce_env(env_df = prep$env
+                                                      , env_cols = names(prep_preds)
+                                                      , y_col = "pa"
+                                                      , imp_col = "1"
+                                                      , thresh_corr = reduce_env_thresh_corr
+                                                      , quant_rf_imp = reduce_env_quant_rf_imp
+                                                      , remove_always = c(pres_x, pres_y, "x", "y", "pa", "block", "cell", "id")
+                                                      )
+
+              prep$log <- paste0(prep$log
+                                 , "\n"
+                                 , "reduce_env completed in: "
+                                 , round(difftime(Sys.time(), start_reduce_env, units = "mins"), 2)
+                                 , " minutes. Original "
+                                 , length(names(prep_preds))
+                                 , " variables reduced to "
+                                 , length(prep$reduce_env$keep)
+                                 )
+
+            }
+
+          }
+
+          # end timer ------
+
+          prep$log <- paste0(prep$log
+                             , "\n"
+                             , "prep completed. elapsed time: "
+                             , round(difftime(Sys.time(), start_time, units = "mins"), 2)
+                             , " minutes"
+                             )
+
+          prep$finished <- TRUE
+
+      }
+
+        } else {
 
         prep$abandoned <- TRUE
 
-        readr::write_lines(paste0("only "
-                                  , n_p
-                                  , " useable presence points. SDM abandoned"
-                                  )
-                           , file = log_file
-                           , append = TRUE
+        prep$log <- paste0(prep$log
+                           , "\n"
+                           , "only "
+                           , n_p
+                           , " useable presence points. SDM abandoned"
                            )
 
       }
@@ -1170,6 +1158,8 @@
       # no need for anything here.... should only get here if force_new is FALSE
       # but prep exists and is either finished or abandoned
 
+      prep <- readRDS(prep_file)
+
       m <- paste0("prep skipped "
                   , Sys.time()
                   , " as force_new was "
@@ -1182,10 +1172,12 @@
 
       message(m)
 
-      readr::write_lines(m
-                         , file = log_file
-                         , append = TRUE
+      prep$log <- paste0(prep$log
+                         , "\n"
+                         , m
                          )
+
+      rio::export(prep, prep_file)
 
     }
 
