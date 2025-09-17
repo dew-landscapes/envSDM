@@ -1007,15 +1007,19 @@
                             )
 
             ### spatial cv identical --------
-            prep_block_corr <- stats::cor(tibble::as_tibble(prep$training$blocks, .name_repair = "unique"))
+            if(length(prep$training$blocks) > 1) {
 
-            change_to_non_spatial <- caret::findCorrelation(prep_block_corr
-                                                            , cutoff = max_block_corr
-                                                            )
+              prep_block_corr <- stats::cor(tibble::as_tibble(prep$training$blocks, .name_repair = "unique"))
 
-            if(sum(change_to_non_spatial, na.rm = TRUE)) {
+              change_to_non_spatial <- caret::findCorrelation(prep_block_corr
+                                                              , cutoff = max_block_corr
+                                                              )
 
-              prep$training$spatial_folds[change_to_non_spatial] <- FALSE
+              if(sum(change_to_non_spatial, na.rm = TRUE)) {
+
+                prep$training$spatial_folds[change_to_non_spatial] <- FALSE
+
+              }
 
             }
 
