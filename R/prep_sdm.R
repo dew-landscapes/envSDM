@@ -1163,20 +1163,25 @@
 
     } else {
 
-      # too few presences -------
-      readr::write_lines(paste0("Only "
-                                , start_presences
-                                , " presences in supplied data which is below min_fold_n of "
-                                , min_fold_n
-                                , ". SDM abandoned"
-                                )
+      # no need for anything here.... should only get here if force_new is FALSE
+      # but prep exists and is either finished or abandoned
+
+      m <- paste0("prep skipped "
+                  , Sys.time()
+                  , " as force_new was "
+                  , force_new
+                  , "; prep$abandoned was "
+                  , prep$abandoned
+                  , "; and prep$finished was "
+                  , prep$finished
+                  )
+
+      message(m)
+
+      readr::write_lines(m
                          , file = log_file
                          , append = TRUE
                          )
-
-      prep$finished <- TRUE
-      prep$log <- readr::read_lines(log_file)
-      rio::export(prep, prep_file)
 
     }
 
