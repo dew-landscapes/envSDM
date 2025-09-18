@@ -1160,36 +1160,31 @@
         stuff <- stuff[! stuff %in% c(return_val, "return_val")]
 
         rm(list = stuff)
-
         gc()
 
       }
 
     } else {
 
-      # no need for anything here.... should only get here if force_new is FALSE
-      # but prep exists and is either finished or abandoned
+      # Should only get here if:
+        # * prep.rds exists & (prep$abandoned or prep$finished) & force_new = FALSE
+        # * there were less than min_fold_n presences
 
-      prep <- readRDS(prep_file)
+      if(start_presences < min_fold_n) {
 
-      m <- paste0("prep skipped "
-                  , Sys.time()
-                  , " as force_new was "
-                  , force_new
-                  , "; prep$abandoned was "
-                  , prep$abandoned
-                  , "; and prep$finished was "
-                  , prep$finished
-                  )
+        m <- paste0("Only "
+                    , start_presences
+                    , " incoming presences. SDM abandoned"
+                    )
 
-      message(m)
+        message(m)
 
-      prep$log <- paste0(prep$log
-                         , "\n"
-                         , m
-                         )
+        prep$log <- paste0(prep$log
+                           , "\n"
+                           , m
+                           )
 
-      rio::export(prep, prep_file)
+      }
 
     }
 
