@@ -49,6 +49,7 @@
     if(isFALSE(out_dir)) out_dir <- tempfile()
 
     ## out_dir ------
+    # everything should go through here, at least as far as blah_file.rds
     if(is.character(out_dir)) {
 
       fs::dir_create(out_dir)
@@ -56,12 +57,23 @@
       if(dir.exists(out_dir)) {
 
         full_run_file <- fs::path(out_dir
-                              , "full_run.rds"
-                              )
+                                  , "full_run.rds"
+                                  )
 
-        if(file.exists(full_run_file)) {
+        if(all(file.exists(full_run_file), ! force_new)) {
 
-          full_run <- rio::import(full_run_file, trust = TRUE)
+          safe_import <- purrr::safely(rio::import)
+
+          full_run <- safe_import(full_run_file, trust = TRUE)
+
+          if(is.null(full_run$error)) full_run <- full_run$result else {
+
+            # remove the full_run file if it can't be opened
+            fs::file_delete(full_run_file)
+
+            rm(full_run)
+
+          }
 
         }
 

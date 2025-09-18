@@ -95,6 +95,7 @@
     if(isFALSE(out_dir)) out_dir <- tempfile()
 
     ## out_dir ------
+    # everything should go through here, at least as far as blah_file.rds
     if(is.character(out_dir)) {
 
       fs::dir_create(out_dir)
