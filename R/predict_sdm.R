@@ -117,14 +117,10 @@ predict_sdm <- function(prep
   }
 
   ### log --------
-  readr::write_lines(paste0("\n\n"
-                            , this_taxa
-                            , "\npredict process started at "
-                            , start_time
-                            )
-                     , file = log_file
-                     , append = TRUE
-                     )
+  log <- paste0(this_taxa
+                , "\npredict process started at "
+                , start_time
+                )
 
   ## test tifs ------
   # need to test before running, in case the test deletes an incomplete .tif
@@ -168,10 +164,10 @@ predict_sdm <- function(prep
 
       warning(note)
 
-      readr::write_lines(note
-                         , file = log_file
-                         , append = TRUE
-                         )
+      log <- paste0(log
+                    , "\n"
+                    , note
+                    )
 
     }
 
@@ -197,26 +193,7 @@ predict_sdm <- function(prep
       }
 
       ## predict_stack---------
-      predict_stack_start <- Sys.time()
-
-      m <- paste0("predict window for ", this_taxa)
-
-      message(m)
-
-      readr::write_lines(m
-                         , file = log_file
-                         , append = TRUE
-                         )
-
       terra::window(x) <- terra::ext(terra::vect(prep$predict_boundary))
-
-      readr::write_lines(paste0("predict window created in "
-                                , round(difftime(Sys.time(), predict_stack_start, units = "mins"), 2)
-                                , " minutes"
-                                )
-                         , file = log_file
-                         , append = TRUE
-                         )
 
       ## predict--------
       pred_start <-  Sys.time()
@@ -235,10 +212,10 @@ predict_sdm <- function(prep
 
       message(m)
 
-      readr::write_lines(m
-                         , file = log_file
-                         , append = TRUE
-                         )
+      log <- paste0(log
+                    , "\n"
+                    , m
+                    )
 
       window_predict_file <- paste0(tempfile(), ".tif")
 
@@ -264,23 +241,22 @@ predict_sdm <- function(prep
 
         message(m)
 
-        readr::write_lines(m
-                           , file = log_file
-                           , append = TRUE
-                           )
+        log <- paste0(log
+                      , "\n"
+                      , m
+                      )
 
       }
 
       ## else mask -------
       if(is.null(p$error)) {
 
-        readr::write_lines(paste0("predict finished in "
-                                  , round(difftime(Sys.time(), pred_start, units = "mins"), 2)
-                                  , " minutes"
-                                  )
-                           , file = log_file
-                           , append = TRUE
-                           )
+        log <- paste0(log
+                      , "\n"
+                      "predict finished in "
+                      , round(difftime(Sys.time(), pred_start, units = "mins"), 2)
+                      , " minutes"
+                      )
 
         predict_mask_start <- Sys.time()
 
@@ -288,10 +264,10 @@ predict_sdm <- function(prep
 
         message(m)
 
-        readr::write_lines(m
-                           , file = log_file
-                           , append = TRUE
-                           )
+        log <- paste0(log
+                      , "\n"
+                      , m
+                      )
 
         terra::mask(p$result
                     , mask = terra::vect(prep$predict_boundary)
@@ -302,22 +278,20 @@ predict_sdm <- function(prep
 
         if(file.exists(window_predict_file)) fs::file_delete(window_predict_file)
 
-        readr::write_lines(paste0("predict mask created in "
-                                  , round(difftime(Sys.time(), predict_mask_start, units = "mins"), 2)
-                                  , " minutes"
-                                  )
-                           , file = log_file
-                           , append = TRUE
-                           )
+        log <- paste0(log
+                      , "\n"
+                      , "predict mask created in "
+                      , round(difftime(Sys.time(), predict_mask_start, units = "mins"), 2)
+                      , " minutes"
+                      )
 
         ## finish ----
-        readr::write_lines(paste0("predict process finished. elapsed time: "
-                                  , round(difftime(Sys.time(), start_time, units = "mins"), 2)
-                                  , " minutes"
-                                  )
-                           , file = log_file
-                           , append = TRUE
-                           )
+        log <- paste0(log
+                      , "\n"
+                      , "predict process finished. elapsed time: "
+                      , round(difftime(Sys.time(), start_time, units = "mins"), 2)
+                      , " minutes"
+                      )
 
       }
 
@@ -342,12 +316,16 @@ predict_sdm <- function(prep
                 , "\n"
                 )
 
-    readr::write_lines(m
-                       , file = log_file
-                       , append = TRUE
-                       )
+    log <- paste0(log
+                  , "\n"
+                  , m
+                  )
 
   }
+
+  writeLines(log
+             , log_file
+             )
 
   if(do_gc) {
 
