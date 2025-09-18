@@ -1184,6 +1184,8 @@
                            , m
                            )
 
+        rio::export(prep, prep_file)
+
       }
 
     }
