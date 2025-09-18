@@ -197,7 +197,10 @@
 
           if(is.null(prep$error)) prep <- prep$result else {
 
-            stop("Unable to import existing prep file.")
+            # remove the prep file if it can't be opened
+            fs::file_delete(prep_file)
+
+            rm(prep)
 
           }
 
@@ -209,9 +212,11 @@
 
     if(!exists("prep", inherits = FALSE)) prep <- list(abandoned = FALSE, finished = FALSE, log = NULL)
 
-    if(start_presences < min_fold_n) prep$abandoned <- TRUE
-
+    # run if not finished or abandoned, otherwise only run if force_new
     run <- if(any(prep$abandoned, prep$finished)) force_new else TRUE
+
+    # but still don't run if start_presences < min_fold_n
+    run <- if(start_presences < min_fold_n) FALSE else TRUE
 
     if(is.null(this_taxa)) this_taxa <- basename(out_dir)
 
@@ -1195,6 +1200,7 @@
                            , m
                            )
 
+        prep$abandoned <- TRUE
         prep$finished <- TRUE
 
         rio::export(prep, prep_file)
