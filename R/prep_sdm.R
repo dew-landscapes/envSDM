@@ -987,12 +987,17 @@
           }
 
           ## non-spatial option -------
-          prep$training <- prep$training |>
+          prep$training <- prep$training %>%
             dplyr::mutate(nsb = purrr::map(training
                                            , \(x) non_spatial_blocks(k_folds
                                                                      , x
                                                                      )
                                            )
+                          , blocks = if(!"blocks" %in% names(.)) {
+                            nsb
+                          } else {
+                            blocks
+                          }
                           , blocks = purrr::pmap(list(spatial_folds
                                                      , blocks
                                                      , nsb
