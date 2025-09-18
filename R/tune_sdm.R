@@ -85,6 +85,9 @@
                        , ...
                        ) {
 
+    # start timer ------
+    start_time <- Sys.time()
+
     # setup -------
     ## return ------
     return_val <- if(any(isFALSE(out_dir), return_val == "object")) "tune" else "tune_file"
@@ -140,9 +143,6 @@
 
       # tune -----
       if(exists("training", where = prep)) {
-
-        # start timer ------
-        start_time <- Sys.time()
 
         tune$log <- paste0(tune$log
                            , "\n"
