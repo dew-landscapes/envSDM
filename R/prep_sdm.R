@@ -638,11 +638,11 @@
 
 
         # background points -------
+        start_bg <- Sys.time()
+
         run <- if(exists("bg_points", where = prep)) force_new else TRUE
 
         if(run) {
-
-          start_bg <- Sys.time()
 
           if(!exists("target_density")) target_density <- terra::rast(density_file)
 
@@ -695,12 +695,11 @@
         }
 
         # env--------
+        start_env <- Sys.time()
 
         run <- if(exists("blocks", prep)) force_new else TRUE
 
         if(run) {
-
-          start_env <- Sys.time()
 
           spp_pa <- dplyr::bind_rows(prep$presence_ras %>%
                                        tibble::as_tibble() %>%
@@ -758,11 +757,11 @@
 
         if(!prep$abandoned) {
 
+          start_blocks <- Sys.time()
+
           run <- if(exists("blocks", prep)) force_new else TRUE
 
           if(run) {
-
-            start_blocks <- Sys.time()
 
             # testing/training split ----------
             to_split <- prep$env |>
