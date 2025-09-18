@@ -253,7 +253,7 @@ predict_sdm <- function(prep
 
         log <- paste0(log
                       , "\n"
-                      "predict finished in "
+                      , "predict finished in "
                       , round(difftime(Sys.time(), pred_start, units = "mins"), 2)
                       , " minutes"
                       )
