@@ -63,7 +63,7 @@
 #' by this value before being passed to the `block_dist` argument of
 #' `blockCV::cv_spatial()`. If using repeated cross validation, `block_div`
 #' must be of the same length as `1:repeats`.
-#' @param max_block_corr Numeric. Maximum correlation allowed between the folds
+#' @param max_repeat_corr Numeric. Maximum correlation allowed between the folds
 #' of any two spatial blocks before one of the correlated blocks will be set to
 #' non-spatial and the folds reallocated. Correlation tested on presences only.
 #' @param min_fold_n Numeric. Sets both minimum number of presences, and,
@@ -145,7 +145,7 @@
                        , spatial_folds = TRUE
                        , repeats = 1
                        , block_div = seq(5, by = 2, length.out = repeats)
-                       , max_block_corr = 0.9
+                       , max_repeat_corr = 0.9
                        , min_fold_n = 8
                        , hold_prop = 0.3
                        , stretch_value = 10
@@ -957,7 +957,7 @@
 
             }
 
-            ## extract blocks from cv_spatial
+            ### extract blocks from cv_spatial --------
             prep$training <- prep$training |>
               dplyr::filter(purrr::map_lgl(error, \(x) is.null(x))) |> # remove errors
               dplyr::mutate(blocks = purrr::map(cv_spatial, \(x) x$result$folds_ids))
@@ -973,7 +973,7 @@
               prep_block_corr <- stats::cor(tibble::as_tibble(check_pres_corr, .name_repair = "unique"))
 
               change_to_non_spatial <- caret::findCorrelation(prep_block_corr
-                                                              , cutoff = max_block_corr
+                                                              , cutoff = max_repeat_corr
                                                               )
 
               if(sum(change_to_non_spatial, na.rm = TRUE)) {
@@ -993,10 +993,16 @@
                                                                      , x
                                                                      )
                                            )
-                          , blocks = ifelse(spatial_folds
-                                            , blocks
-                                            , nsb
-                                            )
+                          , blocks = purrr::pmap(list(spatial_folds
+                                                     , blocks
+                                                     , nsb
+                                                     )
+                                                , \(x, y, z) {
+
+                                                  if(x) y else z
+
+                                                }
+                                                )
                           )
 
           ### too few p --------
@@ -1007,11 +1013,17 @@
                           , single_fold = purrr::map_lgl(blocks
                                                          , \(x) length(unique(x)) == 1
                                                          )
-                          # again, if only one fold, go to non-spatial
-                          , blocks = ifelse(! single_fold
-                                            , blocks
-                                            , nsb
-                                            )
+                          # again, if only one fold left, go to non-spatial
+                          , blocks = purrr::pmap(list(single_fold
+                                                     , blocks
+                                                     , nsb
+                                                     )
+                                                , \(x, y, z) {
+
+                                                  if(x) y else z
+
+                                                }
+                                                )
                           )
 
           prep$training <- prep$training |>
