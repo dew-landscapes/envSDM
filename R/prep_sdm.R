@@ -161,7 +161,7 @@
 
       sum(presence[pres_col] == pres_val)
 
-    } else  nrow(presence)
+    } else nrow(presence)
 
 
     # setup -------
@@ -217,15 +217,21 @@
 
     prep$this_taxa <- this_taxa
 
-    message(paste0("prep for "
-                   , this_taxa
-                   , "\nout_dir is "
-                   , out_dir
-                   , ".\n "
-                   , start_presences
-                   , " incoming presences"
-                   )
-            )
+    m <- paste0("prep for "
+                , this_taxa
+                , "\nout_dir is "
+                , out_dir
+                , ".\n "
+                , start_presences
+                , " incoming presences"
+                )
+
+    message(m)
+
+    prep$log <- paste0(prep$log
+                       , "\n"
+                       , m
+                       )
 
     if(run) {
 
@@ -1188,6 +1194,8 @@
                            , "\n"
                            , m
                            )
+
+        prep$finished <- TRUE
 
         rio::export(prep, prep_file)
 
