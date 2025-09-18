@@ -107,7 +107,18 @@
 
         if(file.exists(tune_file)) {
 
-          tune <- rio::import(tune_file, trust = TRUE)
+          safe_import <- purrr::safely(rio::import)
+
+          tune <- safe_import(tune_file, trust = TRUE)
+
+          if(is.null(tune$error)) tune <- tune$result else {
+
+            # remove the tune file if it can't be opened
+            fs::file_delete(tune_file)
+
+            rm(tune)
+
+          }
 
         }
 
