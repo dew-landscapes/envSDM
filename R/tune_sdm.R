@@ -221,6 +221,7 @@
                     )
 
         tune$log <- paste0(tune$log
+                           , "\n"
                            , m
                            )
 
@@ -785,6 +786,13 @@
     # save -------
     # export before gc()
     tune$finished <- TRUE
+
+    tune$log <- paste0(tune$log
+                       , "\n"
+                       , "tune completed. elapsed time: "
+                       , round(difftime(Sys.time(), start_time, units = "mins"), 2)
+                       , " minutes"
+                       )
 
     rio::export(tune, tune_file)
 
