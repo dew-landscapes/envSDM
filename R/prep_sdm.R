@@ -977,16 +977,30 @@
             ### spatial cv correlation --------
             if(nrow(prep$training) > 1) {
 
+              reps <- prep$training$rep
+
               check_pres_corr <- purrr::map2(prep$training$blocks
                                              , prep$training$training
                                              , \(x, y) x[y$pa == 1]
-                                             )
+                                             ) |>
+                purrr::set_names(reps)
 
-              prep_block_corr <- stats::cor(tibble::as_tibble(check_pres_corr, .name_repair = "unique"))
+              reps_single_block <- purrr::map_lgl(check_pres_corr
+                                                  , \(x) length(table(x)) == 1
+                                                  ) |>
+                purrr::set_names(reps)
 
-              change_to_non_spatial <- caret::findCorrelation(prep_block_corr
-                                                              , cutoff = max_repeat_corr
-                                                              )
+              prep_block_corr <- stats::cor(tibble::as_tibble(check_pres_corr[! reps_single_block], .name_repair = "unique"))
+
+              change_to_non_spatial <- c(names(reps_single_block[reps_single_block])
+                                         , caret::findCorrelation(prep_block_corr
+                                                                  , cutoff = max_repeat_corr
+                                                                  , names = TRUE
+                                                                  )
+                                         ) |>
+                unique() |>
+                as.numeric() |>
+                sort()
 
               if(sum(change_to_non_spatial, na.rm = TRUE)) {
 
