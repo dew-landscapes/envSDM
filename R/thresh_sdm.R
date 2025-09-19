@@ -60,14 +60,10 @@ thresh_sdm <- function(pred_file
     log_file <- gsub("tif$", "log", thresh_file)
 
     ### log --------
-    readr::write_lines(paste0("\n"
-                              , this_taxa
-                              , " threshold started at "
-                              , start_thresh
-                              )
-                       , file = log_file
-                       , append = TRUE
-                       )
+    log <- paste0(this_taxa
+                  , " threshold started at "
+                  , start_thresh
+                  )
 
     ## test tifs ------
     # need to test before running, in case the test deletes an incomplete .tif
@@ -104,10 +100,10 @@ thresh_sdm <- function(pred_file
 
       message(m)
 
-      readr::write_lines(m
-                         , file = log_file
-                         , append = TRUE
-                         )
+      log <- paste0(log
+                    , "\n"
+                    , m
+                    )
 
       safe_app <- purrr::safely(terra::app)
 
@@ -122,13 +118,12 @@ thresh_sdm <- function(pred_file
 
       if(is.null(t$error)) {
 
-        readr::write_lines(paste0("thresh done in "
-                                  , round(difftime(Sys.time(), start_thresh, units = "mins"), 2)
-                                  , " minutes"
-                                  )
-                           , file = log_file
-                           , append = TRUE
-                           )
+        log <- paste0(log
+                      , "\n"
+                      , "thresh done in "
+                      , round(difftime(Sys.time(), start_thresh, units = "mins"), 2)
+                      , " minutes"
+                      )
 
         rm(t)
 
@@ -144,13 +139,12 @@ thresh_sdm <- function(pred_file
 
         m <- as.character(t$error)
 
-        readr::write_lines(paste0(m
-                                  , "\n"
-                                  , "threshold file not completed"
-                                  )
-                           , file = log_file
-                           , append = TRUE
-                           )
+        log <- paste0(log
+                      , "\n"
+                      , m
+                      , "\n"
+                      , "threshold file not completed"
+                      )
 
         stop(m)
 
@@ -174,6 +168,10 @@ thresh_sdm <- function(pred_file
     res <- NULL
 
   }
+
+  writeLines(log
+             , log_file
+             )
 
   return(res)
 
