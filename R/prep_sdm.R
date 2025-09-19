@@ -985,24 +985,33 @@
                                              ) |>
                 purrr::set_names(reps)
 
+              # catch any blocks coming out of blockCV::cv_spatial that have all the presences in just one fold/block
               reps_single_block <- purrr::map_lgl(check_pres_corr
                                                   , \(x) length(table(x)) == 1
                                                   ) |>
                 purrr::set_names(reps)
 
-              prep_block_corr <- stats::cor(tibble::as_tibble(check_pres_corr[! reps_single_block], .name_repair = "unique"))
+              # run correlation between repeats (if there are at least 2 repeats with presences split among folds/blocks)
+              if(length(reps) - length(reps_single_block) > 1) {
 
+                prep_block_corr <- stats::cor(tibble::as_tibble(check_pres_corr[! reps_single_block], .name_repair = "unique"))
+
+                block_corr_drop <- caret::findCorrelation(prep_block_corr
+                                                          , cutoff = max_repeat_corr
+                                                          , names = TRUE
+                                                          )
+
+              } else block_corr_drop <- NULL
+
+              # combine single fold/block repeats and correlated repeats
               change_to_non_spatial <- c(names(reps_single_block[reps_single_block])
-                                         , caret::findCorrelation(prep_block_corr
-                                                                  , cutoff = max_repeat_corr
-                                                                  , names = TRUE
-                                                                  )
+                                         , block_corr_drop
                                          ) |>
                 unique() |>
                 as.numeric() |>
                 sort()
 
-              if(sum(change_to_non_spatial, na.rm = TRUE)) {
+              if(any(as.logical(change_to_non_spatial))) {
 
                 prep$training$spatial_folds[change_to_non_spatial] <- FALSE
 
