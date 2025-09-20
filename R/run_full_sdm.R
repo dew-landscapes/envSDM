@@ -146,6 +146,8 @@
 
         }
 
+        full_run$finished <- TRUE
+
         full_run <- c(full_run, full_run_tune)
 
       }
@@ -154,7 +156,6 @@
 
     # save -------
     # export before gc()
-    full_run$finished <- TRUE
     rio::export(full_run, full_run_file)
 
     if(do_gc) {
