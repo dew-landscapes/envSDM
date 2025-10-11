@@ -941,7 +941,7 @@
                                                        , \(x, y) safe_cv_spatial(x
                                                                                  , column = "pa"
                                                                                  , k = k_folds
-                                                                                 , size = block_dist
+                                                                                 , size = y
                                                                                  , iteration = 200
                                                                                  , selection = "random"
                                                                                  , extend = 0.5
