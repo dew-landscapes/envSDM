@@ -3,9 +3,7 @@
 
   source(fs::path(out_dir, "tune_sdm_ex.R")) # make sure following prep file exists
 
-  prep <- rio::import(fs::path(out_dir, "acaule", "prep.rds")
-                      , trust = TRUE
-                      )
+  prep <- rio::import(fs::path(data$out_dir[[1]], "prep.rds"), trust = TRUE)
 
   model <- tune_sdm(prep = prep
                     , out_dir = FALSE

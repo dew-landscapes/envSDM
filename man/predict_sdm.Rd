@@ -17,6 +17,7 @@ predict_sdm(
   force_new = FALSE,
   do_gc = FALSE,
   check_tifs = FALSE,
+  handle_errors = TRUE,
   ...
 )
 }
@@ -62,6 +63,10 @@ especially if done in parallel.}
 \code{terra::rast()} and delete them if they do. Useful after a crash during
 predict.}
 
+\item{handle_errors}{Logical. Use purrr::safely when predicting, enabling the
+capture of (m)any errors (which are then written to the log). Suggest turning
+off (i.e. \code{handle_errors = FALSE}) when running in a targets pipeline.}
+
 \item{...}{Passed to \code{...} in \code{terra::mask()} - the last step in the
 \code{envSDM::predict_sdm} process. Used to provide additional arguments to
 \code{terra::writeRaster}.}
@@ -80,7 +85,8 @@ The resulting \code{pred.tif} is masked to the boundary provided to the
   # setup -------
   out_dir <- file.path(system.file(package = "envSDM"), "examples")
 
-  env_dat <- system.file("ex/bio.tif", package = "predicts")
+  # predictors -------
+  preds <- fs::dir_ls(fs::path(out_dir, "tif"))
 
 
   # data ------
@@ -119,7 +125,7 @@ The resulting \code{pred.tif} is masked to the boundary provided to the
                , \(a, b) predict_sdm(prep = a
                                      , full_run = fs::path(b, "full_run.rds")
                                      , out_dir = b
-                                     , predictors = env_dat
+                                     , predictors = preds
                                      , check_tifs = TRUE
                                      #, force_new = TRUE
                                      )
@@ -144,7 +150,7 @@ The resulting \code{pred.tif} is masked to the boundary provided to the
 
   ## visualise-------
   ### mask -------
-  purrr::walk(data$out_dir
+  purrr::walk(data$out_dir[file.exists(fs::path(data$out_dir, "pred.tif"))]
               , \(x) fs::path(x, "pred.tif") \%>\%
                 terra::rast() \%>\%
                 terra::trim() \%>\%
@@ -178,7 +184,7 @@ The resulting \code{pred.tif} is masked to the boundary provided to the
                , \(a, b) predict_sdm(prep = a
                                      , full_run = fs::path(b, "full_run.rds")
                                      , out_dir = b
-                                     , predictors = env_dat
+                                     , predictors = preds
                                      , is_env_pred = FALSE
                                      , check_tifs = TRUE
                                      #, force_new = TRUE
@@ -188,7 +194,7 @@ The resulting \code{pred.tif} is masked to the boundary provided to the
 
   ## visualise-------
   ### mask -------
-  purrr::walk(data$out_dir
+  purrr::walk(data$out_dir[file.exists(fs::path(data$out_dir, "pred.tif"))]
               , \(x) fs::path(x, "pred.tif") \%>\%
                 terra::rast() \%>\%
                 terra::trim() \%>\%

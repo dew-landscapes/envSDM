@@ -49,7 +49,8 @@ presence points.
   # setup -------
   out_dir <- file.path(system.file(package = "envSDM"), "examples")
 
-  env_dat <- system.file("ex/bio.tif", package = "predicts")
+  # predictors -------
+  preds <- fs::dir_ls(fs::path(out_dir, "tif"))
 
 
   # data ------
@@ -88,7 +89,7 @@ presence points.
                , \(a, b) predict_sdm(prep = a
                                      , full_run = fs::path(b, "full_run.rds")
                                      , out_dir = b
-                                     , predictors = env_dat
+                                     , predictors = preds
                                      , check_tifs = TRUE
                                      #, force_new = TRUE
                                      )
@@ -113,7 +114,7 @@ presence points.
 
   ## visualise-------
   ### mask -------
-  purrr::walk(data$out_dir
+  purrr::walk(data$out_dir[file.exists(fs::path(data$out_dir, "pred.tif"))]
               , \(x) fs::path(x, "pred.tif") \%>\%
                 terra::rast() \%>\%
                 terra::trim() \%>\%
@@ -147,7 +148,7 @@ presence points.
                , \(a, b) predict_sdm(prep = a
                                      , full_run = fs::path(b, "full_run.rds")
                                      , out_dir = b
-                                     , predictors = env_dat
+                                     , predictors = preds
                                      , is_env_pred = FALSE
                                      , check_tifs = TRUE
                                      #, force_new = TRUE
@@ -157,7 +158,7 @@ presence points.
 
   ## visualise-------
   ### mask -------
-  purrr::walk(data$out_dir
+  purrr::walk(data$out_dir[file.exists(fs::path(data$out_dir, "pred.tif"))]
               , \(x) fs::path(x, "pred.tif") \%>\%
                 terra::rast() \%>\%
                 terra::trim() \%>\%

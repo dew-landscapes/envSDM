@@ -48,8 +48,7 @@
   <main id="main" class="col-md-9"><p>The goal of <code>envSDM</code> is to help automate the preparation, tuning and prediction of species distribution models. <code>envSDM</code> attempts to make decisions at each of these steps that are robust(ish) for running SDMs for many, many taxa.</p>
 <p>If you are looking for packages to run species distribution models (or ecological niche models) there are plenty of better packages to choose from:</p>
 <ul>
-<li>
-<a href="https://cran.r-project.org/web/packages/tidysdm/index.html" class="external-link">tidysdm</a>. Future versions of envSDM are likely to move towards this framework.</li>
+<li><a href="https://cran.r-project.org/web/packages/tidysdm/index.html" class="external-link">tidysdm</a></li>
 <li><a href="https://sjevelazco.github.io/flexsdm/" class="external-link">flexsdm</a></li>
 <li><a href="https://cran.r-project.org/web/packages/ENMeval/index.html" class="external-link">ENMeval</a></li>
 </ul>
@@ -80,10 +79,14 @@
 </li>
 <li>ability to use multiple metrics for choosing a ‘best’ tune</li>
 </ul>
-<p>Prediction includes:</p>
+<p>Prediction is limited to boundary established during the preparation.</p>
+<p>Several values provided as options for thresholding the prediction:</p>
 <ul>
-<li>only predicting to a predict boundary established during the preparation</li>
-<li>threshold to maximum of specificity + sensitivity</li>
+<li>maximum of specificity + sensitivity</li>
+<li>equal specificity + sensitivity</li>
+<li>omission rate at 10%</li>
+<li>equal prevalence</li>
+<li>no omission</li>
 </ul>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>

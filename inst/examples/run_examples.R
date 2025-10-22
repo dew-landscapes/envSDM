@@ -5,6 +5,7 @@
     fs::dir_info("inst/examples") |>
       dplyr::filter(type == "directory") |>
       dplyr::pull(path) |>
+      grep("tif$", x = _, value = TRUE, invert = TRUE) |>
       fs::dir_delete()
 
   }

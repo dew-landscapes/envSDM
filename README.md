@@ -10,8 +10,7 @@ If you are looking for packages to run species distribution models (or
 ecological niche models) there are plenty of better packages to choose
 from:
 
-- [tidysdm](https://cran.r-project.org/web/packages/tidysdm/index.html).
-  Future versions of envSDM are likely to move towards this framework.
+- [tidysdm](https://cran.r-project.org/web/packages/tidysdm/index.html)
 - [flexsdm](https://sjevelazco.github.io/flexsdm/)
 - [ENMeval](https://cran.r-project.org/web/packages/ENMeval/index.html)
 
@@ -45,11 +44,15 @@ Tuning includes:
   - `predicts::envelope()`
 - ability to use multiple metrics for choosing a ‘best’ tune
 
-Prediction includes:
+Prediction is limited to boundary established during the preparation.
 
-- only predicting to a predict boundary established during the
-  preparation
-- threshold to maximum of specificity + sensitivity
+Several values provided as options for thresholding the prediction:
+
+- maximum of specificity + sensitivity
+- equal specificity + sensitivity
+- omission rate at 10%
+- equal prevalence
+- no omission
 
 ## Installation
 

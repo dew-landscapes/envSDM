@@ -611,9 +611,7 @@ that are robust(ish) for running SDMs for many, many taxa.</p>
 (or ecological niche models) there are plenty of better packages to
 choose from:</p>
 <ul>
-<li><a href="https://cran.r-project.org/web/packages/tidysdm/index.html">tidysdm</a>.
-Future versions of envSDM are likely to move towards this
-framework.</li>
+<li><a href="https://cran.r-project.org/web/packages/tidysdm/index.html">tidysdm</a></li>
 <li><a href="https://sjevelazco.github.io/flexsdm/">flexsdm</a></li>
 <li><a href="https://cran.r-project.org/web/packages/ENMeval/index.html">ENMeval</a></li>
 </ul>
@@ -650,11 +648,16 @@ argument downsample to the minimum number of presences</li>
 </ul></li>
 <li>ability to use multiple metrics for choosing a ‘best’ tune</li>
 </ul>
-<p>Prediction includes:</p>
+<p>Prediction is limited to boundary established during the
+preparation.</p>
+<p>Several values provided as options for thresholding the
+prediction:</p>
 <ul>
-<li>only predicting to a predict boundary established during the
-preparation</li>
-<li>threshold to maximum of specificity + sensitivity</li>
+<li>maximum of specificity + sensitivity</li>
+<li>equal specificity + sensitivity</li>
+<li>omission rate at 10%</li>
+<li>equal prevalence</li>
+<li>no omission</li>
 </ul>
 <h2 id="installation">Installation</h2>
 <p><code>envSDM</code> is not on <a href="https://CRAN.R-project.org">CRAN</a>.</p>
