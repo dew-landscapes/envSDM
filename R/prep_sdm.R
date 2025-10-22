@@ -218,7 +218,7 @@
     run <- if(any(prep$abandoned, prep$finished)) force_new else TRUE
 
     # but still don't run if start_presences < min_fold_n
-    run <- if(start_presences < min_fold_n) FALSE else TRUE
+    run <- if(start_presences < min_fold_n) FALSE else run
 
     if(is.null(this_taxa)) this_taxa <- basename(out_dir)
 
@@ -339,6 +339,9 @@
           prep$predict_boundary <- sfarrow::st_read_parquet(pred_limit) %>%
             sf::st_geometry() %>%
             sf::st_sf() %>%
+            terra::vect() |>
+            terra::densify(50000) |>
+            sf::st_as_sf() |>
             sf::st_transform(crs = sf::st_crs(prep_preds[[1]])) %>%
             sf::st_make_valid()
 
@@ -351,6 +354,9 @@
       if("sf" %in% class(pred_limit)) {
 
         prep$predict_boundary <- pred_limit %>%
+          terra::vect() |>
+          terra::densify(50000) |>
+          sf::st_as_sf() |>
           sf::st_transform(crs = sf::st_crs(prep_preds[[1]])) %>%
           sf::st_make_valid() %>%
           sf::st_intersection(sf::st_bbox(prep_preds) %>%
