@@ -34,6 +34,9 @@
 #' @param check_tifs Logical. Check if any output `.tif` files error on
 #' `terra::rast()` and delete them if they do. Useful after a crash during
 #' predict.
+#' @param handle_errors Logical. Use purrr::safely when predicting, enabling the
+#' capture of (m)any errors (which are then written to the log). Suggest turning
+#' off (i.e. `handle_errors = FALSE`) when running in a targets pipeline.
 #' @param ... Passed to `...` in `terra::mask()` - the last step in the
 #' `envSDM::predict_sdm` process. Used to provide additional arguments to
 #' `terra::writeRaster`.
@@ -57,6 +60,7 @@ predict_sdm <- function(prep
                         , force_new = FALSE
                         , do_gc = FALSE
                         , check_tifs = FALSE
+                        , handle_errors = TRUE
                         , ...
                         ) {
 
@@ -233,7 +237,6 @@ predict_sdm <- function(prep
       ## if error -------
       if(!is.null(p$error)) {
 
-
         m <- paste0("error: "
                     , as.character(p$error)
                     , ". Predict process not finished."
@@ -245,6 +248,9 @@ predict_sdm <- function(prep
                       , "\n"
                       , m
                       )
+
+        ### handle errors -------
+        if(! handle_errors) stop(m)
 
       }
 
