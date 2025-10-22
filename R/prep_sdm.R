@@ -332,7 +332,7 @@
 
       ## file path -------
       # use existing MCP polygon file for the predict boundary
-      if(is.character(pred_limit)) {
+      if(is.character(pred_limit) & length(pred_limit)) {
 
         if(file.exists(pred_limit)) {
 
@@ -368,7 +368,7 @@
       }
 
       # recast pred_limit from here on as T/F
-      if(!isFALSE(pred_limit)) pred_limit <- TRUE
+      pred_limit <- if(all(!isFALSE(pred_limit), length(pred_limit))) TRUE else FALSE
 
       ## FALSE ------
       # use the full extent of the predictors for the predict boundary
@@ -947,7 +947,7 @@
                                                        , \(x, y) safe_cv_spatial(x
                                                                                  , column = "pa"
                                                                                  , k = k_folds
-                                                                                 , size = block_dist
+                                                                                 , size = y
                                                                                  , iteration = 200
                                                                                  , selection = "random"
                                                                                  , extend = 0.5
@@ -1066,7 +1066,7 @@
                                                      )
                                                 , \(x, y, z) {
 
-                                                  if(x) y else z
+                                                  if(!x) y else z
 
                                                 }
                                                 )
