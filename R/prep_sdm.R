@@ -434,7 +434,7 @@
                          , " presences in predict_boundary and on env rasters"
                          )
 
-      if(n_p > needed_p) {
+      if(n_p >= needed_p) {
 
         # subset predictors ------
         if(pred_limit) {
