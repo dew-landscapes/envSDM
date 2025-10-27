@@ -121,7 +121,8 @@ predict_sdm <- function(prep
   }
 
   ### log --------
-  log <- paste0(this_taxa
+  log <- paste0(if(file_exists(log_file)) paste0(readr::read_lines(log_file), "\n\n")
+                , this_taxa
                 , "\npredict process started at "
                 , start_time
                 )

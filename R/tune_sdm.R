@@ -433,7 +433,7 @@
 
               message(m)
 
-              prep$log <- paste0(prep$log
+              tune$log <- paste0(tune$log
                                  , "\n"
                                  , m
                                  )
@@ -474,7 +474,7 @@
 
               message(m)
 
-              prep$log <- paste0(prep$log
+              tune$log <- paste0(tune$log
                                  , "\n"
                                  , m
                                  )
@@ -485,7 +485,7 @@
               dplyr::filter(purrr::map_lgl(e, \(x) ! is.null(x))) %>%
               {if(keep_model) (.) %>% dplyr::select(! dplyr::where(is.list), m, e) else (.) %>% dplyr::select(! dplyr::where(is.list), e)}
 
-            prep$log <- paste0(prep$log
+            tune$log <- paste0(tune$log
                                , "\n"
                                , "maxnet tune finished in: "
                                , round(difftime(Sys.time(), start_maxnet, units = "mins"), 2)
@@ -529,7 +529,7 @@
                             ) %>%
               {if(keep_model) (.) %>% dplyr::select(! dplyr::where(is.list), m, e) else (.) %>% dplyr::select(! dplyr::where(is.list), e)}
 
-            prep$log <- paste0(prep$log
+            tune$log <- paste0(tune$log
                                , "\n"
                                , "envelope tune finished in: "
                                , round(difftime(Sys.time(), start_envelope, units = "mins"), 2)
@@ -658,7 +658,7 @@
 
               message(m)
 
-              prep$log <- paste0(prep$log
+              tune$log <- paste0(tune$log
                                  , "\n"
                                  , m
                                  )
@@ -684,7 +684,7 @@
                   dplyr::select(! dplyr::where(is.list), e)
               }
 
-            prep$log <- paste0(prep$log
+            tune$log <- paste0(tune$log
                                , "\n"
                                , "rf tune finished in: "
                                , round(difftime(Sys.time(), start_rf, units = "mins"), 2)
@@ -703,7 +703,7 @@
 
     } else {
 
-      prep$log <- paste0(prep$log
+      tune$log <- paste0(tune$log
                          , "\n"
                          , "tune abandoned"
                          )
@@ -777,7 +777,7 @@
 
           if(!best_run) {
 
-            prep$log <- paste0(prep$log
+            tune$log <- paste0(tune$log
                                , "\n"
                                , "based on the product of metrics: "
                                , stringr::str_flatten_comma(metrics_df$metric[metrics_df$summary_mets])
