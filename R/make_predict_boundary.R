@@ -19,6 +19,10 @@
 #' @param out_crs Numeric. [epsg](https://epsg.io/) code
 #' @param return_poly Logical. Return the mcp, or alternatively `out_file`
 #' @param force_new Logical. If `out_file` exists, recreate it?
+#' @param dens_int Numeric. `terra::densify()` `interval` argument ("positive
+#' number, specifying the desired minimum distance between nodes. The unit is
+#' meter for lonlat data, and in the linear unit of the crs for planar data").
+#' Set to `NULL` to not densify.
 #'
 #' @return If `return_poly`, sf, else `out_file`. .parquet mcp written to
 #' `out_file`
@@ -34,6 +38,7 @@ make_predict_boundary <- function(poly_list
                                   , out_crs
                                   , return_poly = FALSE
                                   , force_new = FALSE
+                                  , dens_int = NULL
                                   ) {
 
   if(!is.null(poly_list)) {
@@ -73,16 +78,19 @@ make_predict_boundary <- function(poly_list
                            , buffer_list
                            , \(x, y) sf::st_geometry(x) |>
                              sf::st_as_sf() %>%
+                             {if(!is.null(dens_int)) (.) |> terra::vect() |> terra::densify(dens_int) |> sf::st_as_sf() else (.)} %>%
                              sf::st_transform(crs = out_crs) |>
                              sf::st_buffer(dist = y)
                            ) %>%
           dplyr::bind_rows() |>
           dplyr::summarise() |>
-          dplyr::mutate(!!rlang::ensym(col_name) := col_name_val)
+          dplyr::mutate(!!rlang::ensym(col_name) := col_name_val) |>
+          sf::st_make_valid()
 
         if(!is.null(clip)) {
 
           clip <- clip %>%
+            {if(!is.null(dens_int)) (.) |> terra::vect() |> terra::densify(dens_int) |> sf::st_as_sf() else (.)} |>
             sf::st_transform(crs = out_crs)
 
           mcp <- sf::st_intersection(mcp, clip)
