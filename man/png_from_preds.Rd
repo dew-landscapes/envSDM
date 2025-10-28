@@ -77,7 +77,7 @@ presence points.
 
                                          # passed to tune_sdm via dots
                                          , metrics_df = envSDM::sdm_metrics
-                                         #, force_new = TRUE
+                                         , force_new = FALSE
                                          )
                )
 
@@ -91,7 +91,7 @@ presence points.
                                      , out_dir = b
                                      , predictors = preds
                                      , check_tifs = TRUE
-                                     #, force_new = TRUE
+                                     , force_new = FALSE
                                      )
                )
 
@@ -137,7 +137,7 @@ presence points.
 
                                          # passed to tune_sdm via dots
                                          , metrics_df = envSDM::sdm_metrics
-                                         #, force_new = TRUE
+                                         , force_new = FALSE
                                          )
               )
 
@@ -151,7 +151,7 @@ presence points.
                                      , predictors = preds
                                      , is_env_pred = FALSE
                                      , check_tifs = TRUE
-                                     #, force_new = TRUE
+                                     , force_new = FALSE
                                      )
                )
 

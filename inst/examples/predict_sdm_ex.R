@@ -30,7 +30,7 @@
 
                                          # passed to tune_sdm via dots
                                          , metrics_df = envSDM::sdm_metrics
-                                         #, force_new = TRUE
+                                         , force_new = FALSE
                                          )
                )
 
@@ -44,7 +44,7 @@
                                      , out_dir = b
                                      , predictors = preds
                                      , check_tifs = TRUE
-                                     #, force_new = TRUE
+                                     , force_new = FALSE
                                      )
                )
 
@@ -90,7 +90,7 @@
 
                                          # passed to tune_sdm via dots
                                          , metrics_df = envSDM::sdm_metrics
-                                         #, force_new = TRUE
+                                         , force_new = FALSE
                                          )
               )
 
@@ -104,7 +104,7 @@
                                      , predictors = preds
                                      , is_env_pred = FALSE
                                      , check_tifs = TRUE
-                                     #, force_new = TRUE
+                                     , force_new = FALSE
                                      )
                )
 

@@ -212,13 +212,13 @@ elements:</p>
 <span class="r-in"><span>                              <span class="op">)</span></span></span>
 <span class="r-in"><span>              <span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [[1]]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> C:/temp/nige/RtmpSWfQ0A/temp_libpath5c9034321a50/envSDM/examples/chg/tune.rds</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> C:/temp/nige/RtmpkDfFu6/temp_libpath57ecc1774b9/envSDM/examples/chg/tune.rds</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [[2]]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> C:/temp/nige/RtmpSWfQ0A/temp_libpath5c9034321a50/envSDM/examples/mjs/tune.rds</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> C:/temp/nige/RtmpkDfFu6/temp_libpath57ecc1774b9/envSDM/examples/mjs/tune.rds</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [[3]]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> C:/temp/nige/RtmpSWfQ0A/temp_libpath5c9034321a50/envSDM/examples/wjb/tune.rds</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> C:/temp/nige/RtmpkDfFu6/temp_libpath57ecc1774b9/envSDM/examples/wjb/tune.rds</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>  <span class="co"># which tune args were best for each taxa using 'combo'?</span></span></span>
@@ -233,8 +233,8 @@ elements:</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 2 × 8</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   taxa  algo  tune_args             combo auc_po  IMAE   CBI max_spec_sens</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                 <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> chg   rf    tr: 500. mt: 2. ns: 3 0.163  0.907 0.839 0.965         0.413</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> mjs   rf    tr: 500. mt: 3. ns: 3 0.263  0.930 0.885 0.876         0.316</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> chg   rf    tr: 500. mt: 3. ns: 3 0.209  0.900 0.839 0.949         0.359</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> mjs   rf    tr: 500. mt: 3. ns: 2 0.259  0.938 0.889 0.864         0.276</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>  <span class="co"># or best tune args choosing on just auc_po?</span></span></span>
 <span class="r-in"><span>  <span class="va">data</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
@@ -250,8 +250,8 @@ elements:</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 2 × 7</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   taxa  algo  tune_args             auc_po  IMAE   CBI max_spec_sens</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> chg   rf    tr: 500. mt: 2. ns: 3  0.907 0.839 0.965         0.413</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> mjs   rf    tr: 500. mt: 3. ns: 2  0.931 0.887 0.876         0.326</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> chg   rf    tr: 500. mt: 3. ns: 2  0.900 0.840 0.940         0.378</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> mjs   rf    tr: 500. mt: 2. ns: 1  0.939 0.887 0.859         0.266</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
