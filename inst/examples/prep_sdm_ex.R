@@ -25,6 +25,7 @@
                    )
                , \(x, y) envDistribution::make_mcp(x, y, pres_x = "cell_long", pres_y = "cell_lat"
                                                    , clip = clip
+                                                   , dens_int = 50000
                                                    )
                )
 

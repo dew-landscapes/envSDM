@@ -59,7 +59,8 @@ the extent of the environmental variables.</p>
 <span>  clip <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="va">out_crs</span>,</span>
 <span>  return_poly <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  force_new <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  force_new <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  dens_int <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -103,6 +104,13 @@ Buffering occurs after transformation to <code>out_crs</code>.</p></dd>
 
 <dt id="arg-force-new">force_new<a class="anchor" aria-label="anchor" href="#arg-force-new"></a></dt>
 <dd><p>Logical. If <code>out_file</code> exists, recreate it?</p></dd>
+
+
+<dt id="arg-dens-int">dens_int<a class="anchor" aria-label="anchor" href="#arg-dens-int"></a></dt>
+<dd><p>Numeric. <code><a href="https://rspatial.github.io/terra/reference/densify.html" class="external-link">terra::densify()</a></code> <code>interval</code> argument ("positive
+number, specifying the desired minimum distance between nodes. The unit is
+meter for lonlat data, and in the linear unit of the crs for planar data").
+Set to <code>NULL</code> to not densify.</p></dd>
 
 </dl></div>
     <div class="section level2">

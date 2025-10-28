@@ -1,8 +1,8 @@
 mjs
-predict process started at 2025-10-23 08:52:17.900706
-predict for mjs from rf model with arguments: tr = 500, mt = 3, ns = 1
+predict process started at 2025-10-28 12:33:07.975863
+predict for mjs from rf model with arguments: tr = 500, mt = 3, ns = 2
  out file will be pred.tif
-predict finished in 0.04 minutes
+predict finished in 0.07 minutes
 predict mask for mjs
 predict mask created in 0 minutes
-predict process finished. elapsed time: 0.06 minutes
+predict process finished. elapsed time: 0.11 minutes

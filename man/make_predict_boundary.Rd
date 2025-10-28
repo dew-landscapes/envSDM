@@ -14,7 +14,8 @@ make_predict_boundary(
   clip = NULL,
   out_crs,
   return_poly = FALSE,
-  force_new = FALSE
+  force_new = FALSE,
+  dens_int = NULL
 )
 }
 \arguments{
@@ -37,6 +38,11 @@ Buffering occurs after transformation to \code{out_crs}.}
 \item{return_poly}{Logical. Return the mcp, or alternatively \code{out_file}}
 
 \item{force_new}{Logical. If \code{out_file} exists, recreate it?}
+
+\item{dens_int}{Numeric. \code{terra::densify()} \code{interval} argument ("positive
+number, specifying the desired minimum distance between nodes. The unit is
+meter for lonlat data, and in the linear unit of the crs for planar data").
+Set to \code{NULL} to not densify.}
 }
 \value{
 If \code{return_poly}, sf, else \code{out_file}. .parquet mcp written to

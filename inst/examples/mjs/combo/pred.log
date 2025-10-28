@@ -1,5 +1,8 @@
 mjs
-predict process started at 2025-10-23 08:52:09.445954
-predict did not run as:
- predict file: H:/dev/nige/packages/envSDM/inst/examples/mjs/combo/pred.tif already exists and force_new was not TRUE
-
+predict process started at 2025-10-28 12:32:52.3229
+predict for mjs from rf model with arguments: tr = 500, mt = 3, ns = 3
+ out file will be pred.tif
+predict finished in 0.04 minutes
+predict mask for mjs
+predict mask created in 0 minutes
+predict process finished. elapsed time: 0.07 minutes
