@@ -120,13 +120,6 @@ predict_sdm <- function(prep
 
   }
 
-  ### log --------
-  log <- paste0(if(file.exists(log_file)) paste0(readr::read_lines(log_file), "\n\n")
-                , this_taxa
-                , "\npredict process started at "
-                , start_time
-                )
-
   ## test tifs ------
   # need to test before running, in case the test deletes an incomplete .tif
   if(check_tifs) {
@@ -147,7 +140,6 @@ predict_sdm <- function(prep
 
   }
 
-
   # run?-----
   run <- all(!prep$abandoned
              , prep$finished
@@ -156,6 +148,12 @@ predict_sdm <- function(prep
              )
 
   if(run) {
+
+    ### log --------
+    log <- paste0(this_taxa
+                  , "\npredict process started at "
+                  , start_time
+                  )
 
     algo <- full_run$tune_mean$algo[[1]]
 
@@ -314,25 +312,41 @@ predict_sdm <- function(prep
 
   } else {
 
-    m <- paste0("predict did not run as:\n "
-                , if(prep$abandoned) "prep abandoned\n "
-                , if(! prep$finished) "prep did not finish\n "
-                , if(any(prep$abandoned, ! prep$finished)) paste0("prep log:\n  ", paste0(prep$log, collapse = "\n  "), "\n ")
-                , if (! full_run$finished) paste0("full run did not finish\n full run log:\n  ", paste0(full_run$log, collapse = "\n  "), "\n ")
-                , if(file.exists(pred_file)) paste0("predict file: ", pred_file, " already exists and force_new was not TRUE")
-                , "\n"
-                )
+    # if pred_file does not exist, then create a log
 
-    log <- paste0(log
+    if(! file.exists(pred_file)) {
+
+      log <- paste0(this_taxa
+                    , "\npredict process started at "
+                    , start_time
+                    )
+
+      m <- paste0("predict did not run as:\n "
+                  , if(prep$abandoned) "prep abandoned\n "
+                  , if(! prep$finished) "prep did not finish\n "
+                  , if(any(prep$abandoned, ! prep$finished)) paste0("prep log:\n  ", paste0(prep$log, collapse = "\n  "), "\n ")
+                  , if (! full_run$finished) paste0("full run did not finish\n full run log:\n  ", paste0(full_run$log, collapse = "\n  "), "\n ")
                   , "\n"
-                  , m
                   )
+
+      log <- paste0(log
+                    , "\n"
+                    , m
+                    )
+
+    }
 
   }
 
-  writeLines(log
-             , log_file
-             )
+  # write log ------
+  # only if it exists
+  if(exists("log", inherits = FALSE)) {
+
+    writeLines(log
+               , log_file
+               )
+
+  }
 
   if(do_gc) {
 
