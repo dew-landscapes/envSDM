@@ -526,7 +526,9 @@
                                                                         , do_gc = do_gc
                                                                         )
                                               )
-                            ) %>%
+                            )
+
+            tune$tune_envelope <- tune$tune_envelope %>%
               {if(any(keep_model, nrow(tune$tune_envelope) == 1)) (.) %>% dplyr::select(! dplyr::where(is.list), m, e) else (.) %>% dplyr::select(! dplyr::where(is.list), e)}
 
             tune$log <- paste0(tune$log
@@ -679,7 +681,7 @@
                                             , .progress = "evaluate rf"
                                             )
                             ) %>%
-              {if(any(keep_model, nrow(tune$tune_rf) == 1)) (.) %>%
+              {if(any(keep_model, nrow(tune_rf) == 1)) (.) %>%
                   dplyr::select(! dplyr::where(is.list), m, e) else (.) %>%
                   dplyr::select(! dplyr::where(is.list), e)
               }
