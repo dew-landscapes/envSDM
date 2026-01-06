@@ -114,7 +114,9 @@
          ){
 
         # If only 1 repeat/block, no need to run again
-        full_run_tune <- tune
+        full_run <- tune
+
+        full_run$finished <- TRUE
 
       } else if(nrow(tune_args)) {
 
