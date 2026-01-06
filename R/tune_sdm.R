@@ -483,7 +483,7 @@
 
             tune$tune_maxnet <- tune$tune_maxnet %>%
               dplyr::filter(purrr::map_lgl(e, \(x) ! is.null(x))) %>%
-              {if(any(keep_model, nrow(tune$tune_maxnet == 1))) (.) %>% dplyr::select(! dplyr::where(is.list), m, e) else (.) %>% dplyr::select(! dplyr::where(is.list), e)}
+              {if(any(keep_model, nrow(tune$tune_maxnet) == 1)) (.) %>% dplyr::select(! dplyr::where(is.list), m, e) else (.) %>% dplyr::select(! dplyr::where(is.list), e)}
 
             tune$log <- paste0(tune$log
                                , "\n"
@@ -527,7 +527,7 @@
                                                                         )
                                               )
                             ) %>%
-              {if(any(keep_model, nrow(tune$tune_envelope == 1))) (.) %>% dplyr::select(! dplyr::where(is.list), m, e) else (.) %>% dplyr::select(! dplyr::where(is.list), e)}
+              {if(any(keep_model, nrow(tune$tune_envelope) == 1)) (.) %>% dplyr::select(! dplyr::where(is.list), m, e) else (.) %>% dplyr::select(! dplyr::where(is.list), e)}
 
             tune$log <- paste0(tune$log
                                , "\n"
@@ -679,7 +679,7 @@
                                             , .progress = "evaluate rf"
                                             )
                             ) %>%
-              {if(any(keep_model, nrow(tune$tune_rf == 1))) (.) %>%
+              {if(any(keep_model, nrow(tune$tune_rf) == 1)) (.) %>%
                   dplyr::select(! dplyr::where(is.list), m, e) else (.) %>%
                   dplyr::select(! dplyr::where(is.list), e)
               }
