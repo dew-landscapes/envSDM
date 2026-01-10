@@ -107,6 +107,15 @@ thresh_sdm <- function(pred_file
 
       safe_app <- purrr::safely(terra::app)
 
+      ## terra options -------
+      if(!is.null(terra_options)) {
+
+        do.call(terra::terraOptions
+                , args = terra_options
+        )
+
+      }
+
       t <- safe_app(terra::rast(pred_file)
                     , \(i) i > threshold
                     , filename = thresh_file
