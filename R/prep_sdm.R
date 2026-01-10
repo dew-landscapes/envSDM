@@ -411,10 +411,16 @@
                      ) %>%
         sf::st_filter(prep$predict_boundary %>%
                         sf::st_transform(crs = sf::st_crs(prep_preds))
-                      ) %>%
-        sf::st_coordinates() %>%
-        tibble::as_tibble() %>%
-        purrr::set_names(c("x", "y"))
+                      )
+
+      if(nrow(prep$presence_ras)) {
+
+        prep$presence_ras <- prep$presence_ras %>%
+          sf::st_coordinates() %>%
+          tibble::as_tibble() %>%
+          purrr::set_names(c("x", "y"))
+
+      }
 
       # n_p / needed_p ---------
       n_p <- nrow(prep$presence_ras)
