@@ -1007,7 +1007,7 @@
                 purrr::set_names(reps)
 
               # run correlation between repeats (if there are at least 2 repeats with presences split among folds/blocks)
-              if(length(reps) - length(reps_single_block) > 1) {
+              if(length(reps) - sum(reps_single_block) > 1) {
 
                 prep_block_corr <- stats::cor(tibble::as_tibble(check_pres_corr[! reps_single_block], .name_repair = "unique"))
 
