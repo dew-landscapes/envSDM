@@ -147,7 +147,7 @@
                        , folds = 5
                        , spatial_folds = TRUE
                        , repeats = 1
-                       , block_div = seq(5, by = 2, length.out = repeats)
+                       , block_div = seq(2.1, by = 0.1, length.out = repeats)
                        , max_repeat_corr = 0.9
                        , min_fold_n = 8
                        , hold_prop = 0.3
