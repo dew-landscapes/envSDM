@@ -58,7 +58,7 @@
                )
 
   # example of 'prep'
-  prep <- rio::import(fs::path(data$taxa_dir[[2]], "prep.rds"), trust = TRUE)
+  prep <- rio::import(fs::path(data$taxa_dir[[1]], "prep.rds"), trust = TRUE)
 
   names(prep)
 
@@ -73,8 +73,6 @@
   if(require("tmap")) {
 
     m <-
-      tm_shape(clip) +
-      tm_borders() +
       tm_shape(dens_ras) +
       tm_raster(col.legend = "Background point density"
                 , col.scale = c(0, 2, 4, 6, 8, 10)
@@ -112,10 +110,10 @@
                    )
 
 
-    tm_shape(clip) +
-      tm_borders() +
-      tm_shape(blocks) +
-      tm_dots(fill = "block") +
+    tm_shape(blocks) +
+      tm_dots(fill = "block"
+              , fill.scale = tm_scale(values = "viridis")
+              ) +
       tm_facets(by = "rep") +
       tm_legend(outside = TRUE)
 

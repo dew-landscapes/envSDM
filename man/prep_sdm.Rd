@@ -27,7 +27,7 @@ prep_sdm(
   folds = 5,
   spatial_folds = TRUE,
   repeats = 1,
-  block_div = seq(5, by = 2, length.out = repeats),
+  block_div = seq(2.1, by = 0.1, length.out = repeats),
   max_repeat_corr = 0.9,
   min_fold_n = 8,
   hold_prop = 0.3,
@@ -166,6 +166,7 @@ centroids on the predictors at presences supplied in argument \code{presence}
 \itemize{
 \item sf used to limit the background points and used by \code{predict_sdm()} to
 generate the 'mask'ed output
+\item i.e. the predict boundary is both callibration and predict boundary
 }
 \item bg_points:
 \itemize{
@@ -209,7 +210,9 @@ If memory is an issue, try adjusting \code{terra_options} and/or \code{do_gc}.
 To help build the density raster for assigning background points, 'absence'
 data can be supplied in \code{presence} as \code{0} values. e.g. For a bird, absence
 data might be generated from other sites where birds were recorded but
-\code{this_taxa} was not.
+\code{this_taxa} was not. Note that these \code{0} 'records' are not used directly as
+background points but instead are used to improve the sampling density raster
+against which background points are assigned.
 }
 \examples{
 
@@ -272,7 +275,7 @@ data might be generated from other sites where birds were recorded but
                )
 
   # example of 'prep'
-  prep <- rio::import(fs::path(data$taxa_dir[[2]], "prep.rds"), trust = TRUE)
+  prep <- rio::import(fs::path(data$taxa_dir[[1]], "prep.rds"), trust = TRUE)
 
   names(prep)
 
@@ -287,8 +290,6 @@ data might be generated from other sites where birds were recorded but
   if(require("tmap")) {
 
     m <-
-      tm_shape(clip) +
-      tm_borders() +
       tm_shape(dens_ras) +
       tm_raster(col.legend = "Background point density"
                 , col.scale = c(0, 2, 4, 6, 8, 10)
@@ -326,10 +327,10 @@ data might be generated from other sites where birds were recorded but
                    )
 
 
-    tm_shape(clip) +
-      tm_borders() +
-      tm_shape(blocks) +
-      tm_dots(fill = "block") +
+    tm_shape(blocks) +
+      tm_dots(fill = "block"
+              , fill.scale = tm_scale(values = "viridis")
+              ) +
       tm_facets(by = "rep") +
       tm_legend(outside = TRUE)
 

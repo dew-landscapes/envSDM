@@ -1,11 +1,11 @@
 wjb
-predict process started at 2025-10-28 15:50:18.792639
+predict process started at 2026-01-12 13:02:36.684224
 predict did not run as:
  prep abandoned
  prep log:
   
 prep for wjb
-out_dir is H:/dev/nige/packages/envSDM/inst/examples/wjb.
+out_dir is /projects/dev/nige/packages/envSDM/inst/examples/wjb.
  5 incoming presences
 Only 5 incoming presences. SDM abandoned
  full run did not finish
