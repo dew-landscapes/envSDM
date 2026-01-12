@@ -11,7 +11,9 @@
 #' To help build the density raster for assigning background points, 'absence'
 #' data can be supplied in `presence` as `0` values. e.g. For a bird, absence
 #' data might be generated from other sites where birds were recorded but
-#' `this_taxa` was not.
+#' `this_taxa` was not. Note that these `0` 'records' are not used directly as
+#' background points but instead are used to improve the sampling density raster
+#' against which background points are assigned.
 #'
 #' @param this_taxa Character. Name of taxa. Only used to print some messages.
 #' Ignored if NULL
@@ -100,6 +102,7 @@
 #' * predict_boundary:
 #'     + sf used to limit the background points and used by `predict_sdm()` to
 #'     generate the 'mask'ed output
+#'     + i.e. the predict boundary is both callibration and predict boundary
 #' * bg_points:
 #'    + sf of cell centroids representing unique cell centroids for background
 #'    points
