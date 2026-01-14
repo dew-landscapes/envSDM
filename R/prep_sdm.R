@@ -784,25 +784,26 @@
             to_split <- prep$env |>
               dplyr::mutate(id = dplyr::row_number())
 
-            prep$testing <- tibble::tibble(rep = 1:repeats, testing = list(tibble::tibble(pa = 0)))
+            ## repeats adj -----
+            repeats_adj <- if(n_p / min_fold_n < repeats) floor(n_p / min_fold_n) else repeats
+
+            prep$testing <- tibble::tibble(rep = 1:repeats_adj, testing = list(tibble::tibble(pa = 0)))
             counter <- 0
             hold_prop_adj <- hold_prop
 
             # Try to get min_fold_n presences within prep$testing
             if(hold_prop > 0) {
 
-              while(all(prep$testing$testing |> purrr::map(\(x) sum(x$pa == 1)) < min_fold_n) | hold_prop_adj > 0.5) {
+              while(any(all(prep$testing$testing |> purrr::map(\(x) sum(x$pa == 1)) < min_fold_n), hold_prop_adj < 0.5)) {
 
                 prep$testing <- prep$testing |>
-                  dplyr::mutate(testing = purrr::map(1:repeats
+                  dplyr::mutate(testing = purrr::map(1:repeats_adj
                                                      , \(x) to_split %>%
                                                        dplyr::slice_sample(prop = hold_prop_adj, by = pa)
                                                      )
                                 )
 
-                counter <- counter + 1
                 hold_prop_adj <- hold_prop_adj + 0.01
-
 
               }
 
