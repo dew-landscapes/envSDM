@@ -882,7 +882,7 @@
 
           } else {
 
-            prep$training <- tibble::tibble(rep = 1:repeats) |>
+            prep$training <- tibble::tibble(rep = 1:repeats_adj) |>
               dplyr::cross_join(prep$testing |>
                                   dplyr::select(- rep, training = testing)
                                 )
@@ -902,7 +902,7 @@
                              )
 
           text_two <- paste0(" repeat: "
-                             , 1:repeats
+                             , 1:repeats_adj
                              , ". "
                              , purrr::map_chr(prep$training$training, \(x) as.character(nrow(x)))
                              , " training data, including "
@@ -944,7 +944,7 @@
                                                                  , crs = sf::st_crs(prep_preds[[1]])
                                                                  )
                                                   )
-                            , block_div = block_div
+                            , block_div = block_div[1:nrow(prep$training)]
                             , block_dist = purrr::map_dbl(block_div
                                                           , \(x) prep$predict_boundary %>%
                                                             sf::st_area() %>%
