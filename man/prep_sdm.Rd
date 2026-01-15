@@ -219,11 +219,14 @@ against which background points are assigned.
   out_dir <- file.path(system.file(package = "envSDM"), "examples")
 
   # data ---------
-  data <- fs::dir_ls(out_dir, regexp = "\\\\.csv$") |>
+  data <- fs::dir_ls(out_dir, regexp = "\\\\.csv$")[[1]] |>
     tibble::enframe(name = NULL, value = "path") |>
     dplyr::mutate(taxa = gsub("\\\\.csv", "", basename(path))
                   , presence = purrr::map(path, rio::import, setclass = "tibble", trust = TRUE)
-                  , taxa_dir = fs::path(out_dir, taxa)
+                  ) |>
+    dplyr::cross_join(tibble::tibble(hold_prop = c(0, 0.3))) |>
+    dplyr::cross_join(tibble::tibble(repeats = c(1, 5))) |>
+    dplyr::mutate(taxa_dir = fs::path(out_dir, paste0(taxa, "__", hold_prop, "__", repeats))
                   , out_mcp = fs::path(taxa_dir, "mcp.parquet")
                   )
 
@@ -254,8 +257,9 @@ against which background points are assigned.
                     , data$taxa_dir
                     , data$presence
                     , data$out_mcp
+                    , data$hold_prop
                     )
-               , function(a, b, c, d) prep_sdm(this_taxa = a
+               , function(a, b, c, d, e) prep_sdm(this_taxa = a
                                                , out_dir = b
                                                , presence = c
                                                , pres_x = "cell_long"
@@ -266,7 +270,7 @@ against which background points are assigned.
                                                , limit_buffer = 10000
                                                , folds = 5
                                                , repeats = 5
-                                               , hold_prop = 0
+                                               , hold_prop = e
                                                , dens_res = 1000 # ignored as decimal degrees preds
                                                , reduce_env_thresh_corr = 0.95
                                                , reduce_env_quant_rf_imp = 0.2

@@ -154,13 +154,22 @@ Character path to predicted file, usually 'pred.tif'. Output .tif and
                                          )
                )
 #> [[1]]
-#> /home/nwilloug/temp/RtmpZmDzsp/temp_libpath19cb0544a4dd6f/envSDM/examples/chg/combo/full_run.rds
+#> /home/nwilloug/temp/RtmprTkVGw/temp_libpath19fa091c7edf0e/envSDM/examples/chg__0/combo/full_run.rds
 #> 
 #> [[2]]
-#> /home/nwilloug/temp/RtmpZmDzsp/temp_libpath19cb0544a4dd6f/envSDM/examples/mjs/combo/full_run.rds
+#> /home/nwilloug/temp/RtmprTkVGw/temp_libpath19fa091c7edf0e/envSDM/examples/chg__0.3/combo/full_run.rds
 #> 
 #> [[3]]
-#> /home/nwilloug/temp/RtmpZmDzsp/temp_libpath19cb0544a4dd6f/envSDM/examples/wjb/combo/full_run.rds
+#> /home/nwilloug/temp/RtmprTkVGw/temp_libpath19fa091c7edf0e/envSDM/examples/chg__0.3__1/combo/full_run.rds
+#> 
+#> [[4]]
+#> /home/nwilloug/temp/RtmprTkVGw/temp_libpath19fa091c7edf0e/envSDM/examples/chg__0.3__5/combo/full_run.rds
+#> 
+#> [[5]]
+#> /home/nwilloug/temp/RtmprTkVGw/temp_libpath19fa091c7edf0e/envSDM/examples/chg__0__1/combo/full_run.rds
+#> 
+#> [[6]]
+#> /home/nwilloug/temp/RtmprTkVGw/temp_libpath19fa091c7edf0e/envSDM/examples/chg__0__5/combo/full_run.rds
 #> 
 
 
@@ -205,6 +214,10 @@ Character path to predicted file, usually 'pred.tif'. Output .tif and
 
 
 
+
+
+
+
   # Best auc--------
   ## run full SDM --------
   data <- data %>%
@@ -225,13 +238,22 @@ Character path to predicted file, usually 'pred.tif'. Output .tif and
                                          )
               )
 #> [[1]]
-#> /home/nwilloug/temp/RtmpZmDzsp/temp_libpath19cb0544a4dd6f/envSDM/examples/chg/auc_po/full_run.rds
+#> /home/nwilloug/temp/RtmprTkVGw/temp_libpath19fa091c7edf0e/envSDM/examples/chg__0/auc_po/full_run.rds
 #> 
 #> [[2]]
-#> /home/nwilloug/temp/RtmpZmDzsp/temp_libpath19cb0544a4dd6f/envSDM/examples/mjs/auc_po/full_run.rds
+#> /home/nwilloug/temp/RtmprTkVGw/temp_libpath19fa091c7edf0e/envSDM/examples/chg__0.3/auc_po/full_run.rds
 #> 
 #> [[3]]
-#> /home/nwilloug/temp/RtmpZmDzsp/temp_libpath19cb0544a4dd6f/envSDM/examples/wjb/auc_po/full_run.rds
+#> /home/nwilloug/temp/RtmprTkVGw/temp_libpath19fa091c7edf0e/envSDM/examples/chg__0.3__1/auc_po/full_run.rds
+#> 
+#> [[4]]
+#> /home/nwilloug/temp/RtmprTkVGw/temp_libpath19fa091c7edf0e/envSDM/examples/chg__0.3__5/auc_po/full_run.rds
+#> 
+#> [[5]]
+#> /home/nwilloug/temp/RtmprTkVGw/temp_libpath19fa091c7edf0e/envSDM/examples/chg__0__1/auc_po/full_run.rds
+#> 
+#> [[6]]
+#> /home/nwilloug/temp/RtmprTkVGw/temp_libpath19fa091c7edf0e/envSDM/examples/chg__0__5/auc_po/full_run.rds
 #> 
 
   ## predict -------
@@ -257,6 +279,10 @@ Character path to predicted file, usually 'pred.tif'. Output .tif and
                 terra::trim() %>%
                 terra::plot()
               )
+
+
+
+
 
 
 

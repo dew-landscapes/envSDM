@@ -31,7 +31,7 @@ prep_sdm(
   folds = 5,
   spatial_folds = TRUE,
   repeats = 1,
-  block_div = seq(2.1, by = 0.1, length.out = repeats),
+  folds_div = seq(2.1, by = 0.1, length.out = folds),
   max_repeat_corr = 0.9,
   min_fold_n = 8,
   hold_prop = 0.3,
@@ -161,18 +161,18 @@ prep_sdm(
 
   Numeric. Number of repeated cross validations.
 
-- block_div:
+- folds_div:
 
   Numeric. The square root of the predict area is divided by this value
   before being passed to the `block_dist` argument of
   [`blockCV::cv_spatial()`](https://rdrr.io/pkg/blockCV/man/cv_spatial.html).
-  If using repeated cross validation, `block_div` must be of the same
-  length as `1:repeats`.
+  If using cross validation, `fold_div` must be of the same length as
+  `1:folds`.
 
 - max_repeat_corr:
 
   Numeric. Maximum correlation allowed between the folds of any two
-  spatial blocks before one of the correlated blocks will be set to
+  spatial folds before one of the correlated folds will be set to
   non-spatial and the folds reallocated. Correlation tested on presences
   only.
 
@@ -253,7 +253,7 @@ elements:
   - sf of cell centroids representing unique cell centroids for
     background points
 
-- blocks
+- folds
 
   - data.frame with columns:
 
@@ -261,7 +261,7 @@ elements:
 
     - `x` and `y`: cell centroids for each presence and absence
 
-    - `block`: the spatial block to which the row belongs
+    - `fold`: the spatial fold to which the row belongs
 
     - a column with values for each of `predictors` at `x` and `y`
 
@@ -296,11 +296,14 @@ sampling density raster against which background points are assigned.
   out_dir <- file.path(system.file(package = "envSDM"), "examples")
 
   # data ---------
-  data <- fs::dir_ls(out_dir, regexp = "\\.csv$") |>
+  data <- fs::dir_ls(out_dir, regexp = "\\.csv$")[[1]] |>
     tibble::enframe(name = NULL, value = "path") |>
     dplyr::mutate(taxa = gsub("\\.csv", "", basename(path))
                   , presence = purrr::map(path, rio::import, setclass = "tibble", trust = TRUE)
-                  , taxa_dir = fs::path(out_dir, taxa)
+                  ) |>
+    dplyr::cross_join(tibble::tibble(hold_prop = c(0, 0.3))) |>
+    dplyr::cross_join(tibble::tibble(repeats = c(1, 5))) |>
+    dplyr::mutate(taxa_dir = fs::path(out_dir, paste0(taxa, "__", hold_prop, "__", repeats))
                   , out_mcp = fs::path(taxa_dir, "mcp.parquet")
                   )
 
@@ -331,8 +334,9 @@ sampling density raster against which background points are assigned.
                     , data$taxa_dir
                     , data$presence
                     , data$out_mcp
+                    , data$hold_prop
                     )
-               , function(a, b, c, d) prep_sdm(this_taxa = a
+               , function(a, b, c, d, e) prep_sdm(this_taxa = a
                                                , out_dir = b
                                                , presence = c
                                                , pres_x = "cell_long"
@@ -343,7 +347,7 @@ sampling density raster against which background points are assigned.
                                                , limit_buffer = 10000
                                                , folds = 5
                                                , repeats = 5
-                                               , hold_prop = 0
+                                               , hold_prop = e
                                                , dens_res = 1000 # ignored as decimal degrees preds
                                                , reduce_env_thresh_corr = 0.95
                                                , reduce_env_quant_rf_imp = 0.2
@@ -351,15 +355,17 @@ sampling density raster against which background points are assigned.
                                                )
                )
 #> prep for chg
-#> out_dir is /home/nwilloug/temp/RtmpZmDzsp/temp_libpath19cb0544a4dd6f/envSDM/examples/chg.
+#> out_dir is /home/nwilloug/temp/RtmprTkVGw/temp_libpath19fa091c7edf0e/envSDM/examples/chg__0__1.
 #>  103 incoming presences
-#> prep for mjs
-#> out_dir is /home/nwilloug/temp/RtmpZmDzsp/temp_libpath19cb0544a4dd6f/envSDM/examples/mjs.
-#>  677 incoming presences
-#> prep for wjb
-#> out_dir is /home/nwilloug/temp/RtmpZmDzsp/temp_libpath19cb0544a4dd6f/envSDM/examples/wjb.
-#>  5 incoming presences
-#> Only 5 incoming presences. SDM abandoned
+#> prep for chg
+#> out_dir is /home/nwilloug/temp/RtmprTkVGw/temp_libpath19fa091c7edf0e/envSDM/examples/chg__0__5.
+#>  103 incoming presences
+#> prep for chg
+#> out_dir is /home/nwilloug/temp/RtmprTkVGw/temp_libpath19fa091c7edf0e/envSDM/examples/chg__0.3__1.
+#>  103 incoming presences
+#> prep for chg
+#> out_dir is /home/nwilloug/temp/RtmprTkVGw/temp_libpath19fa091c7edf0e/envSDM/examples/chg__0.3__5.
+#>  103 incoming presences
 
   # example of 'prep'
   prep <- rio::import(fs::path(data$taxa_dir[[1]], "prep.rds"), trust = TRUE)
@@ -368,13 +374,13 @@ sampling density raster against which background points are assigned.
 #>  [1] "abandoned"        "finished"         "log"              "this_taxa"       
 #>  [5] "original"         "pa_ras"           "presence_ras"     "predict_boundary"
 #>  [9] "bg_points"        "env"              "testing"          "training"        
-#> [13] "prep_block_corr"  "reduce_env"      
+#> [13] "prep_fold_corr"   "reduce_env"      
 
   # env variables to remove prior to SDM
   prep$reduce_env$remove
 #>  [1] "bio04"     "bio07"     "bio08"     "bio09"     "bio12"     "bio13"    
-#>  [7] "bio16"     "bio17"     "bio18"     "bio19"     "block"     "cell"     
-#> [13] "cell_lat"  "cell_long" "id"        "pa"        "x"         "y"        
+#>  [7] "bio16"     "bio17"     "bio18"     "bio19"     "cell"      "cell_lat" 
+#> [13] "cell_long" "fold"      "id"        "pa"        "x"         "y"        
 
   # Density raster
   dens_ras <- terra::rast(fs::path(data$taxa_dir[[2]], "density.tif")) %>%
@@ -418,12 +424,12 @@ sampling density raster against which background points are assigned.
   # Background points
   if(require("tmap")) {
 
-    blocks <- prep$bg_points %>%
+    folds <- prep$bg_points %>%
       dplyr::inner_join(prep$training |>
                          dplyr::select(rep, training) |>
                          tidyr::unnest(cols = c(training))
                        ) |>
-      dplyr::mutate(block = factor(block) # for map
+      dplyr::mutate(fold = factor(fold) # for map
                     , rep = paste0("rep: ", rep)
                     ) %>%
       sf::st_as_sf(coords = c("x", "y")
@@ -431,8 +437,8 @@ sampling density raster against which background points are assigned.
                    )
 
 
-    tm_shape(blocks) +
-      tm_dots(fill = "block"
+    tm_shape(folds) +
+      tm_dots(fill = "fold"
               , fill.scale = tm_scale(values = "viridis")
               ) +
       tm_facets(by = "rep") +

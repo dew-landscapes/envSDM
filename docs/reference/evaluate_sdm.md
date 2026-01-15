@@ -56,48 +56,38 @@ CBI_rescale is 0 to 1); and IMAE.
 ``` r
   out_dir <- file.path(system.file(package = "envSDM"), "examples")
 
-  source(fs::path(out_dir, "tune_sdm_ex.R")) # make sure following prep file exists
+  preps <- fs::dir_ls(out_dir, regexp = "prep.rds", recurse = TRUE)
 
-  prep <- rio::import(fs::path(data$out_dir[[1]], "prep.rds"), trust = TRUE)
+  prep <- rio::import(preps[[1]], trust = TRUE)
 
-  model <- tune_sdm(prep = prep
-                    , out_dir = FALSE
-                    , return_val = "object"
-                    , algo = "rf"
-                    , trees = 500
-                    , mtry = 2
-                    , nodesize = 1
-                    , keep_model = TRUE
-                    )
-#> tuning chg with algorithms: rf
-#> out_dir is /home/nwilloug/temp/RtmpJkraMl/file19cbce2552cfb7
-#> rf tune
-#> tune rf ■■■■■■■■■■■■■■■■■■■■■■■■■■■       88% |  ETA:  0s
+  full_run <- rio::import(fs::path(dirname(preps[[1]]), "combo", "full_run.rds"), trust = TRUE)
+  algo <- full_run$tune_mean$algo[[1]]
+  model <- full_run[[paste0("tune_", algo)]]$m[[1]]
 
-  presences <- prep$testing$testing[[1]][prep$testing$testing[[1]]$pa == 1, ]
-  background <- prep$testing$testing[[1]][prep$testing$testing[[1]]$pa == 0, ]
+  presences <- prep$testing[prep$testing$pa == 1, ]
+  background <- prep$testing[prep$testing$pa == 0, ]
 
-  evaluate_sdm(model$tune_rf$m[[1]]
+  evaluate_sdm(full_run$tune_rf$m[[1]]
                , p_test = presences
                , b_test = background
                )
 #> @stats
-#>   np   na prevalence  auc   cor pcor   ODP auc_po auc_po_flexsdm   CBI
-#> 1 92 5069      0.018 0.98 0.468    0 0.982   0.98           0.98 0.882
+#>   np   na prevalence   auc   cor pcor   ODP auc_po auc_po_flexsdm  CBI
+#> 1 92 5094      0.018 0.995 0.485    0 0.982  0.995          0.995 0.69
 #>   CBI_rescale  IMAE
-#> 1       0.941 0.862
+#> 1       0.845 0.863
 #> 
 #> @thresholds
 #>   max_kappa max_spec_sens no_omission equal_prevalence equal_sens_spec  or10
-#> 1     0.938         0.634       0.236            0.018            0.41 0.644
+#> 1      0.95         0.654       0.654            0.018            0.68 0.754
 #> 
 #> @tr_stats
-#>     treshold kappa  CCR  TPR  TNR  FPR  FNR  PPP  NPP  MCR     OR
-#> 1          0     0 0.02    1    0    1    0 0.02  NaN 0.98    NaN
-#> 2          0     0 0.13    1 0.12 0.88    0 0.02    1 0.87    Inf
-#> 3          0  0.01 0.19    1 0.17 0.83    0 0.02    1 0.81    Inf
-#> 4        ...   ...  ...  ...  ...  ...  ...  ...  ...  ...    ...
-#> 353        1  0.36 0.99 0.23    1    0 0.77 0.88 0.99 0.01 499.46
-#> 354        1  0.36 0.99 0.23    1    0 0.77 0.88 0.99 0.01 499.46
-#> 355        1     0 0.98    0    1    0    1  NaN 0.98 0.02    NaN
+#>     treshold kappa  CCR  TPR TNR FPR  FNR  PPP  NPP  MCR     OR
+#> 1          0     0 0.02    1   0   1    0 0.02  NaN 0.98    NaN
+#> 2          0     0 0.11    1 0.1 0.9    0 0.02    1 0.89    Inf
+#> 3          0  0.01 0.22    1 0.2 0.8    0 0.02    1 0.78    Inf
+#> 4        ...   ...  ...  ... ... ...  ...  ...  ...  ...    ...
+#> 370        1   0.3 0.99 0.18   1   0 0.82 0.89 0.99 0.01 577.09
+#> 371        1   0.3 0.99 0.18   1   0 0.82 0.89 0.99 0.01 577.09
+#> 372        1     0 0.98    0   1   0    1  NaN 0.98 0.02    NaN
 ```

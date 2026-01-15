@@ -115,10 +115,18 @@ Character path to threshold file, usually 'thresh.tif'. Output .tif and
                                        #, force_new = TRUE
                                        )
                )
-#> threshold file: /home/nwilloug/temp/RtmpZmDzsp/temp_libpath19cb0544a4dd6f/envSDM/examples/chg/auc_po/thresh.tif already exists
-#> threshold file: /home/nwilloug/temp/RtmpZmDzsp/temp_libpath19cb0544a4dd6f/envSDM/examples/chg/combo/thresh.tif already exists
-#> threshold file: /home/nwilloug/temp/RtmpZmDzsp/temp_libpath19cb0544a4dd6f/envSDM/examples/mjs/auc_po/thresh.tif already exists
-#> threshold file: /home/nwilloug/temp/RtmpZmDzsp/temp_libpath19cb0544a4dd6f/envSDM/examples/mjs/combo/thresh.tif already exists
+#> threshold file: /home/nwilloug/temp/RtmprTkVGw/temp_libpath19fa091c7edf0e/envSDM/examples/chg__0/auc_po/thresh.tif already exists
+#> threshold file: /home/nwilloug/temp/RtmprTkVGw/temp_libpath19fa091c7edf0e/envSDM/examples/chg__0/combo/thresh.tif already exists
+#> threshold file: /home/nwilloug/temp/RtmprTkVGw/temp_libpath19fa091c7edf0e/envSDM/examples/chg__0.3/auc_po/thresh.tif already exists
+#> threshold file: /home/nwilloug/temp/RtmprTkVGw/temp_libpath19fa091c7edf0e/envSDM/examples/chg__0.3/combo/thresh.tif already exists
+#> threshold file: /home/nwilloug/temp/RtmprTkVGw/temp_libpath19fa091c7edf0e/envSDM/examples/chg__0.3__1/auc_po/thresh.tif already exists
+#> threshold file: /home/nwilloug/temp/RtmprTkVGw/temp_libpath19fa091c7edf0e/envSDM/examples/chg__0.3__1/combo/thresh.tif already exists
+#> threshold file: /home/nwilloug/temp/RtmprTkVGw/temp_libpath19fa091c7edf0e/envSDM/examples/chg__0.3__5/auc_po/thresh.tif already exists
+#> threshold file: /home/nwilloug/temp/RtmprTkVGw/temp_libpath19fa091c7edf0e/envSDM/examples/chg__0.3__5/combo/thresh.tif already exists
+#> threshold file: /home/nwilloug/temp/RtmprTkVGw/temp_libpath19fa091c7edf0e/envSDM/examples/chg__0__1/auc_po/thresh.tif already exists
+#> threshold file: /home/nwilloug/temp/RtmprTkVGw/temp_libpath19fa091c7edf0e/envSDM/examples/chg__0__1/combo/thresh.tif already exists
+#> threshold file: /home/nwilloug/temp/RtmprTkVGw/temp_libpath19fa091c7edf0e/envSDM/examples/chg__0__5/auc_po/thresh.tif already exists
+#> threshold file: /home/nwilloug/temp/RtmprTkVGw/temp_libpath19fa091c7edf0e/envSDM/examples/chg__0__5/combo/thresh.tif already exists
 
   ## visualise-------
   ### threshold -------
@@ -128,6 +136,14 @@ Character path to threshold file, usually 'thresh.tif'. Output .tif and
                 terra::trim() %>%
                 terra::plot()
               )
+
+
+
+
+
+
+
+
 
 
 

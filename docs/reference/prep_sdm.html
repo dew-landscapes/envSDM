@@ -70,7 +70,7 @@ by user <a href="https://gis.stackexchange.com/users/865/spacedman" class="exter
 <span>  folds <span class="op">=</span> <span class="fl">5</span>,</span>
 <span>  spatial_folds <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  repeats <span class="op">=</span> <span class="fl">1</span>,</span>
-<span>  block_div <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">2.1</span>, by <span class="op">=</span> <span class="fl">0.1</span>, length.out <span class="op">=</span> <span class="va">repeats</span><span class="op">)</span>,</span>
+<span>  folds_div <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">2.1</span>, by <span class="op">=</span> <span class="fl">0.1</span>, length.out <span class="op">=</span> <span class="va">folds</span><span class="op">)</span>,</span>
 <span>  max_repeat_corr <span class="op">=</span> <span class="fl">0.9</span>,</span>
 <span>  min_fold_n <span class="op">=</span> <span class="fl">8</span>,</span>
 <span>  hold_prop <span class="op">=</span> <span class="fl">0.3</span>,</span>
@@ -196,16 +196,16 @@ not enough presences to support more than one fold.</p></dd>
 <dd><p>Numeric. Number of repeated cross validations.</p></dd>
 
 
-<dt id="arg-block-div">block_div<a class="anchor" aria-label="anchor" href="#arg-block-div"></a></dt>
+<dt id="arg-folds-div">folds_div<a class="anchor" aria-label="anchor" href="#arg-folds-div"></a></dt>
 <dd><p>Numeric. The square root of the predict area is divided
 by this value before being passed to the <code>block_dist</code> argument of
-<code><a href="https://rdrr.io/pkg/blockCV/man/cv_spatial.html" class="external-link">blockCV::cv_spatial()</a></code>. If using repeated cross validation, <code>block_div</code>
-must be of the same length as <code>1:repeats</code>.</p></dd>
+<code><a href="https://rdrr.io/pkg/blockCV/man/cv_spatial.html" class="external-link">blockCV::cv_spatial()</a></code>. If using cross validation, <code>fold_div</code>
+must be of the same length as <code>1:folds</code>.</p></dd>
 
 
 <dt id="arg-max-repeat-corr">max_repeat_corr<a class="anchor" aria-label="anchor" href="#arg-max-repeat-corr"></a></dt>
 <dd><p>Numeric. Maximum correlation allowed between the folds
-of any two spatial blocks before one of the correlated blocks will be set to
+of any two spatial folds before one of the correlated folds will be set to
 non-spatial and the folds reallocated. Correlation tested on presences only.</p></dd>
 
 
@@ -271,9 +271,9 @@ generate the 'mask'ed output</p></li>
 <li><p>bg_points:</p><ul><li><p>sf of cell centroids representing unique cell centroids for background
 points</p></li>
 </ul></li>
-<li><p>blocks</p><ul><li><p>data.frame with columns:</p><ul><li><p><code>pa</code>: presence (1) or absence/background (0)</p></li>
+<li><p>folds</p><ul><li><p>data.frame with columns:</p><ul><li><p><code>pa</code>: presence (1) or absence/background (0)</p></li>
 <li><p><code>x</code> and <code>y</code>: cell centroids for each presence and absence</p></li>
-<li><p><code>block</code>: the spatial block to which the row belongs</p></li>
+<li><p><code>fold</code>: the spatial fold to which the row belongs</p></li>
 <li><p>a column with values for each of <code>predictors</code> at <code>x</code> and <code>y</code></p></li>
 </ul></li>
 </ul></li>
@@ -304,11 +304,14 @@ against which background points are assigned.</p>
 <span class="r-in"><span>  <span class="va">out_dir</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span>package <span class="op">=</span> <span class="st">"envSDM"</span><span class="op">)</span>, <span class="st">"examples"</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>  <span class="co"># data ---------</span></span></span>
-<span class="r-in"><span>  <span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">fs</span><span class="fu">::</span><span class="fu"><a href="https://fs.r-lib.org/reference/dir_ls.html" class="external-link">dir_ls</a></span><span class="op">(</span><span class="va">out_dir</span>, regexp <span class="op">=</span> <span class="st">"\\.csv$"</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>  <span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">fs</span><span class="fu">::</span><span class="fu"><a href="https://fs.r-lib.org/reference/dir_ls.html" class="external-link">dir_ls</a></span><span class="op">(</span><span class="va">out_dir</span>, regexp <span class="op">=</span> <span class="st">"\\.csv$"</span><span class="op">)</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>    <span class="fu">tibble</span><span class="fu">::</span><span class="fu"><a href="https://tibble.tidyverse.org/reference/enframe.html" class="external-link">enframe</a></span><span class="op">(</span>name <span class="op">=</span> <span class="cn">NULL</span>, value <span class="op">=</span> <span class="st">"path"</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>taxa <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">gsub</a></span><span class="op">(</span><span class="st">"\\.csv"</span>, <span class="st">""</span>, <span class="fu"><a href="https://rdrr.io/r/base/basename.html" class="external-link">basename</a></span><span class="op">(</span><span class="va">path</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span>                  , presence <span class="op">=</span> <span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">map</a></span><span class="op">(</span><span class="va">path</span>, <span class="fu">rio</span><span class="fu">::</span><span class="va"><a href="http://gesistsa.github.io/rio/reference/import.html" class="external-link">import</a></span>, setclass <span class="op">=</span> <span class="st">"tibble"</span>, trust <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
-<span class="r-in"><span>                  , taxa_dir <span class="op">=</span> <span class="fu">fs</span><span class="fu">::</span><span class="fu"><a href="https://fs.r-lib.org/reference/path.html" class="external-link">path</a></span><span class="op">(</span><span class="va">out_dir</span>, <span class="va">taxa</span><span class="op">)</span></span></span>
+<span class="r-in"><span>                  <span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/cross_join.html" class="external-link">cross_join</a></span><span class="op">(</span><span class="fu">tibble</span><span class="fu">::</span><span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span>hold_prop <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0.3</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/cross_join.html" class="external-link">cross_join</a></span><span class="op">(</span><span class="fu">tibble</span><span class="fu">::</span><span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span>repeats <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">5</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>taxa_dir <span class="op">=</span> <span class="fu">fs</span><span class="fu">::</span><span class="fu"><a href="https://fs.r-lib.org/reference/path.html" class="external-link">path</a></span><span class="op">(</span><span class="va">out_dir</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">taxa</span>, <span class="st">"__"</span>, <span class="va">hold_prop</span>, <span class="st">"__"</span>, <span class="va">repeats</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span>                  , out_mcp <span class="op">=</span> <span class="fu">fs</span><span class="fu">::</span><span class="fu"><a href="https://fs.r-lib.org/reference/path.html" class="external-link">path</a></span><span class="op">(</span><span class="va">taxa_dir</span>, <span class="st">"mcp.parquet"</span><span class="op">)</span></span></span>
 <span class="r-in"><span>                  <span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
@@ -339,8 +342,9 @@ against which background points are assigned.</p>
 <span class="r-in"><span>                    , <span class="va">data</span><span class="op">$</span><span class="va">taxa_dir</span></span></span>
 <span class="r-in"><span>                    , <span class="va">data</span><span class="op">$</span><span class="va">presence</span></span></span>
 <span class="r-in"><span>                    , <span class="va">data</span><span class="op">$</span><span class="va">out_mcp</span></span></span>
+<span class="r-in"><span>                    , <span class="va">data</span><span class="op">$</span><span class="va">hold_prop</span></span></span>
 <span class="r-in"><span>                    <span class="op">)</span></span></span>
-<span class="r-in"><span>               , <span class="kw">function</span><span class="op">(</span><span class="va">a</span>, <span class="va">b</span>, <span class="va">c</span>, <span class="va">d</span><span class="op">)</span> <span class="fu">prep_sdm</span><span class="op">(</span>this_taxa <span class="op">=</span> <span class="va">a</span></span></span>
+<span class="r-in"><span>               , <span class="kw">function</span><span class="op">(</span><span class="va">a</span>, <span class="va">b</span>, <span class="va">c</span>, <span class="va">d</span>, <span class="va">e</span><span class="op">)</span> <span class="fu">prep_sdm</span><span class="op">(</span>this_taxa <span class="op">=</span> <span class="va">a</span></span></span>
 <span class="r-in"><span>                                               , out_dir <span class="op">=</span> <span class="va">b</span></span></span>
 <span class="r-in"><span>                                               , presence <span class="op">=</span> <span class="va">c</span></span></span>
 <span class="r-in"><span>                                               , pres_x <span class="op">=</span> <span class="st">"cell_long"</span></span></span>
@@ -351,7 +355,7 @@ against which background points are assigned.</p>
 <span class="r-in"><span>                                               , limit_buffer <span class="op">=</span> <span class="fl">10000</span></span></span>
 <span class="r-in"><span>                                               , folds <span class="op">=</span> <span class="fl">5</span></span></span>
 <span class="r-in"><span>                                               , repeats <span class="op">=</span> <span class="fl">5</span></span></span>
-<span class="r-in"><span>                                               , hold_prop <span class="op">=</span> <span class="fl">0</span></span></span>
+<span class="r-in"><span>                                               , hold_prop <span class="op">=</span> <span class="va">e</span></span></span>
 <span class="r-in"><span>                                               , dens_res <span class="op">=</span> <span class="fl">1000</span> <span class="co"># ignored as decimal degrees preds</span></span></span>
 <span class="r-in"><span>                                               , reduce_env_thresh_corr <span class="op">=</span> <span class="fl">0.95</span></span></span>
 <span class="r-in"><span>                                               , reduce_env_quant_rf_imp <span class="op">=</span> <span class="fl">0.2</span></span></span>
@@ -359,15 +363,17 @@ against which background points are assigned.</p>
 <span class="r-in"><span>                                               <span class="op">)</span></span></span>
 <span class="r-in"><span>               <span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> prep for chg</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> out_dir is /home/nwilloug/temp/RtmpZmDzsp/temp_libpath19cb0544a4dd6f/envSDM/examples/chg.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> out_dir is /home/nwilloug/temp/RtmprTkVGw/temp_libpath19fa091c7edf0e/envSDM/examples/chg__0__1.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>  103 incoming presences</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> prep for mjs</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> out_dir is /home/nwilloug/temp/RtmpZmDzsp/temp_libpath19cb0544a4dd6f/envSDM/examples/mjs.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>  677 incoming presences</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> prep for wjb</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> out_dir is /home/nwilloug/temp/RtmpZmDzsp/temp_libpath19cb0544a4dd6f/envSDM/examples/wjb.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>  5 incoming presences</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Only 5 incoming presences. SDM abandoned</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> prep for chg</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> out_dir is /home/nwilloug/temp/RtmprTkVGw/temp_libpath19fa091c7edf0e/envSDM/examples/chg__0__5.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>  103 incoming presences</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> prep for chg</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> out_dir is /home/nwilloug/temp/RtmprTkVGw/temp_libpath19fa091c7edf0e/envSDM/examples/chg__0.3__1.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>  103 incoming presences</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> prep for chg</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> out_dir is /home/nwilloug/temp/RtmprTkVGw/temp_libpath19fa091c7edf0e/envSDM/examples/chg__0.3__5.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>  103 incoming presences</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>  <span class="co"># example of 'prep'</span></span></span>
 <span class="r-in"><span>  <span class="va">prep</span> <span class="op">&lt;-</span> <span class="fu">rio</span><span class="fu">::</span><span class="fu"><a href="http://gesistsa.github.io/rio/reference/import.html" class="external-link">import</a></span><span class="op">(</span><span class="fu">fs</span><span class="fu">::</span><span class="fu"><a href="https://fs.r-lib.org/reference/path.html" class="external-link">path</a></span><span class="op">(</span><span class="va">data</span><span class="op">$</span><span class="va">taxa_dir</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span>, <span class="st">"prep.rds"</span><span class="op">)</span>, trust <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
@@ -376,13 +382,13 @@ against which background points are assigned.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [1] "abandoned"        "finished"         "log"              "this_taxa"       </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [5] "original"         "pa_ras"           "presence_ras"     "predict_boundary"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [9] "bg_points"        "env"              "testing"          "training"        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [13] "prep_block_corr"  "reduce_env"      </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [13] "prep_fold_corr"   "reduce_env"      </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>  <span class="co"># env variables to remove prior to SDM</span></span></span>
 <span class="r-in"><span>  <span class="va">prep</span><span class="op">$</span><span class="va">reduce_env</span><span class="op">$</span><span class="va">remove</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [1] "bio04"     "bio07"     "bio08"     "bio09"     "bio12"     "bio13"    </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [7] "bio16"     "bio17"     "bio18"     "bio19"     "block"     "cell"     </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [13] "cell_lat"  "cell_long" "id"        "pa"        "x"         "y"        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [7] "bio16"     "bio17"     "bio18"     "bio19"     "cell"      "cell_lat" </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [13] "cell_long" "fold"      "id"        "pa"        "x"         "y"        </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>  <span class="co"># Density raster</span></span></span>
 <span class="r-in"><span>  <span class="va">dens_ras</span> <span class="op">&lt;-</span> <span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rspatial.github.io/terra/reference/rast.html" class="external-link">rast</a></span><span class="op">(</span><span class="fu">fs</span><span class="fu">::</span><span class="fu"><a href="https://fs.r-lib.org/reference/path.html" class="external-link">path</a></span><span class="op">(</span><span class="va">data</span><span class="op">$</span><span class="va">taxa_dir</span><span class="op">[[</span><span class="fl">2</span><span class="op">]</span><span class="op">]</span>, <span class="st">"density.tif"</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
@@ -426,12 +432,12 @@ against which background points are assigned.</p>
 <span class="r-in"><span>  <span class="co"># Background points</span></span></span>
 <span class="r-in"><span>  <span class="kw">if</span><span class="op">(</span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">require</a></span><span class="op">(</span><span class="st"><a href="https://github.com/r-tmap/tmap" class="external-link">"tmap"</a></span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span>    <span class="va">blocks</span> <span class="op">&lt;-</span> <span class="va">prep</span><span class="op">$</span><span class="va">bg_points</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
+<span class="r-in"><span>    <span class="va">folds</span> <span class="op">&lt;-</span> <span class="va">prep</span><span class="op">$</span><span class="va">bg_points</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
 <span class="r-in"><span>      <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate-joins.html" class="external-link">inner_join</a></span><span class="op">(</span><span class="va">prep</span><span class="op">$</span><span class="va">training</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>                         <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">rep</span>, <span class="va">training</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>                         <span class="fu">tidyr</span><span class="fu">::</span><span class="fu"><a href="https://tidyr.tidyverse.org/reference/unnest.html" class="external-link">unnest</a></span><span class="op">(</span>cols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">training</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span>                       <span class="op">)</span> <span class="op">|&gt;</span></span></span>
-<span class="r-in"><span>      <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>block <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">block</span><span class="op">)</span> <span class="co"># for map</span></span></span>
+<span class="r-in"><span>      <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>fold <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">fold</span><span class="op">)</span> <span class="co"># for map</span></span></span>
 <span class="r-in"><span>                    , rep <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"rep: "</span>, <span class="va">rep</span><span class="op">)</span></span></span>
 <span class="r-in"><span>                    <span class="op">)</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
 <span class="r-in"><span>      <span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_as_sf.html" class="external-link">st_as_sf</a></span><span class="op">(</span>coords <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"x"</span>, <span class="st">"y"</span><span class="op">)</span></span></span>
@@ -439,8 +445,8 @@ against which background points are assigned.</p>
 <span class="r-in"><span>                   <span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span>    <span class="fu"><a href="https://r-tmap.github.io/tmap/reference/tm_shape.html" class="external-link">tm_shape</a></span><span class="op">(</span><span class="va">blocks</span><span class="op">)</span> <span class="op">+</span></span></span>
-<span class="r-in"><span>      <span class="fu"><a href="https://r-tmap.github.io/tmap/reference/tm_symbols.html" class="external-link">tm_dots</a></span><span class="op">(</span>fill <span class="op">=</span> <span class="st">"block"</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="https://r-tmap.github.io/tmap/reference/tm_shape.html" class="external-link">tm_shape</a></span><span class="op">(</span><span class="va">folds</span><span class="op">)</span> <span class="op">+</span></span></span>
+<span class="r-in"><span>      <span class="fu"><a href="https://r-tmap.github.io/tmap/reference/tm_symbols.html" class="external-link">tm_dots</a></span><span class="op">(</span>fill <span class="op">=</span> <span class="st">"fold"</span></span></span>
 <span class="r-in"><span>              , fill.scale <span class="op">=</span> <span class="fu"><a href="https://r-tmap.github.io/tmap/reference/tm_scale.html" class="external-link">tm_scale</a></span><span class="op">(</span>values <span class="op">=</span> <span class="st">"viridis"</span><span class="op">)</span></span></span>
 <span class="r-in"><span>              <span class="op">)</span> <span class="op">+</span></span></span>
 <span class="r-in"><span>      <span class="fu"><a href="https://r-tmap.github.io/tmap/reference/tm_facets.html" class="external-link">tm_facets</a></span><span class="op">(</span>by <span class="op">=</span> <span class="st">"rep"</span><span class="op">)</span> <span class="op">+</span></span></span>
