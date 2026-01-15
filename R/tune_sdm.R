@@ -213,12 +213,16 @@
 
           preds <- preds[names(preds) %in% algo]
 
+          tune$preds <- preds
+
         } else {
 
           preds <- purrr::map(algo
                               , \(x) prep$reduce_env$env_cols[prep$reduce_env$env_cols %in% prep$reduce_env$keep]
                               ) |>
             purrr::set_names(algo)
+
+          tune$preds <- preds
 
         }
 
