@@ -773,11 +773,12 @@
               dplyr::mutate(combo = purrr::pmap_dbl(dplyr::across(tidyselect::any_of(metrics_df$metric[metrics_df$summary_mets]))
                                                     , prod
                                                     )
-                            , evaluation = dplyr::case_when(tunes == 1 & reps == 1 & n_p_test == n_p_train & hold_prop == 0 ~ "full model: internal"
-                                                            , tunes == 1 & reps == 1 & n_p_test != n_p_train & hold_prop != 0 ~ "full model: holdout"
+                            , evaluation = dplyr::case_when(tunes == 1 & reps == 1 & n_p_test == n_p_train ~ "full model: internal"
+                                                            , tunes == 1 & reps == 1 & n_p_test != n_p_train ~ "full model: holdout"
                                                             , tunes > 1 & reps > 1 ~ "repeated cross fold"
                                                             , tunes > 1 & reps == 1 ~ "cross fold"
                                                             , TRUE ~ "unsure"
+                                                            # ideally need a more robust test than n_p_test == n_p_train
                                                             )
                             ) |>
               dplyr::mutate(best = combo == max(combo, na.rm = TRUE)) |>
