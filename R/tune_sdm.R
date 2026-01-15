@@ -488,7 +488,7 @@
 
             tune$tune_maxnet <- tune$tune_maxnet %>%
               dplyr::filter(purrr::map_lgl(e, \(x) ! is.null(x))) %>%
-              {if(any(keep_model, unique(tune$tune_maxnet$tunes) == 1)) (.) %>% dplyr::select(! dplyr::where(is.list), m, e) else (.) %>% dplyr::select(! dplyr::where(is.list), e)}
+              {if(any(keep_model, isTRUE(unique(tune$tune_maxnet$single_fold)))) (.) %>% dplyr::select(! dplyr::where(is.list), m, e) else (.) %>% dplyr::select(! dplyr::where(is.list), e)}
 
             tune$log <- paste0(tune$log
                                , "\n"
@@ -534,7 +534,7 @@
                             )
 
             tune$tune_envelope <- tune$tune_envelope %>%
-              {if(any(keep_model, unique(tune$tune_envelope$tunes) == 1)) (.) %>% dplyr::select(! dplyr::where(is.list), m, e) else (.) %>% dplyr::select(! dplyr::where(is.list), e)}
+              {if(any(keep_model, isTRUE(unique(tune$tune_envelope$single_fold)))) (.) %>% dplyr::select(! dplyr::where(is.list), m, e) else (.) %>% dplyr::select(! dplyr::where(is.list), e)}
 
             tune$log <- paste0(tune$log
                                , "\n"
@@ -686,7 +686,7 @@
                                             , .progress = "evaluate rf"
                                             )
                             ) %>%
-              {if(any(keep_model, unique(tune_rf$tunes) == 1)) (.) %>%
+              {if(any(keep_model, isTRUE(unique(tune_rf$single_fold)))) (.) %>%
                   dplyr::select(! dplyr::where(is.list), m, e) else (.) %>%
                   dplyr::select(! dplyr::where(is.list), e)
               }
