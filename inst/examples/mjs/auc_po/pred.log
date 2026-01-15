@@ -1,8 +1,0 @@
-mjs
-predict process started at 2026-01-12 13:02:52.239358
-predict for mjs from maxnet model with arguments: fc = lq, rm = 3
- out file will be pred.tif
-predict finished in 0.01 minutes
-predict mask for mjs
-predict mask created in 0 minutes
-predict process finished. elapsed time: 0.03 minutes

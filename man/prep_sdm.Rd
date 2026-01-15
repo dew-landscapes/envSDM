@@ -27,7 +27,7 @@ prep_sdm(
   folds = 5,
   spatial_folds = TRUE,
   repeats = 1,
-  block_div = seq(2.1, by = 0.1, length.out = repeats),
+  folds_div = seq(2.1, by = 0.1, length.out = folds),
   max_repeat_corr = 0.9,
   min_fold_n = 8,
   hold_prop = 0.3,
@@ -107,13 +107,13 @@ not enough presences to support more than one fold.}
 
 \item{repeats}{Numeric. Number of repeated cross validations.}
 
-\item{block_div}{Numeric. The square root of the predict area is divided
+\item{folds_div}{Numeric. The square root of the predict area is divided
 by this value before being passed to the \code{block_dist} argument of
-\code{blockCV::cv_spatial()}. If using repeated cross validation, \code{block_div}
-must be of the same length as \code{1:repeats}.}
+\code{blockCV::cv_spatial()}. If using cross validation, \code{fold_div}
+must be of the same length as \code{1:folds}.}
 
 \item{max_repeat_corr}{Numeric. Maximum correlation allowed between the folds
-of any two spatial blocks before one of the correlated blocks will be set to
+of any two spatial folds before one of the correlated folds will be set to
 non-spatial and the folds reallocated. Correlation tested on presences only.}
 
 \item{min_fold_n}{Numeric. Sets both minimum number of presences, and,
@@ -173,13 +173,13 @@ generate the 'mask'ed output
 \item sf of cell centroids representing unique cell centroids for background
 points
 }
-\item blocks
+\item folds
 \itemize{
 \item data.frame with columns:
 \itemize{
 \item \code{pa}: presence (1) or absence/background (0)
 \item \code{x} and \code{y}: cell centroids for each presence and absence
-\item \code{block}: the spatial block to which the row belongs
+\item \code{fold}: the spatial fold to which the row belongs
 \item a column with values for each of \code{predictors} at \code{x} and \code{y}
 }
 }
@@ -314,12 +314,12 @@ against which background points are assigned.
   # Background points
   if(require("tmap")) {
 
-    blocks <- prep$bg_points \%>\%
+    folds <- prep$bg_points \%>\%
       dplyr::inner_join(prep$training |>
                          dplyr::select(rep, training) |>
                          tidyr::unnest(cols = c(training))
                        ) |>
-      dplyr::mutate(block = factor(block) # for map
+      dplyr::mutate(fold = factor(fold) # for map
                     , rep = paste0("rep: ", rep)
                     ) \%>\%
       sf::st_as_sf(coords = c("x", "y")
@@ -327,8 +327,8 @@ against which background points are assigned.
                    )
 
 
-    tm_shape(blocks) +
-      tm_dots(fill = "block"
+    tm_shape(folds) +
+      tm_dots(fill = "fold"
               , fill.scale = tm_scale(values = "viridis")
               ) +
       tm_facets(by = "rep") +

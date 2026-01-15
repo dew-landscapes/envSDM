@@ -101,12 +101,12 @@
 
       # tune_args------
       tune_args <- tune$tune_mean |>
-        dplyr::filter(tunes >= quantile(tunes, probs = 0.9)) |> # don't want too many tunes to have failed
+        dplyr::filter(tunes >= 0.9 * max(tunes, na.rm = TRUE)) |> # don't want too many tunes to have failed
         dplyr::arrange(desc(!!rlang::ensym(use_metric)))
 
       if(max(unique(tune_args$tunes)) == 1) {
 
-        # If only 1 repeat/block, no need to run again
+        # If only 1 repeat/fold, no need to run again
         full_run <- tune
 
         full_run$finished <- TRUE

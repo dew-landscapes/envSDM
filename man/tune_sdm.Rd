@@ -79,7 +79,7 @@ or equal to \code{limit_spat_mtry}.}
 list column in the returned tibble (as column \code{m})}
 
 \item{best_run}{Logical. If \code{TRUE} this alters the behaviour of the
-\code{tune_sdm()} by, well, not tuning. :). Sets all blocks to the same value so
+\code{tune_sdm()} by, well, not tuning. :). Sets all folds to the same value so
 no cross-validation.}
 
 \item{metrics_df}{Dataframe. Defines which metrics to use when deciding on
@@ -131,8 +131,8 @@ Tune, and evaluate, species distribution models
                               , mtry = c(1:3)
                               , nodesize = c(1, 2, 3)
                               , limit_p = 3
-                              , use_metrics = c("auc_po", "CBI_rescale", "IMAE", "or10")
-                              #, force_new = TRUE
+                              , use_metrics = c("auc_po", "CBI_rescale", "IMAE")
+                              , force_new = TRUE
                               )
               )
 

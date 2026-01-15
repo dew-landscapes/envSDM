@@ -40,7 +40,7 @@
 #' @param keep_model Logical. If `TRUE` the model results will be appended as a
 #' list column in the returned tibble (as column `m`)
 #' @param best_run Logical. If `TRUE` this alters the behaviour of the
-#' `tune_sdm()` by, well, not tuning. :). Sets all blocks to the same value so
+#' `tune_sdm()` by, well, not tuning. :). Sets all folds to the same value so
 #' no cross-validation.
 #' @param metrics_df Dataframe. Defines which metrics to use when deciding on
 #' 'good' SDMs.
@@ -167,7 +167,7 @@
 
         ## setup ------
 
-        prep$training <- prep$training |>
+        training <- prep$training |>
           dplyr::mutate(nobs = purrr::map_int(training
                                               , \(x) x |>
                                                 dplyr::filter(pa == 1) |>
@@ -179,21 +179,24 @@
 
         if(best_run) {
 
-          prep$training <- prep$training |>
+          training <- training |>
             dplyr::slice(1) |>
             dplyr::mutate(training = purrr::map(training
                                                 , \(x) x |>
-                                                  dplyr::mutate(old_block = block
-                                                                , block = 1
+                                                  dplyr::mutate(old_fold = fold
+                                                                , fold = 1
                                                                 )
                                                 )
+                          , testing = list(prep$testing |>
+                                             dplyr::mutate(fold = 1)
+                                           )
                           )
 
         }
 
-        prep$training <- prep$training |>
-          dplyr::mutate(single_block = purrr::map_lgl(training
-                                                      , \(x) if(length(unique(x$block[x$pa == 1])) == 1) TRUE else FALSE
+        training <- training |>
+          dplyr::mutate(single_fold = purrr::map_lgl(training
+                                                      , \(x) if(length(unique(x$fold[x$pa == 1])) == 1) TRUE else FALSE
                                                       )
                         )
 
@@ -237,12 +240,12 @@
                            , m
                            )
 
-        start_df <- prep$training |>
-          dplyr::mutate(used_block = purrr::map(training
-                                                 , \(x) unique(x$block)
+        start_df <- training |>
+          dplyr::mutate(used_fold = purrr::map(training
+                                                 , \(x) unique(x$fold)
                                                  )
                         ) |>
-          tidyr::unnest(cols = c(used_block)) |>
+          tidyr::unnest(cols = c(used_fold)) |>
           dplyr::mutate(p = purrr::map(training
                                        , \(x) x$pa
                                        )
@@ -250,11 +253,11 @@
                                             , \(x) x |>
                                               dplyr::select(tidyselect::any_of(prep$reduce_env$env_cols))
                                             )
-                        , ids = purrr::pmap(list(used_block
+                        , ids = purrr::pmap(list(used_fold
                                                  , training
-                                                 , single_block
+                                                 , single_fold
                                                  )
-                                            , \(x, y, z) if(!z) y$block != x else y$block == x
+                                            , \(x, y, z) if(!z) y$fold != x else y$fold == x
                                             )
                         , pa_train = purrr::map2(ids
                                                  , p
@@ -264,19 +267,19 @@
                                                    , data
                                                    , \(a, b) b[a,]
                                                    )
-                        , p_data_test = purrr::map2(training
-                                                    , used_block
+                        , p_data_test = purrr::map2(if(best_run) testing else training
+                                                    , used_fold
                                                     , \(a, b) a %>%
                                                       dplyr::filter(pa == 1
-                                                                    , block == b
+                                                                    , fold == b
                                                                     ) |>
                                                       as.data.frame()
                                                    )
-                        , a_data_test = purrr::map2(training
-                                                    , used_block
+                        , a_data_test = purrr::map2(if(best_run) testing else training
+                                                    , used_fold
                                                     , \(a, b) a %>%
                                                       dplyr::filter(pa == 0
-                                                                    , block == b
+                                                                    , fold == b
                                                                     ) |>
                                                       as.data.frame()
                                                     )
@@ -300,7 +303,11 @@
 
           # testing set --------
           start_df <- start_df |>
-            dplyr::left_join(prep$testing) |>
+            dplyr::mutate(testing = list(prep$testing |>
+                                           dplyr::select(- hold_prop)
+                                         )
+                          , hold_prop = unique(prep$testing$hold_prop)
+                          ) |>
             dplyr::mutate(p_data_test = purrr::map(testing
                                                    , \(x) x %>%
                                                      dplyr::filter(pa == 1) %>%
@@ -460,7 +467,7 @@
             if(sum(null_e)) {
 
               null_e_tune <- envFunc::vec_to_sentence(unique(tune$tune_maxnet$tune_args[null_e]))
-              blocks <- envFunc::vec_to_sentence(unique(tune$tune_maxnet$k[null_e]))
+              folds <- envFunc::vec_to_sentence(unique(tune$tune_maxnet$k[null_e]))
 
               m <- paste0("warning. tune_args: "
                                         , null_e_tune
@@ -468,8 +475,8 @@
                                         , sum(null_e)
                                         , " out of "
                                         , nrow(tune$tune_maxnet)
-                                        , " total tunes) in block(s) "
-                                        , blocks
+                                        , " total tunes) in fold(s) "
+                                        , folds
                                         )
 
               message(m)
@@ -572,7 +579,7 @@
             ### mtry ------
             use_mtry <- if(isTRUE(mtry)) {
 
-              if(! all(prep$training$spatial_folds)) {
+              if(! all(training$spatial_folds)) {
 
                 # rf default for classification
                 seq(1, floor(sqrt(length(preds$rf))), 1)
@@ -699,7 +706,7 @@
 
       } else {
 
-        stop("no 'blocks' element in supplied prep")
+        stop("no 'folds' element in supplied prep")
 
       }
 
@@ -731,9 +738,9 @@
 
         if(nrow(tunes) > 0) {
 
-          keeps <- c("algo", "spatial", "tune_args", "tunes"
+          keeps <- c("algo", "spatial", "tune_args", "tunes", "reps"
                      , "fc", "rm"
-                     , "trees", "nodesize", "mtry"
+                     , "trees", "nodesize", "mtry", "hold_prop", "evaluation"
                      )
 
           metrics_df <- metrics_df %>%
@@ -752,9 +759,9 @@
                             ) %>%
               tidyr::unnest(cols = c(stats, tr)) %>%
               dplyr::group_by(dplyr::across(tidyselect::any_of(keeps))) %>%
-              dplyr::summarise(dplyr::across(dplyr::where(is.numeric), mean)
+              dplyr::summarise(reps = dplyr::n_distinct(rep)
                                , tunes = dplyr::n()
-                               , reps = dplyr::n_distinct(rep)
+                               , dplyr::across(dplyr::where(is.numeric), mean)
                                ) %>%
               dplyr::ungroup()
 
@@ -766,8 +773,14 @@
               dplyr::mutate(combo = purrr::pmap_dbl(dplyr::across(tidyselect::any_of(metrics_df$metric[metrics_df$summary_mets]))
                                                     , prod
                                                     )
+                            , evaluation = dplyr::case_when(tunes == 1 & reps == 1 & n_p_test == n_p_train & hold_prop == 0 ~ "full model: internal"
+                                                            , tunes == 1 & reps == 1 & n_p_test != n_p_train & hold_prop != 0 ~ "full model: holdout"
+                                                            , tunes > 1 & reps > 1 ~ "repeated cross fold"
+                                                            , tunes > 1 & reps == 1 ~ "cross fold"
+                                                            , TRUE ~ "unsure"
+                                                            )
                             ) |>
-              dplyr::mutate(best = combo == max(combo)) |>
+              dplyr::mutate(best = combo == max(combo, na.rm = TRUE)) |>
               dplyr::select(tidyselect::any_of(keeps)
                             , tidyselect::any_of(metrics_df$metric)
                             , combo, best
@@ -780,6 +793,9 @@
           if(!best_run) {
 
             tune$log <- paste0(tune$log
+                               , "\n"
+                               , "evaluation type is "
+                               , unique(tune$tune_mean$evaluation)
                                , "\n"
                                , "based on the product of metrics: "
                                , stringr::str_flatten_comma(metrics_df$metric[metrics_df$summary_mets])

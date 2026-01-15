@@ -72,8 +72,8 @@
 
       e@stats$auc_po <- e@stats$auc
       e@stats$auc_po_flexsdm <- mean(e_fsdm$AUC, na.rm = TRUE)
-      e@stats$CBI <- mean(e_fsdm$BOYCE, na.rm = TRUE)
-      e@stats$CBI_rescale <- (e@stats$CBI + 1) / 2
+      e@stats$CBI <- if(is.na(e_fsdm$BOYCE)) -1 else mean(e_fsdm$BOYCE, na.rm = TRUE)
+      e@stats$CBI_rescale <- scales::rescale(e@stats$CBI, to = c(0, 1), from = c(-1, 1))
       e@stats$IMAE <- mean(e_fsdm$IMAE, na.rm = TRUE)
 
       # 10% omission rate

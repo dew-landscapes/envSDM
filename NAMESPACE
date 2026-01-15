@@ -2,9 +2,9 @@
 
 export("%>%")
 export(evaluate_sdm)
-export(fix_blocks)
+export(fix_folds)
 export(make_predict_boundary)
-export(non_spatial_blocks)
+export(non_spatial_folds)
 export(png_from_preds)
 export(png_from_tif)
 export(predict_sdm)

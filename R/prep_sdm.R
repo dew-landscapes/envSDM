@@ -61,12 +61,12 @@
 #' to non-spatial cv if presences per fold do not meet `min_fold_n` or there are
 #' not enough presences to support more than one fold.
 #' @param repeats Numeric. Number of repeated cross validations.
-#' @param block_div Numeric. The square root of the predict area is divided
+#' @param folds_div Numeric. The square root of the predict area is divided
 #' by this value before being passed to the `block_dist` argument of
-#' `blockCV::cv_spatial()`. If using repeated cross validation, `block_div`
-#' must be of the same length as `1:repeats`.
+#' `blockCV::cv_spatial()`. If using cross validation, `fold_div`
+#' must be of the same length as `1:folds`.
 #' @param max_repeat_corr Numeric. Maximum correlation allowed between the folds
-#' of any two spatial blocks before one of the correlated blocks will be set to
+#' of any two spatial folds before one of the correlated folds will be set to
 #' non-spatial and the folds reallocated. Correlation tested on presences only.
 #' @param min_fold_n Numeric. Sets both minimum number of presences, and,
 #' by default, the minimum number of presences required for a model.
@@ -106,11 +106,11 @@
 #' * bg_points:
 #'    + sf of cell centroids representing unique cell centroids for background
 #'    points
-#' * blocks
+#' * folds
 #'     + data.frame with columns:
 #'       + `pa`: presence (1) or absence/background (0)
 #'       + `x` and `y`: cell centroids for each presence and absence
-#'       + `block`: the spatial block to which the row belongs
+#'       + `fold`: the spatial fold to which the row belongs
 #'       +  a column with values for each of `predictors` at `x` and `y`
 #' * spatial_folds_used:
 #'     + logical indicating if spatial folds were used. This may differ from
@@ -147,7 +147,7 @@
                        , folds = 5
                        , spatial_folds = TRUE
                        , repeats = 1
-                       , block_div = seq(2.1, by = 0.1, length.out = repeats)
+                       , folds_div = seq(2.1, by = 0.1, length.out = folds)
                        , max_repeat_corr = 0.9
                        , min_fold_n = 8
                        , hold_prop = 0.3
@@ -714,7 +714,7 @@
         # env--------
         start_env <- Sys.time()
 
-        run <- if(exists("blocks", prep)) force_new else TRUE
+        run <- if(exists("folds", prep)) force_new else TRUE
 
         if(run) {
 
@@ -770,13 +770,13 @@
 
         }
 
-        # blocks------
+        # folds------
 
         if(!prep$abandoned) {
 
-          start_blocks <- Sys.time()
+          start_folds <- Sys.time()
 
-          run <- if(exists("blocks", prep)) force_new else TRUE
+          run <- if(exists("folds", prep)) force_new else TRUE
 
           if(run) {
 
@@ -787,38 +787,37 @@
             ## repeats adj -----
             repeats_adj <- if(n_p / min_fold_n < repeats) floor(n_p / min_fold_n) else repeats
 
-            prep$testing <- tibble::tibble(rep = 1:repeats_adj, testing = list(tibble::tibble(pa = 0)))
+            prep$testing <- tibble::tibble(pa = 0)
             counter <- 0
             hold_prop_adj <- hold_prop
 
             # Try to get min_fold_n presences within prep$testing
             if(hold_prop > 0) {
 
-              while(any(all(prep$testing$testing |> purrr::map(\(x) sum(x$pa == 1)) < min_fold_n), hold_prop_adj < 0.5)) {
+              while(any(sum(prep$testing$pa == 1) < min_fold_n, hold_prop_adj >= 0.5)) {
 
-                prep$testing <- prep$testing |>
-                  dplyr::mutate(testing = purrr::map(1:repeats_adj
-                                                     , \(x) to_split %>%
-                                                       dplyr::slice_sample(prop = hold_prop_adj, by = pa)
-                                                     )
-                                )
+                hold_prop_adj <- hold_prop_adj + counter * 0.01
 
-                hold_prop_adj <- hold_prop_adj + 0.01
+                prep$testing <- to_split %>%
+                  dplyr::slice_sample(prop = hold_prop_adj, by = pa)
+
+                counter <- counter + 1
 
               }
 
             } else {
 
-              prep$testing <- prep$testing |>
-                dplyr::slice(1) |>
-                dplyr::mutate(testing = list(to_split))
+              prep$testing <- to_split
 
             }
 
-            if(hold_prop_adj > hold_prop + 0.01) {
+            prep$testing <- prep$testing |>
+              dplyr::mutate(hold_prop = hold_prop_adj)
+
+            if(hold_prop_adj > hold_prop) {
 
               m <- paste0("Warning. hold_prop adjusted up to "
-                          , hold_prop_adj - 0.01
+                          , hold_prop_adj
                           , " (from "
                           , hold_prop
                           , ") to acheive min_fold_n of "
@@ -835,23 +834,15 @@
 
             }
 
-            # remove any tests that didn't reach min_fold_n
-            if(any(prep$testing$testing |> purrr::map(\(x) sum(x$pa == 1)) < min_fold_n)) {
-
-              prep$testing <- prep$testing |>
-                dplyr::filter(purrr::map_lgl(testing, \(x) sum(x$pa == 1) > min_fold_n))
-
-            }
-
             # If never enough presences in test - abandon
-            if(all(prep$testing$testing |> purrr::map(\(x) sum(x$pa == 1)) < min_fold_n)) {
+            if(sum(prep$testing$pa == 1) < min_fold_n) {
 
               m <- paste0("ERROR: not enough presences ("
                           , n_p
                           , ") to acheive min_fold_n ("
                           , min_fold_n
                           , ") in the test split with hold_prop of "
-                          , hold_prop_adj - 0.01
+                          , hold_prop_adj
                           , " (adjusted up from "
                           , hold_prop
                           , ")"
@@ -874,30 +865,24 @@
 
         if(!prep$abandoned) {
 
-          if(hold_prop > 0) {
+          to_split <- to_split |>
+            dplyr::anti_join(prep$testing |>
+                               dplyr::distinct(id)
+                             )
 
-            prep$training <- prep$testing |>
-              dplyr::mutate(training = purrr::map(testing, \(x) to_split |> dplyr::anti_join(x))) |>
-              dplyr::select(rep, training)
+          if(! as.logical(nrow(to_split))) to_split <- prep$testing
 
-          } else {
-
-            prep$training <- tibble::tibble(rep = 1:repeats_adj) |>
-              dplyr::cross_join(prep$testing |>
-                                  dplyr::select(- rep, training = testing)
-                                )
-
-          }
-
-          prep$training <- prep$training |>
+          prep$training <- tibble::tibble(rep = 1:repeats_adj
+                                          , training = list(to_split)
+                                          ) |>
             dplyr::mutate(spatial_folds = dplyr::if_else(k_folds == 1, FALSE, spatial_folds))
 
           rm(to_split)
 
           text_one <- paste0("test/training split\n "
-                             , purrr::map_chr(prep$testing$testing, \(x) as.character(nrow(x)))
+                             , as.character(nrow(prep$testing))
                              , " test data, including "
-                             , purrr::map_chr(prep$testing$testing, \(x) as.character(sum(x$pa == 1)))
+                             , as.character(sum(prep$testing$pa == 1))
                              , " presences."
                              )
 
@@ -917,7 +902,10 @@
                              , text
                              )
 
-          if(hold_prop == 0) {
+          if(any(hold_prop == 0
+                 , if(nrow(prep$training) == 1) prep$training$single_fold[[1]] else FALSE
+                 )
+             ) {
 
             prep$log <- paste0(prep$log
                                , "\n"
@@ -927,14 +915,10 @@
 
           }
 
-        }
-
-        if(!prep$abandoned) {
-
           if(k_folds > 1) {
 
-            ## spatial ------
-            safe_cv_spatial <- purrr::safely(blockCV::cv_spatial)
+          ## spatial ------
+          safe_cv_spatial <- purrr::safely(blockCV::cv_spatial)
 
             prep$training <- prep$training |>
               dplyr::mutate(point_sf = purrr::map(training
@@ -944,8 +928,8 @@
                                                                  , crs = sf::st_crs(prep_preds[[1]])
                                                                  )
                                                   )
-                            , block_div = block_div[1:nrow(prep$training)]
-                            , block_dist = purrr::map_dbl(block_div
+                            , folds_div = folds_div[1:nrow(prep$training)]
+                            , fold_dist = purrr::map_dbl(folds_div
                                                           , \(x) prep$predict_boundary %>%
                                                             sf::st_area() %>%
                                                             as.numeric() %>%
@@ -953,18 +937,21 @@
                                                             `/` (x)
                                                           )
                             , cv_spatial = purrr::map2(point_sf
-                                                       , block_dist
-                                                       , \(x, y) safe_cv_spatial(x
-                                                                                 , column = "pa"
-                                                                                 , k = k_folds
-                                                                                 , size = y
-                                                                                 , iteration = 200
-                                                                                 , selection = "random"
-                                                                                 , extend = 0.5
-                                                                                 , progress = FALSE
-                                                                                 , report = FALSE
-                                                                                 , plot = FALSE
-                                                                                 )
+                                                       , fold_dist
+                                                       , \(x, y) suppressWarnings(
+                                                         # The warnings are dealt with below by 'fix_folds'
+                                                         safe_cv_spatial(x
+                                                                         , column = "pa"
+                                                                         , k = k_folds
+                                                                         , size = y
+                                                                         , iteration = 200
+                                                                         , selection = "random"
+                                                                         , extend = 0.5
+                                                                         , progress = FALSE
+                                                                         , report = FALSE
+                                                                         , plot = FALSE
+                                                                         )
+                                                         )
                                                        )
                             , error = purrr::map(cv_spatial, "error")
                             )
@@ -985,43 +972,46 @@
 
             }
 
-            ### extract blocks from cv_spatial --------
+            ### extract folds from cv_spatial --------
             prep$training <- prep$training |>
               dplyr::filter(purrr::map_lgl(error, \(x) is.null(x))) |> # remove errors
-              dplyr::mutate(blocks = purrr::map(cv_spatial, \(x) x$result$folds_ids))
+              dplyr::mutate(folds = purrr::map(cv_spatial, \(x) x$result$folds_ids))
 
             ### spatial cv correlation --------
             if(nrow(prep$training) > 1) {
 
               reps <- prep$training$rep
 
-              check_pres_corr <- purrr::map2(prep$training$blocks
+              check_pres_corr <- purrr::map2(prep$training$folds
                                              , prep$training$training
                                              , \(x, y) x[y$pa == 1]
                                              ) |>
                 purrr::set_names(reps)
 
-              # catch any blocks coming out of blockCV::cv_spatial that have all the presences in just one fold/block
-              reps_single_block <- purrr::map_lgl(check_pres_corr
+              # catch any folds coming out of blockCV::cv_spatial that have all the presences in just one fold
+              reps_single_fold <- purrr::map_lgl(check_pres_corr
                                                   , \(x) length(table(x)) == 1
                                                   ) |>
                 purrr::set_names(reps)
 
-              # run correlation between repeats (if there are at least 2 repeats with presences split among folds/blocks)
-              if(length(reps) - sum(reps_single_block) > 1) {
+              # run correlation between repeats (if there are at least 2 repeats with presences split among folds/folds)
+              if(length(reps) - sum(reps_single_fold) > 1) {
 
-                prep_block_corr <- stats::cor(tibble::as_tibble(check_pres_corr[! reps_single_block], .name_repair = "unique"))
+                prep_fold_corr <- stats::cor(tibble::as_tibble(check_pres_corr[! reps_single_fold]
+                                                               , .name_repair = "unique_quiet"
+                                                               )
+                                             )
 
-                block_corr_drop <- caret::findCorrelation(prep_block_corr
+                fold_corr_drop <- caret::findCorrelation(prep_fold_corr
                                                           , cutoff = max_repeat_corr
                                                           , names = TRUE
                                                           )
 
-              } else block_corr_drop <- NULL
+              } else fold_corr_drop <- NULL
 
-              # combine single fold/block repeats and correlated repeats
-              change_to_non_spatial <- c(names(reps_single_block[reps_single_block])
-                                         , block_corr_drop
+              # combine single fold repeats and correlated repeats
+              change_to_non_spatial <- c(names(reps_single_fold[reps_single_fold])
+                                         , fold_corr_drop
                                          ) |>
                 unique() |>
                 as.numeric() |>
@@ -1040,17 +1030,17 @@
           ## non-spatial option -------
           prep$training <- prep$training %>%
             dplyr::mutate(nsb = purrr::map(training
-                                           , \(x) non_spatial_blocks(k_folds
+                                           , \(x) non_spatial_folds(k_folds
                                                                      , x
                                                                      )
                                            )
-                          , blocks = if(!"blocks" %in% names(.)) {
+                          , folds = if(!"folds" %in% names(.)) {
                             nsb
                           } else {
-                            blocks
+                            folds
                           }
-                          , blocks = purrr::pmap(list(spatial_folds
-                                                     , blocks
+                          , folds = purrr::pmap(list(spatial_folds
+                                                     , folds
                                                      , nsb
                                                      )
                                                 , \(x, y, z) {
@@ -1063,15 +1053,15 @@
 
           ### too few p --------
           prep$training <- prep$training |>
-            dplyr::mutate(blocks = purrr::map2(blocks, training
-                                                 , \(x, y) fix_blocks(x, y$pa, min_fold_n)
+            dplyr::mutate(folds = purrr::map2(folds, training
+                                                 , \(x, y) fix_folds(x, y$pa, min_fold_n)
                                                  )
-                          , single_fold = purrr::map_lgl(blocks
+                          , single_fold = purrr::map_lgl(folds
                                                          , \(x) length(unique(x)) == 1
                                                          )
                           # again, if only one fold left, go to non-spatial
-                          , blocks = purrr::pmap(list(single_fold
-                                                     , blocks
+                          , folds = purrr::pmap(list(single_fold
+                                                     , folds
                                                      , nsb
                                                      )
                                                 , \(x, y, z) {
@@ -1084,27 +1074,27 @@
 
           prep$training <- prep$training |>
             dplyr::mutate(training = purrr::map2(training
-                                                 , blocks
+                                                 , folds
                                                  , \(x, y) x |>
-                                                   dplyr::bind_cols(tibble::tibble(block = y))
+                                                   dplyr::bind_cols(tibble::tibble(fold = y))
                                                  )
                           )
 
           # Find correlation for log
-          if(length(prep$training$blocks) > 1) {
+          if(length(prep$training$folds) > 1) {
 
-            check_pres_corr <- purrr::map2(prep$training$blocks
+            check_pres_corr <- purrr::map2(prep$training$folds
                                            , prep$training$training
                                            , \(x, y) x[y$pa == 1]
                                            )
 
-            prep$prep_block_corr <- stats::cor(tibble::as_tibble(check_pres_corr, .name_repair = "unique"))
+            prep$prep_fold_corr <- stats::cor(tibble::as_tibble(check_pres_corr, .name_repair = "unique_quiet"))
 
-            block_corr <- prep$prep_block_corr
+            fold_corr <- prep$prep_fold_corr
 
-            diag(block_corr) <- NA
+            diag(fold_corr) <- NA
 
-            max_corr <- max(block_corr, na.rm = TRUE)
+            max_corr <- max(fold_corr, na.rm = TRUE)
 
           }
 
@@ -1115,7 +1105,7 @@
                                       , ", spatial folds = "
                                       , prep$training$spatial_folds
                                       , ". Folds = "
-                                      , purrr::map(prep$training$blocks
+                                      , purrr::map(prep$training$folds
                                                    , \(x) x |>
                                                      unique() |>
                                                      length() |>
@@ -1124,18 +1114,18 @@
                                       , " with n presences = "
                                       , purrr::map(prep$training$training
                                                    , \(x) x |>
-                                                     dplyr::count(block, pa) |>
+                                                     dplyr::count(fold, pa) |>
                                                      dplyr::filter(pa == 1) |>
                                                      dplyr::pull(n) |>
                                                      stringr::str_flatten_comma()
                                                    )
                                       , collapse = "\n"
                                       )
-                             , if(length(prep$training$blocks) > 1) paste0("\n Maximum correlation between repeats (presences only): "
+                             , if(length(prep$training$folds) > 1) paste0("\n Maximum correlation between repeats (presences only): "
                                                                            , round(max_corr, 3)
                                                                            )
                              , ".\nFolds done in "
-                             , round(difftime(Sys.time(), start_blocks, units = "mins"), 2)
+                             , round(difftime(Sys.time(), start_folds, units = "mins"), 2)
                              , " minutes"
                              )
 
@@ -1155,7 +1145,7 @@
                                                       , imp_col = "1"
                                                       , thresh_corr = reduce_env_thresh_corr
                                                       , quant_rf_imp = reduce_env_quant_rf_imp
-                                                      , remove_always = c(pres_x, pres_y, "x", "y", "pa", "block", "cell", "id")
+                                                      , remove_always = c(pres_x, pres_y, "x", "y", "pa", "fold", "cell", "id")
                                                       )
 
               prep$log <- paste0(prep$log
@@ -1183,9 +1173,9 @@
 
           prep$finished <- TRUE
 
-      }
+        }
 
-        } else {
+      } else {
 
         prep$abandoned <- TRUE
 

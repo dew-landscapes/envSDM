@@ -2,11 +2,14 @@
   out_dir <- file.path(system.file(package = "envSDM"), "examples")
 
   # data ---------
-  data <- fs::dir_ls(out_dir, regexp = "\\.csv$") |>
+  data <- fs::dir_ls(out_dir, regexp = "\\.csv$")[[1]] |>
     tibble::enframe(name = NULL, value = "path") |>
     dplyr::mutate(taxa = gsub("\\.csv", "", basename(path))
                   , presence = purrr::map(path, rio::import, setclass = "tibble", trust = TRUE)
-                  , taxa_dir = fs::path(out_dir, taxa)
+                  ) |>
+    dplyr::cross_join(tibble::tibble(hold_prop = c(0, 0.3))) |>
+    dplyr::cross_join(tibble::tibble(repeats = c(1, 5))) |>
+    dplyr::mutate(taxa_dir = fs::path(out_dir, paste0(taxa, "__", hold_prop, "__", repeats))
                   , out_mcp = fs::path(taxa_dir, "mcp.parquet")
                   )
 
@@ -37,8 +40,9 @@
                     , data$taxa_dir
                     , data$presence
                     , data$out_mcp
+                    , data$hold_prop
                     )
-               , function(a, b, c, d) prep_sdm(this_taxa = a
+               , function(a, b, c, d, e) prep_sdm(this_taxa = a
                                                , out_dir = b
                                                , presence = c
                                                , pres_x = "cell_long"
@@ -49,7 +53,7 @@
                                                , limit_buffer = 10000
                                                , folds = 5
                                                , repeats = 5
-                                               , hold_prop = 0
+                                               , hold_prop = e
                                                , dens_res = 1000 # ignored as decimal degrees preds
                                                , reduce_env_thresh_corr = 0.95
                                                , reduce_env_quant_rf_imp = 0.2
@@ -97,12 +101,12 @@
   # Background points
   if(require("tmap")) {
 
-    blocks <- prep$bg_points %>%
+    folds <- prep$bg_points %>%
       dplyr::inner_join(prep$training |>
                          dplyr::select(rep, training) |>
                          tidyr::unnest(cols = c(training))
                        ) |>
-      dplyr::mutate(block = factor(block) # for map
+      dplyr::mutate(fold = factor(fold) # for map
                     , rep = paste0("rep: ", rep)
                     ) %>%
       sf::st_as_sf(coords = c("x", "y")
@@ -110,8 +114,8 @@
                    )
 
 
-    tm_shape(blocks) +
-      tm_dots(fill = "block"
+    tm_shape(folds) +
+      tm_dots(fill = "fold"
               , fill.scale = tm_scale(values = "viridis")
               ) +
       tm_facets(by = "rep") +
