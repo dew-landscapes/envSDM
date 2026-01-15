@@ -153,7 +153,7 @@
               , out_dir
               )
 
-      # tune -----
+      # setup -----
       if(exists("training", where = prep)) {
 
         tune$log <- paste0(tune$log
@@ -164,8 +164,6 @@
                            , "\ntune start "
                            , start_time
                            )
-
-        ## setup ------
 
         training <- prep$training |>
           dplyr::mutate(nobs = purrr::map_int(training
@@ -490,7 +488,7 @@
 
             tune$tune_maxnet <- tune$tune_maxnet %>%
               dplyr::filter(purrr::map_lgl(e, \(x) ! is.null(x))) %>%
-              {if(any(keep_model, nrow(tune$tune_maxnet) == 1)) (.) %>% dplyr::select(! dplyr::where(is.list), m, e) else (.) %>% dplyr::select(! dplyr::where(is.list), e)}
+              {if(any(keep_model, unique(tune$tune_maxnet$tunes) == 1)) (.) %>% dplyr::select(! dplyr::where(is.list), m, e) else (.) %>% dplyr::select(! dplyr::where(is.list), e)}
 
             tune$log <- paste0(tune$log
                                , "\n"
@@ -536,7 +534,7 @@
                             )
 
             tune$tune_envelope <- tune$tune_envelope %>%
-              {if(any(keep_model, nrow(tune$tune_envelope) == 1)) (.) %>% dplyr::select(! dplyr::where(is.list), m, e) else (.) %>% dplyr::select(! dplyr::where(is.list), e)}
+              {if(any(keep_model, unique(tune$tune_envelope$tunes) == 1)) (.) %>% dplyr::select(! dplyr::where(is.list), m, e) else (.) %>% dplyr::select(! dplyr::where(is.list), e)}
 
             tune$log <- paste0(tune$log
                                , "\n"
@@ -688,7 +686,7 @@
                                             , .progress = "evaluate rf"
                                             )
                             ) %>%
-              {if(any(keep_model, nrow(tune_rf) == 1)) (.) %>%
+              {if(any(keep_model, unique(tune_rf$tunes) == 1)) (.) %>%
                   dplyr::select(! dplyr::where(is.list), m, e) else (.) %>%
                   dplyr::select(! dplyr::where(is.list), e)
               }
