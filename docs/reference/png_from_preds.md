@@ -100,22 +100,16 @@ files
                                          )
                )
 #> [[1]]
-#> /home/nwilloug/temp/RtmprTkVGw/temp_libpath19fa091c7edf0e/envSDM/examples/chg__0/combo/full_run.rds
+#> /home/nwilloug/temp/RtmpO4BWL8/temp_libpathfdac86abd0f83/envSDM/examples/chg__0.3__1/combo/full_run.rds
 #> 
 #> [[2]]
-#> /home/nwilloug/temp/RtmprTkVGw/temp_libpath19fa091c7edf0e/envSDM/examples/chg__0.3/combo/full_run.rds
+#> /home/nwilloug/temp/RtmpO4BWL8/temp_libpathfdac86abd0f83/envSDM/examples/chg__0.3__5/combo/full_run.rds
 #> 
 #> [[3]]
-#> /home/nwilloug/temp/RtmprTkVGw/temp_libpath19fa091c7edf0e/envSDM/examples/chg__0.3__1/combo/full_run.rds
+#> /home/nwilloug/temp/RtmpO4BWL8/temp_libpathfdac86abd0f83/envSDM/examples/chg__0__1/combo/full_run.rds
 #> 
 #> [[4]]
-#> /home/nwilloug/temp/RtmprTkVGw/temp_libpath19fa091c7edf0e/envSDM/examples/chg__0.3__5/combo/full_run.rds
-#> 
-#> [[5]]
-#> /home/nwilloug/temp/RtmprTkVGw/temp_libpath19fa091c7edf0e/envSDM/examples/chg__0__1/combo/full_run.rds
-#> 
-#> [[6]]
-#> /home/nwilloug/temp/RtmprTkVGw/temp_libpath19fa091c7edf0e/envSDM/examples/chg__0__5/combo/full_run.rds
+#> /home/nwilloug/temp/RtmpO4BWL8/temp_libpathfdac86abd0f83/envSDM/examples/chg__0__5/combo/full_run.rds
 #> 
 
 
@@ -162,8 +156,6 @@ files
 
 
 
-
-
   # Best auc--------
   ## run full SDM --------
   data <- data %>%
@@ -184,22 +176,16 @@ files
                                          )
               )
 #> [[1]]
-#> /home/nwilloug/temp/RtmprTkVGw/temp_libpath19fa091c7edf0e/envSDM/examples/chg__0/auc_po/full_run.rds
+#> /home/nwilloug/temp/RtmpO4BWL8/temp_libpathfdac86abd0f83/envSDM/examples/chg__0.3__1/auc_po/full_run.rds
 #> 
 #> [[2]]
-#> /home/nwilloug/temp/RtmprTkVGw/temp_libpath19fa091c7edf0e/envSDM/examples/chg__0.3/auc_po/full_run.rds
+#> /home/nwilloug/temp/RtmpO4BWL8/temp_libpathfdac86abd0f83/envSDM/examples/chg__0.3__5/auc_po/full_run.rds
 #> 
 #> [[3]]
-#> /home/nwilloug/temp/RtmprTkVGw/temp_libpath19fa091c7edf0e/envSDM/examples/chg__0.3__1/auc_po/full_run.rds
+#> /home/nwilloug/temp/RtmpO4BWL8/temp_libpathfdac86abd0f83/envSDM/examples/chg__0__1/auc_po/full_run.rds
 #> 
 #> [[4]]
-#> /home/nwilloug/temp/RtmprTkVGw/temp_libpath19fa091c7edf0e/envSDM/examples/chg__0.3__5/auc_po/full_run.rds
-#> 
-#> [[5]]
-#> /home/nwilloug/temp/RtmprTkVGw/temp_libpath19fa091c7edf0e/envSDM/examples/chg__0__1/auc_po/full_run.rds
-#> 
-#> [[6]]
-#> /home/nwilloug/temp/RtmprTkVGw/temp_libpath19fa091c7edf0e/envSDM/examples/chg__0__5/auc_po/full_run.rds
+#> /home/nwilloug/temp/RtmpO4BWL8/temp_libpathfdac86abd0f83/envSDM/examples/chg__0__5/auc_po/full_run.rds
 #> 
 
   ## predict -------
@@ -225,8 +211,6 @@ files
                 terra::trim() %>%
                 terra::plot()
               )
-
-
 
 
 

@@ -188,22 +188,16 @@ elements:
                               )
               )
 #> [[1]]
-#> /home/nwilloug/temp/RtmprTkVGw/temp_libpath19fa091c7edf0e/envSDM/examples/chg__0/tune.rds
+#> /home/nwilloug/temp/RtmpO4BWL8/temp_libpathfdac86abd0f83/envSDM/examples/chg__0.3__1/tune.rds
 #> 
 #> [[2]]
-#> /home/nwilloug/temp/RtmprTkVGw/temp_libpath19fa091c7edf0e/envSDM/examples/chg__0.3/tune.rds
+#> /home/nwilloug/temp/RtmpO4BWL8/temp_libpathfdac86abd0f83/envSDM/examples/chg__0.3__5/tune.rds
 #> 
 #> [[3]]
-#> /home/nwilloug/temp/RtmprTkVGw/temp_libpath19fa091c7edf0e/envSDM/examples/chg__0.3__1/tune.rds
+#> /home/nwilloug/temp/RtmpO4BWL8/temp_libpathfdac86abd0f83/envSDM/examples/chg__0__1/tune.rds
 #> 
 #> [[4]]
-#> /home/nwilloug/temp/RtmprTkVGw/temp_libpath19fa091c7edf0e/envSDM/examples/chg__0.3__5/tune.rds
-#> 
-#> [[5]]
-#> /home/nwilloug/temp/RtmprTkVGw/temp_libpath19fa091c7edf0e/envSDM/examples/chg__0__1/tune.rds
-#> 
-#> [[6]]
-#> /home/nwilloug/temp/RtmprTkVGw/temp_libpath19fa091c7edf0e/envSDM/examples/chg__0__5/tune.rds
+#> /home/nwilloug/temp/RtmpO4BWL8/temp_libpathfdac86abd0f83/envSDM/examples/chg__0__5/tune.rds
 #> 
 
   # which tune args were best for each taxa using 'combo'?
@@ -215,15 +209,13 @@ elements:
     tidyr::unnest(cols = c(tune_mean)) %>%
     dplyr::filter(best) %>% # used 'combo' to determine 'best' as default in tune_sdm
     dplyr::select(taxa, algo, tune_args, combo, auc_po, IMAE, CBI, max_spec_sens)
-#> # A tibble: 6 × 8
+#> # A tibble: 4 × 8
 #>   taxa        algo  tune_args             combo auc_po  IMAE   CBI max_spec_sens
 #>   <chr>       <chr> <chr>                 <dbl>  <dbl> <dbl> <dbl>         <dbl>
-#> 1 chg__0      rf    tr: 500. mt: 1. ns: 1 0.560  0.808 0.813 0.705         0.295
-#> 2 chg__0.3    rf    tr: 500. mt: 2. ns: 1 0.376  0.665 0.782 0.446         0.255
-#> 3 chg__0.3__1 rf    tr: 500. mt: 1. ns: 1 0.682  0.909 0.812 0.848         0.496
-#> 4 chg__0.3__5 rf    tr: 500. mt: 3. ns: 1 0.531  0.769 0.804 0.717         0.231
-#> 5 chg__0__1   rf    tr: 500. mt: 2. ns: 3 0.528  0.815 0.816 0.589         0.274
-#> 6 chg__0__5   rf    tr: 500. mt: 2. ns: 3 0.533  0.792 0.809 0.662         0.314
+#> 1 chg__0.3__1 rf    tr: 500. mt: 2. ns: 2 0.657  0.875 0.820 0.832         0.551
+#> 2 chg__0.3__5 rf    tr: 500. mt: 1. ns: 3 0.532  0.785 0.805 0.684         0.281
+#> 3 chg__0__1   rf    tr: 500. mt: 1. ns: 1 0.519  0.782 0.811 0.638         0.275
+#> 4 chg__0__5   rf    tr: 500. mt: 1. ns: 2 0.510  0.792 0.814 0.584         0.263
 
   # or best tune args choosing on just auc_po?
   data %>%
@@ -236,13 +228,11 @@ elements:
     dplyr::filter(auc_po == max(auc_po)) %>%
     dplyr::ungroup() %>%
     dplyr::select(taxa, algo, tune_args, auc_po, IMAE, CBI, max_spec_sens)
-#> # A tibble: 6 × 7
+#> # A tibble: 4 × 7
 #>   taxa        algo  tune_args             auc_po  IMAE   CBI max_spec_sens
 #>   <chr>       <chr> <chr>                  <dbl> <dbl> <dbl>         <dbl>
-#> 1 chg__0      rf    tr: 500. mt: 1. ns: 1  0.808 0.813 0.705         0.295
-#> 2 chg__0.3    rf    tr: 500. mt: 1. ns: 1  0.674 0.781 0.426         0.264
-#> 3 chg__0.3__1 rf    tr: 500. mt: 1. ns: 1  0.909 0.812 0.848         0.496
-#> 4 chg__0.3__5 rf    tr: 500. mt: 1. ns: 1  0.779 0.799 0.693         0.253
-#> 5 chg__0__1   rf    tr: 500. mt: 2. ns: 3  0.815 0.816 0.589         0.274
-#> 6 chg__0__5   rf    tr: 500. mt: 2. ns: 3  0.792 0.809 0.662         0.314
+#> 1 chg__0.3__1 rf    tr: 500. mt: 1. ns: 1  0.877 0.817 0.788         0.606
+#> 2 chg__0.3__5 rf    tr: 500. mt: 2. ns: 2  0.786 0.809 0.640         0.263
+#> 3 chg__0__1   rf    tr: 500. mt: 2. ns: 3  0.788 0.811 0.581         0.272
+#> 4 chg__0__5   rf    tr: 500. mt: 1. ns: 2  0.792 0.814 0.584         0.263
 ```
