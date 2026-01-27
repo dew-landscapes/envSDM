@@ -104,7 +104,7 @@
         dplyr::filter(tunes >= 0.9 * max(tunes, na.rm = TRUE)) |> # don't want too many tunes to have failed
         dplyr::arrange(desc(!!rlang::ensym(use_metric)))
 
-      if(max(unique(tune_args$tunes)) == 1) {
+      if(max(unique(tune_args$tunes)) == 1 & "m" %in% names(tune_args)) {
 
         # If only 1 repeat/fold, no need to run again
         full_run <- tune
@@ -126,10 +126,10 @@
                                     , return_val = "object"
                                     , algo = tune_args$algo[[row_id]]
                                     , fc = tune_args$fc[[row_id]]
-                                    , rm = tune_args$rm[[row_id]]
-                                    , trees = tune_args$trees[[row_id]]
-                                    , mtry = tune_args$mtry[[row_id]]
-                                    , nodesize = tune_args$nodesize[[row_id]]
+                                    , rm = as.numeric(tune_args$rm[[row_id]])
+                                    , trees = as.numeric(tune_args$trees[[row_id]])
+                                    , mtry = as.numeric(tune_args$mtry[[row_id]])
+                                    , nodesize = as.numeric(tune_args$nodesize[[row_id]])
                                     , keep_model = TRUE
                                     , best_run = TRUE
                                     , do_gc = do_gc
