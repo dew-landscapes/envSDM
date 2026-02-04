@@ -790,6 +790,7 @@
             prep$testing <- tibble::tibble(pa = 0)
             counter <- 0
             hold_prop_adj <- hold_prop
+            if(hold_prop_adj >= 0.5) hold_prop_adj = 0.49
 
             # Try to get min_fold_n presences within prep$testing
             if(hold_prop > 0) {
