@@ -267,7 +267,7 @@
       ## predictors -----
       if(is_env_pred) {
 
-        pred_names <- envRaster::name_env_tif(tibble::tibble(path = predictors), parse = TRUE) %>%
+        pred_names <- envRaster::name_env_tif(tibble::tibble(path = predictors), parse = TRUE) |>
           dplyr::pull(name)
 
         prep_preds <- terra::rast(predictors)
@@ -391,7 +391,8 @@
 
         prep$predict_boundary <- prep$predict_boundary %>%
           sf::st_intersection(pred_clip %>%
-                                sf::st_transform(crs = sf::st_crs(prep$predict_boundary))
+                                sf::st_transform(crs = sf::st_crs(prep$predict_boundary)) |>
+                                sf::st_make_valid()
                               ) %>%
           sf::st_make_valid()
 
