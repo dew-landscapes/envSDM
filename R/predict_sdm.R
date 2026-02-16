@@ -196,7 +196,18 @@ predict_sdm <- function(prep
       }
 
       ## predict_stack---------
-      terra::window(x) <- terra::ext(terra::vect(prep$predict_boundary))
+      use_boundary <- if(! identical(terra::crs(x), terra::crs(prep$predict_boundary))) {
+
+        prep$predict_boundary |>
+          terra::vect() |>
+          terra::densify(50000) |>
+          sf::st_as_sf() |>
+          sf::st_transform(crs = sf::st_crs(x)) |>
+          sf::st_make_valid()
+
+      } else prep$predict_boundary
+
+      terra::window(x) <- terra::ext(terra::vect(use_boundary))
 
       ## predict--------
       pred_start <-  Sys.time()
@@ -275,7 +286,7 @@ predict_sdm <- function(prep
                       )
 
         terra::mask(p$result
-                    , mask = terra::vect(prep$predict_boundary)
+                    , mask = terra::vect(use_boundary)
                     , filename = pred_file
                     , overwrite = TRUE
                     , ...
