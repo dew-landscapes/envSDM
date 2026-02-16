@@ -413,8 +413,12 @@
         sf::st_as_sf(coords = c("x", "y")
                      , crs = sf::st_crs(prep_preds)
                      ) %>%
-        sf::st_filter(prep$predict_boundary %>%
-                        sf::st_transform(crs = sf::st_crs(prep_preds))
+        sf::st_filter(prep$predict_boundary |>
+                        terra::vect() |>
+                        terra::densify(50000) |>
+                        sf::st_as_sf() |>
+                        sf::st_transform(crs = sf::st_crs(prep_preds)) |>
+                        sf::st_make_valid()
                       )
 
       if(nrow(prep$presence_ras)) {
