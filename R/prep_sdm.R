@@ -362,6 +362,7 @@
           sf::st_as_sf() |>
           sf::st_transform(crs = sf::st_crs(prep_preds[[1]])) %>%
           sf::st_make_valid() %>%
+          dplyr::summarise() |>
           sf::st_intersection(sf::st_bbox(prep_preds) %>%
                                 sf::st_as_sfc() %>%
                                 sf::st_sf()
@@ -389,21 +390,29 @@
       # clip predict_boundary? -------
       if(!is.null(pred_clip)) {
 
-        prep$predict_boundary <- prep$predict_boundary %>%
-          sf::st_intersection(pred_clip %>%
+        prep$predict_boundary <- prep$predict_boundary |>
+          sf::st_cast("POLYGON") |>
+          sf::st_intersection(pred_clip |>
+                                terra::vect() |>
+                                terra::densify(50000) |>
+                                sf::st_as_sf() |>
                                 sf::st_transform(crs = sf::st_crs(prep$predict_boundary)) |>
                                 sf::st_make_valid()
-                              ) %>%
-          sf::st_make_valid()
+                              ) |>
+          sf::st_make_valid() |>
+          dplyr::summarise()
 
       }
 
       # predict_boundary only on env rasters
-      prep$predict_boundary <- prep$predict_boundary %>%
-        sf::st_intersection(sf::st_bbox(prep_preds) %>%
-                              sf::st_as_sfc() %>%
-                              sf::st_sf()
-                            )
+      prep$predict_boundary <- prep$predict_boundary |>
+        sf::st_intersection(sf::st_bbox(prep_preds) |>
+                              sf::st_as_sfc() |>
+                              terra::vect() |>
+                              terra::densify(50000) |>
+                              sf::st_as_sf()
+                            ) |>
+        sf::st_make_valid()
 
 
       # prep$presence_ras clip to predict_boundary ---------
