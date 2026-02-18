@@ -279,6 +279,9 @@
 
       }
 
+      prep$epsg_in <- pres_crs
+      prep$epsg_out <- terra::crs(prep_preds, describe = TRUE)$code
+
       prep$log <- paste0(prep$log
                          , "\n"
                          , length(names(prep_preds))
