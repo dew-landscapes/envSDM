@@ -389,7 +389,7 @@
       # predict_boundary only on env rasters
       prep$predict_boundary <- prep$predict_boundary |>
         sf::st_join(pred_bb, left = FALSE) |>
-        sf::st_intersection(pred_bb) |>
+        sf::st_intersection(pred_bb, dimensions = "polygon") |>
         sf::st_make_valid()
 
       # clip predict_boundary? -------
@@ -400,7 +400,7 @@
           sf::st_make_valid()
 
         prep$predict_boundary <- prep$predict_boundary |>
-          sf::st_intersection(pred_clip) |>
+          sf::st_intersection(pred_clip, dimensions = "polygon") |>
           sf::st_make_valid()
 
       }
