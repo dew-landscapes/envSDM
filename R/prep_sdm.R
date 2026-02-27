@@ -279,6 +279,7 @@
 
       }
 
+      ## epsg ----------
       prep$epsg_in <- pres_crs
       prep$epsg_out <- as.numeric(terra::crs(prep_preds, describe = TRUE)$code)
 
@@ -410,6 +411,7 @@
 
       # predict_boundary only on env rasters
       prep$predict_boundary <- prep$predict_boundary |>
+        sf::st_cast("POLYGON") |>
         sf::st_intersection(sf::st_bbox(prep_preds) |>
                               sf::st_as_sfc() |>
                               terra::vect() |>
@@ -417,6 +419,8 @@
                               sf::st_as_sf() |>
                               sf::st_make_valid()
                             ) |>
+        sf::st_make_valid() |>
+        dplyr::summarise() |>
         sf::st_make_valid()
 
 
