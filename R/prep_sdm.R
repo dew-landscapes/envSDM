@@ -121,6 +121,8 @@
 #'     `reduce_env` is `FALSE`, a list with elements `remove_env` which is
 #'     empty, and `env_var` and `keep`, which both contain the names of all
 #'     predictors.
+#' The coordinate reference system of any outputs is the same crs as
+#' `predictors`.
 #'
 #' @export
 #'
@@ -281,27 +283,15 @@
 
       ## epsg ----------
       prep$epsg_in <- pres_crs
+      # epsg_out is ALWAYS the crs of the predictors
       prep$epsg_out <- as.numeric(terra::crs(prep_preds, describe = TRUE)$code)
 
-      ## pred bbox ---------
-      if(prep$epsg_out != as.numeric(terra::crs(prep_preds, describe = TRUE)$code)) {
-
-        pred_bb <- sf::st_bbox(prep_preds) |>
-          sf::st_as_sfc() |>
-          sf::st_sf() |>
-          terra::vect() |>
-          terra::densify(50000) |>
-          sf::st_as_sf() |>
-          sf::st_transform(crs = prep$epsg_out) |>
-          sf::st_make_valid()
-
-      } else {
-
-        pred_bb <- sf::st_bbox(prep_preds) |>
-          sf::st_as_sfc() |>
-          sf::st_sf()
-
-      }
+      pred_bb <- sf::st_bbox(prep_preds) |>
+        sf::st_as_sfc() |>
+        sf::st_sf() |>
+        terra::vect() |>
+        terra::densify(50000) |>
+        sf::st_as_sf()
 
       prep$log <- paste0(prep$log
                          , "\n"
@@ -319,7 +309,7 @@
                                          sf::st_as_sf(coords = c(pres_x, pres_y)
                                                       , crs = pres_crs
                                                       ) %>%
-                                         sf::st_transform(crs = sf::st_crs(prep_preds)) %>%
+                                         sf::st_transform(crs = prep$epsg_out) %>%
                                          sf::st_coordinates()
                                        ) %>%
         terra::xyFromCell(prep_preds, .) %>%
@@ -340,21 +330,19 @@
       # create new mcp from points
       if(isTRUE(pred_limit)) {
 
-        prep$predict_boundary <- prep$presence_ras %>%
+        prep$predict_boundary <- prep$presence_ras |>
           dplyr::rename(!!rlang::ensym(pres_x) := x
                         , !!rlang::ensym(pres_y) := y
                         ) |>
-          dplyr::distinct(!!rlang::ensym(pres_x), !!rlang::ensym(pres_y)) %>%
+          dplyr::distinct(!!rlang::ensym(pres_x), !!rlang::ensym(pres_y)) |>
           sf::st_as_sf(coords = c(pres_x, pres_y)
                        , crs = pres_crs
-                       ) %>%
-          sf::st_transform(crs = prep$epsg_out) %>%
-          sf::st_union() %>%
-          sf::st_convex_hull() %>%
-          sf::st_sf() %>%
-          sf::st_buffer(limit_buffer) %>%
-          sf::st_make_valid() |>
-          dplyr::summarise() |>
+                       ) |>
+          sf::st_transform(crs = prep$epsg_out) |>
+          sf::st_union() |>
+          sf::st_convex_hull() |>
+          sf::st_sf() |>
+          sf::st_buffer(limit_buffer) |>
           sf::st_make_valid()
 
       }
@@ -365,15 +353,10 @@
 
         if(file.exists(pred_limit)) {
 
-          prep$predict_boundary <- sfarrow::st_read_parquet(pred_limit) %>%
-            sf::st_geometry() %>%
-            sf::st_sf() %>%
-            terra::vect() |>
-            terra::densify(50000) |>
-            sf::st_as_sf() |>
-            sf::st_transform(crs = prep$epsg_out) %>%
-            sf::st_make_valid() |>
-            dplyr::summarise() |>
+          prep$predict_boundary <- sfarrow::st_read_parquet(pred_limit) |>
+            sf::st_geometry() |>
+            sf::st_sf() |>
+            sf::st_transform(crs = prep$epsg_out) |>
             sf::st_make_valid()
 
         }
@@ -385,9 +368,6 @@
       if("sf" %in% class(pred_limit)) {
 
         prep$predict_boundary <- pred_limit |>
-          terra::vect() |>
-          terra::densify(50000) |>
-          sf::st_as_sf() |>
           sf::st_transform(crs = prep$epsg_out) |>
           sf::st_make_valid()
 
@@ -406,44 +386,34 @@
 
       }
 
-      # clip predict_boundary? -------
-      if(!is.null(pred_clip)) {
-
-        pred_clip <- pred_clip |>
-          terra::vect() |>
-          terra::densify(50000) |>
-          sf::st_as_sf() |>
-          sf::st_transform(crs = sf::st_crs(prep$predict_boundary)) |>
-          sf::st_make_valid()
-
-        prep$predict_boundary <- prep$predict_boundary |>
-          sf::st_join(pred_clip, left = FALSE) |>
-          sf::st_intersection(pred_clip) |>
-          sf::st_make_valid() |>
-          dplyr::summarise() |>
-          sf::st_make_valid()
-
-      }
-
       # predict_boundary only on env rasters
       prep$predict_boundary <- prep$predict_boundary |>
         sf::st_join(pred_bb, left = FALSE) |>
         sf::st_intersection(pred_bb) |>
         sf::st_make_valid()
 
+      # clip predict_boundary? -------
+      if(!is.null(pred_clip)) {
+
+        pred_clip <- pred_clip |>
+          sf::st_transform(crs = sf::st_crs(prep$epsg_out)) |>
+          sf::st_make_valid()
+
+        prep$predict_boundary <- prep$predict_boundary |>
+          sf::st_intersection(pred_clip) |>
+          sf::st_make_valid()
+
+      }
 
       # prep$presence_ras clip to predict_boundary ---------
       # catch some cases where there are presence records on the predictors
       # but outside the predict boundary.
       prep$presence_ras <- prep$presence_ras %>%
         sf::st_as_sf(coords = c("x", "y")
-                     , crs = sf::st_crs(prep_preds)
+                     , crs = prep$epsg_out
                      ) %>%
         sf::st_filter(prep$predict_boundary |>
-                        terra::vect() |>
-                        terra::densify(50000) |>
-                        sf::st_as_sf() |>
-                        sf::st_transform(crs = sf::st_crs(prep_preds)) |>
+                        sf::st_transform(crs = prep$epsg_out) |>
                         sf::st_make_valid()
                       )
 
@@ -543,7 +513,7 @@
             envClean::filter_geo_range(use_aoi = prep$predict_boundary
                                        , x = "x"
                                        , y = "y"
-                                       , crs_df = sf::st_crs(prep$predict_boundary)
+                                       , crs_df = sf::st_crs(prep$epsg_out)
                                        )
 
           if(all(!is.null(dens_res), !terra::is.lonlat(prep_preds[[1]]))) {
@@ -655,7 +625,7 @@
 
             ps <- prep$presence_ras %>%
               tibble::as_tibble() %>%
-              sf::st_as_sf(coords = c("x", "y"), crs = sf::st_crs(prep_preds)) %>%
+              sf::st_as_sf(coords = c("x", "y"), crs = prep$epsg_out) %>%
               terra::vect()
 
             terra::plot(ps, add = TRUE)
