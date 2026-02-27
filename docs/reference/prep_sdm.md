@@ -277,7 +277,8 @@ elements:
     [`envModel::reduce_env()`](https://acanthiza.github.io/envModel/reference/reduce_env.html),
     or, if `reduce_env` is `FALSE`, a list with elements `remove_env`
     which is empty, and `env_var` and `keep`, which both contain the
-    names of all predictors.
+    names of all predictors. The coordinate reference system of any
+    outputs is the same crs as `predictors`.
 
 ## Details
 
@@ -355,16 +356,16 @@ sampling density raster against which background points are assigned.
                                                )
                )
 #> prep for chg
-#> out_dir is /home/nwilloug/temp/RtmpO4BWL8/temp_libpathfdac86abd0f83/envSDM/examples/chg__0__1.
+#> out_dir is /home/nwilloug/temp/R/RtmpFqKb5a/temp_libpath3c46d356bc9bf2/envSDM/examples/chg__0__1.
 #>  103 incoming presences
 #> prep for chg
-#> out_dir is /home/nwilloug/temp/RtmpO4BWL8/temp_libpathfdac86abd0f83/envSDM/examples/chg__0__5.
+#> out_dir is /home/nwilloug/temp/R/RtmpFqKb5a/temp_libpath3c46d356bc9bf2/envSDM/examples/chg__0__5.
 #>  103 incoming presences
 #> prep for chg
-#> out_dir is /home/nwilloug/temp/RtmpO4BWL8/temp_libpathfdac86abd0f83/envSDM/examples/chg__0.3__1.
+#> out_dir is /home/nwilloug/temp/R/RtmpFqKb5a/temp_libpath3c46d356bc9bf2/envSDM/examples/chg__0.3__1.
 #>  103 incoming presences
 #> prep for chg
-#> out_dir is /home/nwilloug/temp/RtmpO4BWL8/temp_libpathfdac86abd0f83/envSDM/examples/chg__0.3__5.
+#> out_dir is /home/nwilloug/temp/R/RtmpFqKb5a/temp_libpath3c46d356bc9bf2/envSDM/examples/chg__0.3__5.
 #>  103 incoming presences
 
   # example of 'prep'
@@ -372,9 +373,9 @@ sampling density raster against which background points are assigned.
 
   names(prep)
 #>  [1] "abandoned"        "finished"         "log"              "this_taxa"       
-#>  [5] "original"         "pa_ras"           "presence_ras"     "predict_boundary"
-#>  [9] "bg_points"        "env"              "testing"          "training"        
-#> [13] "prep_fold_corr"   "reduce_env"      
+#>  [5] "epsg_in"          "epsg_out"         "original"         "pa_ras"          
+#>  [9] "presence_ras"     "predict_boundary" "bg_points"        "env"             
+#> [13] "testing"          "training"         "prep_fold_corr"   "reduce_env"      
 
   # env variables to remove prior to SDM
   prep$reduce_env$remove

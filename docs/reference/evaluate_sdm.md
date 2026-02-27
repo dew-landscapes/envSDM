@@ -72,22 +72,22 @@ CBI_rescale is 0 to 1); and IMAE.
                , b_test = background
                )
 #> @stats
-#>   np   na prevalence  auc   cor pcor   ODP auc_po auc_po_flexsdm   CBI
-#> 1 27 1527      0.017 0.96 0.405    0 0.983   0.96           0.96 0.967
+#>   np   na prevalence   auc   cor pcor   ODP auc_po auc_po_flexsdm   CBI
+#> 1 27 1533      0.017 0.942 0.381    0 0.983  0.942          0.942 0.941
 #>   CBI_rescale  IMAE
-#> 1       0.984 0.853
+#> 1       0.971 0.854
 #> 
 #> @thresholds
-#>   max_kappa max_spec_sens no_omission equal_prevalence equal_sens_spec  or10
-#> 1     0.931         0.394       0.098            0.018           0.414 0.399
+#>   max_kappa max_spec_sens no_omission equal_prevalence equal_sens_spec or10
+#> 1     0.918         0.702       0.094            0.017           0.332 0.14
 #> 
 #> @tr_stats
-#>     treshold kappa  CCR  TPR  TNR  FPR  FNR  PPP  NPP  MCR    OR
-#> 1          0     0 0.02    1    0    1    0 0.02  NaN 0.98   NaN
-#> 2          0     0  0.1    1 0.08 0.92    0 0.02    1  0.9   Inf
-#> 3          0     0  0.1    1 0.08 0.92    0 0.02    1  0.9   Inf
-#> 4        ...   ...  ...  ...  ...  ...  ...  ...  ...  ...   ...
-#> 376        1  0.07 0.98 0.04    1    0 0.96  0.5 0.98 0.02 58.69
-#> 377        1  0.07 0.98 0.04    1    0 0.96  0.5 0.98 0.02 58.69
-#> 378        1     0 0.98    0    1    0    1  NaN 0.98 0.02   NaN
+#>     treshold kappa  CCR  TPR  TNR  FPR  FNR  PPP  NPP  MCR  OR
+#> 1          0     0 0.02    1    0    1    0 0.02  NaN 0.98 NaN
+#> 2          0     0 0.11    1  0.1  0.9    0 0.02    1 0.89 Inf
+#> 3          0  0.01 0.17    1 0.16 0.84    0 0.02    1 0.83 Inf
+#> 4        ...   ...  ...  ...  ...  ...  ...  ...  ...  ... ...
+#> 389        1   0.2 0.98 0.11    1    0 0.89    1 0.98 0.02 Inf
+#> 390        1   0.2 0.98 0.11    1    0 0.89    1 0.98 0.02 Inf
+#> 391        1     0 0.98    0    1    0    1  NaN 0.98 0.02 NaN
 ```

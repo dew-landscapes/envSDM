@@ -112,17 +112,17 @@ Character path to threshold file, usually 'thresh.tif'. Output .tif and
                                        , threshold = b
                                        , this_taxa = c
                                        , thresh_file = "thresh.tif"
-                                       #, force_new = TRUE
+                                       , force_new = TRUE
                                        )
                )
-#> threshold file: /home/nwilloug/temp/RtmpO4BWL8/temp_libpathfdac86abd0f83/envSDM/examples/chg__0.3__1/auc_po/thresh.tif already exists
-#> threshold file: /home/nwilloug/temp/RtmpO4BWL8/temp_libpathfdac86abd0f83/envSDM/examples/chg__0.3__1/combo/thresh.tif already exists
-#> threshold file: /home/nwilloug/temp/RtmpO4BWL8/temp_libpathfdac86abd0f83/envSDM/examples/chg__0.3__5/auc_po/thresh.tif already exists
-#> threshold file: /home/nwilloug/temp/RtmpO4BWL8/temp_libpathfdac86abd0f83/envSDM/examples/chg__0.3__5/combo/thresh.tif already exists
-#> threshold file: /home/nwilloug/temp/RtmpO4BWL8/temp_libpathfdac86abd0f83/envSDM/examples/chg__0__1/auc_po/thresh.tif already exists
-#> threshold file: /home/nwilloug/temp/RtmpO4BWL8/temp_libpathfdac86abd0f83/envSDM/examples/chg__0__1/combo/thresh.tif already exists
-#> threshold file: /home/nwilloug/temp/RtmpO4BWL8/temp_libpathfdac86abd0f83/envSDM/examples/chg__0__5/auc_po/thresh.tif already exists
-#> threshold file: /home/nwilloug/temp/RtmpO4BWL8/temp_libpathfdac86abd0f83/envSDM/examples/chg__0__5/combo/thresh.tif already exists
+#> create thresh.tif for chg__0.3__1 with threshold value: 0.7319
+#> create thresh.tif for chg__0.3__1 with threshold value: 0.7019
+#> create thresh.tif for chg__0.3__5 with threshold value: 0.5413
+#> create thresh.tif for chg__0.3__5 with threshold value: 0.4919
+#> create thresh.tif for chg__0__1 with threshold value: 0.5359
+#> create thresh.tif for chg__0__1 with threshold value: 0.6419
+#> create thresh.tif for chg__0__5 with threshold value: 0.6519
+#> create thresh.tif for chg__0__5 with threshold value: 0.6459
 
   ## visualise-------
   ### threshold -------

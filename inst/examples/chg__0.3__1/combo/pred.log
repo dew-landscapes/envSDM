@@ -1,6 +1,6 @@
 chg
-predict process started at 2026-01-27 10:00:41.376423
-predict for chg from rf model with arguments: tr = 500, mt = 2, ns = 2
+predict process started at 2026-02-27 16:44:27.714538
+predict for chg from rf model with arguments: tr = 500, mt = 3, ns = 3
  out file will be pred.tif
 predict finished in 0 minutes
 predict mask for chg

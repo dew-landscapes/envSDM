@@ -188,16 +188,16 @@ elements:
                               )
               )
 #> [[1]]
-#> /home/nwilloug/temp/RtmpO4BWL8/temp_libpathfdac86abd0f83/envSDM/examples/chg__0.3__1/tune.rds
+#> /home/nwilloug/temp/R/RtmpFqKb5a/temp_libpath3c46d356bc9bf2/envSDM/examples/chg__0.3__1/tune.rds
 #> 
 #> [[2]]
-#> /home/nwilloug/temp/RtmpO4BWL8/temp_libpathfdac86abd0f83/envSDM/examples/chg__0.3__5/tune.rds
+#> /home/nwilloug/temp/R/RtmpFqKb5a/temp_libpath3c46d356bc9bf2/envSDM/examples/chg__0.3__5/tune.rds
 #> 
 #> [[3]]
-#> /home/nwilloug/temp/RtmpO4BWL8/temp_libpathfdac86abd0f83/envSDM/examples/chg__0__1/tune.rds
+#> /home/nwilloug/temp/R/RtmpFqKb5a/temp_libpath3c46d356bc9bf2/envSDM/examples/chg__0__1/tune.rds
 #> 
 #> [[4]]
-#> /home/nwilloug/temp/RtmpO4BWL8/temp_libpathfdac86abd0f83/envSDM/examples/chg__0__5/tune.rds
+#> /home/nwilloug/temp/R/RtmpFqKb5a/temp_libpath3c46d356bc9bf2/envSDM/examples/chg__0__5/tune.rds
 #> 
 
   # which tune args were best for each taxa using 'combo'?
@@ -212,10 +212,10 @@ elements:
 #> # A tibble: 4 × 8
 #>   taxa        algo  tune_args             combo auc_po  IMAE   CBI max_spec_sens
 #>   <chr>       <chr> <chr>                 <dbl>  <dbl> <dbl> <dbl>         <dbl>
-#> 1 chg__0.3__1 rf    tr: 500. mt: 2. ns: 2 0.657  0.875 0.820 0.832         0.551
-#> 2 chg__0.3__5 rf    tr: 500. mt: 1. ns: 3 0.532  0.785 0.805 0.684         0.281
-#> 3 chg__0__1   rf    tr: 500. mt: 1. ns: 1 0.519  0.782 0.811 0.638         0.275
-#> 4 chg__0__5   rf    tr: 500. mt: 1. ns: 2 0.510  0.792 0.814 0.584         0.263
+#> 1 chg__0.3__1 rf    tr: 500. mt: 3. ns: 3 0.681  0.916 0.824 0.804         0.524
+#> 2 chg__0.3__5 rf    tr: 500. mt: 1. ns: 3 0.587  0.832 0.809 0.744         0.366
+#> 3 chg__0__1   rf    tr: 500. mt: 1. ns: 2 0.575  0.835 0.809 0.701         0.308
+#> 4 chg__0__5   rf    tr: 500. mt: 1. ns: 1 0.508  0.761 0.811 0.645         0.224
 
   # or best tune args choosing on just auc_po?
   data %>%
@@ -231,8 +231,8 @@ elements:
 #> # A tibble: 4 × 7
 #>   taxa        algo  tune_args             auc_po  IMAE   CBI max_spec_sens
 #>   <chr>       <chr> <chr>                  <dbl> <dbl> <dbl>         <dbl>
-#> 1 chg__0.3__1 rf    tr: 500. mt: 1. ns: 1  0.877 0.817 0.788         0.606
-#> 2 chg__0.3__5 rf    tr: 500. mt: 2. ns: 2  0.786 0.809 0.640         0.263
-#> 3 chg__0__1   rf    tr: 500. mt: 2. ns: 3  0.788 0.811 0.581         0.272
-#> 4 chg__0__5   rf    tr: 500. mt: 1. ns: 2  0.792 0.814 0.584         0.263
+#> 1 chg__0.3__1 rf    tr: 500. mt: 3. ns: 1  0.918 0.826 0.787         0.479
+#> 2 chg__0.3__5 rf    tr: 500. mt: 1. ns: 3  0.832 0.809 0.744         0.366
+#> 3 chg__0__1   rf    tr: 500. mt: 2. ns: 3  0.837 0.808 0.658         0.326
+#> 4 chg__0__5   rf    tr: 500. mt: 2. ns: 3  0.770 0.807 0.625         0.234
 ```

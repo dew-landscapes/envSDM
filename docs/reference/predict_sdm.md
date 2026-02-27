@@ -154,16 +154,16 @@ Character path to predicted file, usually 'pred.tif'. Output .tif and
                                          )
                )
 #> [[1]]
-#> /home/nwilloug/temp/RtmpO4BWL8/temp_libpathfdac86abd0f83/envSDM/examples/chg__0.3__1/combo/full_run.rds
+#> /home/nwilloug/temp/R/RtmpFqKb5a/temp_libpath3c46d356bc9bf2/envSDM/examples/chg__0.3__1/combo/full_run.rds
 #> 
 #> [[2]]
-#> /home/nwilloug/temp/RtmpO4BWL8/temp_libpathfdac86abd0f83/envSDM/examples/chg__0.3__5/combo/full_run.rds
+#> /home/nwilloug/temp/R/RtmpFqKb5a/temp_libpath3c46d356bc9bf2/envSDM/examples/chg__0.3__5/combo/full_run.rds
 #> 
 #> [[3]]
-#> /home/nwilloug/temp/RtmpO4BWL8/temp_libpathfdac86abd0f83/envSDM/examples/chg__0__1/combo/full_run.rds
+#> /home/nwilloug/temp/R/RtmpFqKb5a/temp_libpath3c46d356bc9bf2/envSDM/examples/chg__0__1/combo/full_run.rds
 #> 
 #> [[4]]
-#> /home/nwilloug/temp/RtmpO4BWL8/temp_libpathfdac86abd0f83/envSDM/examples/chg__0__5/combo/full_run.rds
+#> /home/nwilloug/temp/R/RtmpFqKb5a/temp_libpath3c46d356bc9bf2/envSDM/examples/chg__0__5/combo/full_run.rds
 #> 
 
 
@@ -230,16 +230,16 @@ Character path to predicted file, usually 'pred.tif'. Output .tif and
                                          )
               )
 #> [[1]]
-#> /home/nwilloug/temp/RtmpO4BWL8/temp_libpathfdac86abd0f83/envSDM/examples/chg__0.3__1/auc_po/full_run.rds
+#> /home/nwilloug/temp/R/RtmpFqKb5a/temp_libpath3c46d356bc9bf2/envSDM/examples/chg__0.3__1/auc_po/full_run.rds
 #> 
 #> [[2]]
-#> /home/nwilloug/temp/RtmpO4BWL8/temp_libpathfdac86abd0f83/envSDM/examples/chg__0.3__5/auc_po/full_run.rds
+#> /home/nwilloug/temp/R/RtmpFqKb5a/temp_libpath3c46d356bc9bf2/envSDM/examples/chg__0.3__5/auc_po/full_run.rds
 #> 
 #> [[3]]
-#> /home/nwilloug/temp/RtmpO4BWL8/temp_libpathfdac86abd0f83/envSDM/examples/chg__0__1/auc_po/full_run.rds
+#> /home/nwilloug/temp/R/RtmpFqKb5a/temp_libpath3c46d356bc9bf2/envSDM/examples/chg__0__1/auc_po/full_run.rds
 #> 
 #> [[4]]
-#> /home/nwilloug/temp/RtmpO4BWL8/temp_libpathfdac86abd0f83/envSDM/examples/chg__0__5/auc_po/full_run.rds
+#> /home/nwilloug/temp/R/RtmpFqKb5a/temp_libpath3c46d356bc9bf2/envSDM/examples/chg__0__5/auc_po/full_run.rds
 #> 
 
   ## predict -------

@@ -284,7 +284,9 @@ use spatial folds failed to meet desired <code>folds</code> and <code>min_fold_n
 <li><p>correlated:</p><ul><li><p>list with elements as per <code><a href="https://acanthiza.github.io/envModel/reference/reduce_env.html" class="external-link">envModel::reduce_env()</a></code>, or, if
 <code>reduce_env</code> is <code>FALSE</code>, a list with elements <code>remove_env</code> which is
 empty, and <code>env_var</code> and <code>keep</code>, which both contain the names of all
-predictors.</p></li>
+predictors.
+The coordinate reference system of any outputs is the same crs as
+<code>predictors</code>.</p></li>
 </ul></li>
 </ul></div>
     <div class="section level2">
@@ -363,16 +365,16 @@ against which background points are assigned.</p>
 <span class="r-in"><span>                                               <span class="op">)</span></span></span>
 <span class="r-in"><span>               <span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> prep for chg</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> out_dir is /home/nwilloug/temp/RtmpO4BWL8/temp_libpathfdac86abd0f83/envSDM/examples/chg__0__1.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> out_dir is /home/nwilloug/temp/R/RtmpFqKb5a/temp_libpath3c46d356bc9bf2/envSDM/examples/chg__0__1.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>  103 incoming presences</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> prep for chg</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> out_dir is /home/nwilloug/temp/RtmpO4BWL8/temp_libpathfdac86abd0f83/envSDM/examples/chg__0__5.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> out_dir is /home/nwilloug/temp/R/RtmpFqKb5a/temp_libpath3c46d356bc9bf2/envSDM/examples/chg__0__5.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>  103 incoming presences</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> prep for chg</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> out_dir is /home/nwilloug/temp/RtmpO4BWL8/temp_libpathfdac86abd0f83/envSDM/examples/chg__0.3__1.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> out_dir is /home/nwilloug/temp/R/RtmpFqKb5a/temp_libpath3c46d356bc9bf2/envSDM/examples/chg__0.3__1.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>  103 incoming presences</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> prep for chg</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> out_dir is /home/nwilloug/temp/RtmpO4BWL8/temp_libpathfdac86abd0f83/envSDM/examples/chg__0.3__5.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> out_dir is /home/nwilloug/temp/R/RtmpFqKb5a/temp_libpath3c46d356bc9bf2/envSDM/examples/chg__0.3__5.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>  103 incoming presences</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>  <span class="co"># example of 'prep'</span></span></span>
@@ -380,9 +382,9 @@ against which background points are assigned.</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">prep</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [1] "abandoned"        "finished"         "log"              "this_taxa"       </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [5] "original"         "pa_ras"           "presence_ras"     "predict_boundary"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [9] "bg_points"        "env"              "testing"          "training"        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [13] "prep_fold_corr"   "reduce_env"      </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [5] "epsg_in"          "epsg_out"         "original"         "pa_ras"          </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [9] "presence_ras"     "predict_boundary" "bg_points"        "env"             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [13] "testing"          "training"         "prep_fold_corr"   "reduce_env"      </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>  <span class="co"># env variables to remove prior to SDM</span></span></span>
 <span class="r-in"><span>  <span class="va">prep</span><span class="op">$</span><span class="va">reduce_env</span><span class="op">$</span><span class="va">remove</span></span></span>

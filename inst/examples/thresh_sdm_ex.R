@@ -37,7 +37,7 @@
                                        , threshold = b
                                        , this_taxa = c
                                        , thresh_file = "thresh.tif"
-                                       #, force_new = TRUE
+                                       , force_new = TRUE
                                        )
                )
 

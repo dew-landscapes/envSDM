@@ -195,6 +195,8 @@ use spatial folds failed to meet desired \code{folds} and \code{min_fold_n}
 \code{reduce_env} is \code{FALSE}, a list with elements \code{remove_env} which is
 empty, and \code{env_var} and \code{keep}, which both contain the names of all
 predictors.
+The coordinate reference system of any outputs is the same crs as
+\code{predictors}.
 }
 }
 }
