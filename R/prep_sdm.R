@@ -283,6 +283,18 @@
       prep$epsg_in <- pres_crs
       prep$epsg_out <- as.numeric(terra::crs(prep_preds, describe = TRUE)$code)
 
+      ## pred bbox ---------
+      pred_bb <- sf::st_bbox(prep_preds) |>
+        sf::st_as_sfc() |>
+        sf::st_sf() |>
+        terra::vect() |>
+        terra::densify(50000) |>
+        sf::st_as_sf() |>
+        sf::st_transform(crs = prep$epsg_out) |>
+        st_make_valid() |>
+        dplyr::summarise() |>
+        sf::st_make_valid()
+
       prep$log <- paste0(prep$log
                          , "\n"
                          , length(names(prep_preds))
@@ -328,11 +340,13 @@
           sf::st_as_sf(coords = c(pres_x, pres_y)
                        , crs = pres_crs
                        ) %>%
-          sf::st_transform(crs = sf::st_crs(prep_preds[[1]])) %>%
+          sf::st_transform(crs = prep$epsg_out) %>%
           sf::st_union() %>%
           sf::st_convex_hull() %>%
           sf::st_sf() %>%
           sf::st_buffer(limit_buffer) %>%
+          sf::st_make_valid() |>
+          dplyr::summarise() |>
           sf::st_make_valid()
 
       }
@@ -349,7 +363,9 @@
             terra::vect() |>
             terra::densify(50000) |>
             sf::st_as_sf() |>
-            sf::st_transform(crs = sf::st_crs(prep_preds[[1]])) %>%
+            sf::st_transform(crs = prep$epsg_out) %>%
+            sf::st_make_valid() |>
+            dplyr::summarise() |>
             sf::st_make_valid()
 
         }
@@ -360,17 +376,16 @@
       # existing sf
       if("sf" %in% class(pred_limit)) {
 
-        prep$predict_boundary <- pred_limit %>%
+        prep$predict_boundary <- pred_limit |>
           terra::vect() |>
           terra::densify(50000) |>
           sf::st_as_sf() |>
-          sf::st_transform(crs = sf::st_crs(prep_preds[[1]])) %>%
-          sf::st_make_valid() %>%
+          sf::st_transform(crs = prep$epsg_out) |>
+          sf::st_make_valid() |>
+          sf::st_intersection(pred_bb) |>
+          sf::st_cast("POLYGON") |>
+          sf::st_make_valid() |>
           dplyr::summarise() |>
-          sf::st_intersection(sf::st_bbox(prep_preds) %>%
-                                sf::st_as_sfc() %>%
-                                sf::st_sf()
-                              ) %>%
           sf::st_make_valid()
 
       }
@@ -384,10 +399,7 @@
       # captures anything not already captured above
       if(isFALSE(pred_limit)) {
 
-        prep$predict_boundary <- sf::st_bbox(prep_preds) %>%
-          sf::st_as_sfc() %>%
-          sf::st_sf()  %>%
-          sf::st_make_valid()
+        prep$predict_boundary <- pred_bb
 
       }
 
@@ -411,16 +423,7 @@
 
       # predict_boundary only on env rasters
       prep$predict_boundary <- prep$predict_boundary |>
-        sf::st_cast("POLYGON") |>
-        sf::st_intersection(sf::st_bbox(prep_preds) |>
-                              sf::st_as_sfc() |>
-                              terra::vect() |>
-                              terra::densify(50000) |>
-                              sf::st_as_sf() |>
-                              sf::st_make_valid()
-                            ) |>
-        sf::st_make_valid() |>
-        dplyr::summarise() |>
+        sf::st_intersection(pred_bb) |>
         sf::st_make_valid()
 
 
@@ -580,7 +583,7 @@
 
             pres_ras <- terra::rasterize(prep$pa_ras %>%
                                            sf::st_as_sf(coords = c("x", "y")
-                                                        , crs = sf::st_crs(prep_preds[[1]])
+                                                        , crs = prep$epsg_out
                                                         )
                                          , y = temp_ras
                                          , fun = length
@@ -744,7 +747,7 @@
           spp_pa <- dplyr::bind_rows(prep$presence_ras %>%
                                        tibble::as_tibble() %>%
                                        sf::st_as_sf(coords = c("x", "y")
-                                                    , crs = sf::st_crs(prep_preds[[1]])
+                                                    , crs = prep$epsg_out
                                                     , remove = FALSE
                                                     ) %>%
                                        dplyr::mutate(pa = 1)
@@ -949,7 +952,7 @@
                                                   , \(x) x |>
                                                     dplyr::select(x, y, pa) %>%
                                                     sf::st_as_sf(coords = c("x", "y")
-                                                                 , crs = sf::st_crs(prep_preds[[1]])
+                                                                 , crs = prep$epsg_out
                                                                  )
                                                   )
                             , folds_div = folds_div[1:nrow(prep$training)]
