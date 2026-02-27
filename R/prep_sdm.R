@@ -284,16 +284,24 @@
       prep$epsg_out <- as.numeric(terra::crs(prep_preds, describe = TRUE)$code)
 
       ## pred bbox ---------
-      pred_bb <- sf::st_bbox(prep_preds) |>
-        sf::st_as_sfc() |>
-        sf::st_sf() |>
-        terra::vect() |>
-        terra::densify(50000) |>
-        sf::st_as_sf() |>
-        sf::st_transform(crs = prep$epsg_out) |>
-        st_make_valid() |>
-        dplyr::summarise() |>
-        sf::st_make_valid()
+      if(prep$epsg_out != as.numeric(terra::crs(prep_preds, describe = TRUE)$code)) {
+
+        pred_bb <- sf::st_bbox(prep_preds) |>
+          sf::st_as_sfc() |>
+          sf::st_sf() |>
+          terra::vect() |>
+          terra::densify(50000) |>
+          sf::st_as_sf() |>
+          sf::st_transform(crs = prep$epsg_out) |>
+          sf::st_make_valid()
+
+      } else {
+
+        pred_bb <- sf::st_bbox(prep_preds) |>
+          sf::st_as_sfc() |>
+          sf::st_sf()
+
+      }
 
       prep$log <- paste0(prep$log
                          , "\n"
@@ -381,11 +389,6 @@
           terra::densify(50000) |>
           sf::st_as_sf() |>
           sf::st_transform(crs = prep$epsg_out) |>
-          sf::st_make_valid() |>
-          sf::st_intersection(pred_bb) |>
-          sf::st_cast("POLYGON") |>
-          sf::st_make_valid() |>
-          dplyr::summarise() |>
           sf::st_make_valid()
 
       }
@@ -406,15 +409,16 @@
       # clip predict_boundary? -------
       if(!is.null(pred_clip)) {
 
+        pred_clip <- pred_clip |>
+          terra::vect() |>
+          terra::densify(50000) |>
+          sf::st_as_sf() |>
+          sf::st_transform(crs = sf::st_crs(prep$predict_boundary)) |>
+          sf::st_make_valid()
+
         prep$predict_boundary <- prep$predict_boundary |>
-          sf::st_cast("POLYGON") |>
-          sf::st_intersection(pred_clip |>
-                                terra::vect() |>
-                                terra::densify(50000) |>
-                                sf::st_as_sf() |>
-                                sf::st_transform(crs = sf::st_crs(prep$predict_boundary)) |>
-                                sf::st_make_valid()
-                              ) |>
+          sf::st_join(pred_clip, left = FALSE) |>
+          sf::st_intersection(pred_clip) |>
           sf::st_make_valid() |>
           dplyr::summarise() |>
           sf::st_make_valid()
@@ -423,6 +427,7 @@
 
       # predict_boundary only on env rasters
       prep$predict_boundary <- prep$predict_boundary |>
+        sf::st_join(pred_bb, left = FALSE) |>
         sf::st_intersection(pred_bb) |>
         sf::st_make_valid()
 
