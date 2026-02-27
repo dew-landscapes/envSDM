@@ -403,7 +403,8 @@
                                 sf::st_make_valid()
                               ) |>
           sf::st_make_valid() |>
-          dplyr::summarise()
+          dplyr::summarise() |>
+          sf::st_make_valid()
 
       }
 
@@ -413,7 +414,8 @@
                               sf::st_as_sfc() |>
                               terra::vect() |>
                               terra::densify(50000) |>
-                              sf::st_as_sf()
+                              sf::st_as_sf() |>
+                              sf::st_make_valid()
                             ) |>
         sf::st_make_valid()
 
