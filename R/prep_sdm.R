@@ -516,89 +516,72 @@
                                        , crs_df = sf::st_crs(prep$epsg_out)
                                        )
 
-          if(all(!is.null(dens_res), !terra::is.lonlat(prep_preds[[1]]))) {
 
-            # resolution of density raster < pred raster
+          original_res <- terra::res(prep_preds)[[1]]
 
-            use_res <- if(terra::res(prep_preds)[[1]] < dens_res) dens_res else terra::res(prep_preds)[[1]]
+          use_res <- if(!terra::is.lonlat(prep_preds[[1]])) {
 
-            temp_ras <- terra::rast(resolution = use_res
-                                    , crs = terra::crs(prep_preds[[1]])
-                                    , extent = terra::ext(prep$predict_boundary)
-                                    , vals = 1
-                                    )
+            if(all(!is.null(dens_res), dens_res > original_res)) {
 
-            bw <- MASS::kde2d(as.matrix(prep$pa_ras[,1])
-                              , as.matrix(prep$pa_ras[,2])
-                              , n = c(nrow(temp_ras), ncol(temp_ras))
-                              , lims = terra::ext(temp_ras) %>% as.vector()
-                              )
+              dens_res
 
-            target_density <- raster::raster(bw) %>%
+            } else original_res
+
+          } else {
+
+            original_res
+
+          }
+
+          temp_ras <- terra::rast(resolution = use_res
+                                  , crs = paste0("epsg:", prep$epsg_out)
+                                  , extent = terra::ext(prep$predict_boundary)
+                                  , vals = 1
+                                  )
+
+          bw <- MASS::kde2d(as.matrix(prep$pa_ras[,1])
+                            , as.matrix(prep$pa_ras[,2])
+                            , n = c(nrow(temp_ras), ncol(temp_ras))
+                            , lims = terra::ext(temp_ras) %>% as.vector()
+                            )
+
+          if(sum(prep$pa_ras$pa) < nrow(prep$pa_ras)) {
+
+            bw_p_only <- MASS::kde2d(as.matrix(prep$presence_ras[,1])
+                                     , as.matrix(prep$presence_ras[,2])
+                                     , n = c(nrow(temp_ras), ncol(temp_ras))
+                                     , lims = terra::ext(temp_ras) %>% as.vector()
+                                     )
+
+          }
+
+          target_density <- raster::raster(bw) %>%
+            terra::rast() %>%
+            terra::project(temp_ras) %>%
+            terra::focal(3
+                         , mean
+                         , na.policy = "only"
+                         , na.rm = TRUE
+                         ) |>
+            terra::stretch(1, stretch_value)
+
+          if(exists("bw_p_only", inherits = FALSE)) {
+
+            target_density2 <- raster::raster(bw_p_only) %>%
               terra::rast() %>%
               terra::resample(temp_ras) %>%
               terra::focal(3
                            , mean
                            , na.policy = "only"
                            , na.rm = TRUE
-                           )
+                           ) |>
+              terra::stretch(1, stretch_value)
 
-          } else {
-
-            # density raster = predict raster
-            # STU METHOD
-            # weighted bandwidth
-            ## same method as spatialEco::sf.kde
-
-            temp_ras <- terra::rast(resolution = terra::res(prep_preds)
-                                    , crs = terra::crs(prep_preds[[1]])
-                                    , extent = terra::ext(prep$predict_boundary)
-                                    , vals = 1
-                                    )
-
-            pres_ras <- terra::rasterize(prep$pa_ras %>%
-                                           sf::st_as_sf(coords = c("x", "y")
-                                                        , crs = prep$epsg_out
-                                                        )
-                                         , y = temp_ras
-                                         , fun = length
-                                         , touches = TRUE
+            target_density <- terra::app(c(target_density
+                                           , target_density2
+                                           )
+                                         , "mean"
                                          )
-
-            pres <- terra::as.data.frame(pres_ras, xy = TRUE) %>%
-              tibble::as_tibble()
-
-            colnames(pres)[3] <- "COUNT"
-
-            pres <- pres %>%
-              dplyr::mutate(scaled = COUNT * (length(COUNT) / sum(COUNT)))
-
-            if(all(pres$scaled == 1)) pres$scaled <- sample(c(0.999, 1.001), length(pres$scaled), replace = TRUE) # nw
-
-            bw <- ks::Hpi.diag(x = as.matrix(pres[, c("x", "y", "scaled")])
-                               , pilot = "dscalar"
-                               )
-
-            target_density <- terra::setValues(pres_ras
-                                               , matrix(ks::kde(as.matrix(pres[, c("x", "y")])
-                                                                , eval.points = terra::xyFromCell(pres_ras, 1:terra::ncell(pres_ras))
-                                                                , gridsize = c(nrow(pres_ras), ncol(pres_ras))
-                                                                # use bw or NULL if error
-                                                                ## NULL will use default method - maybe unweighted?
-                                                                , h = ifelse(inherits(bw, "error"), NULL, bw)
-                                                                , w = pres[["scaled"]]
-                                                                , density = TRUE
-                                                                )$estimate
-                                                        , nrow = nrow(pres_ras)
-                                                        , ncol = ncol(pres_ras)
-                                                        , byrow = TRUE
-                                                        )
-                                               ) %>%
-              terra::focal(3
-                           , mean
-                           , na.policy = "only"
-                           , na.rm = TRUE
-                           )
 
           }
 
@@ -620,7 +603,7 @@
 
             terra::plot(prep_preds[[1]])
             terra::plot(target_density
-                        , add = TRUE
+                        #, add = TRUE
                         )
 
             ps <- prep$presence_ras %>%
