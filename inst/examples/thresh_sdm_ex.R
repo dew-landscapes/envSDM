@@ -43,15 +43,17 @@
 
   ## visualise-------
   ### threshold -------
-  purrr::walk(data$out_dir
-              , \(x) fs::path(x, "thresh.tif") %>%
-                terra::rast() %>%
-                terra::trim() %>%
-                terra::plot()
-              )
+  plots <- data |>
+    dplyr::mutate(opts = basename(dirname(out_dir))) |>
+    tidyr::separate(opts, into = c("taxa", "hold_prop", "repeats", "stretch"), sep = "__") |>
+    dplyr::filter(hold_prop == 0, repeats == 5, metric == "combo") |>
+    dplyr::mutate(stretch = as.numeric(stretch)) |>
+    dplyr::arrange(stretch)
 
+  r <- fs::path(plots$out_dir, "thresh.tif") |>
+    terra::rast()
 
+  terra::plot(r, main = plots$stretch, nc = 1)
 
-
-
+  tm_shape(r) + tm_raster()
 

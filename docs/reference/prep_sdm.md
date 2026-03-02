@@ -302,10 +302,13 @@ sampling density raster against which background points are assigned.
     dplyr::mutate(taxa = gsub("\\.csv", "", basename(path))
                   , presence = purrr::map(path, rio::import, setclass = "tibble", trust = TRUE)
                   ) |>
-    dplyr::cross_join(tibble::tibble(hold_prop = c(0, 0.3))) |>
-    dplyr::cross_join(tibble::tibble(repeats = c(1, 5))) |>
-    dplyr::mutate(taxa_dir = fs::path(out_dir, paste0(taxa, "__", hold_prop, "__", repeats))
+    dplyr::cross_join(tibble::tibble(hold_prop = c(0))) |>
+    dplyr::cross_join(tibble::tibble(repeats = c(5))) |>
+    dplyr::cross_join(tibble::tibble(stretch = c(10, 20, 100))) |>
+    dplyr::mutate(taxa_dir = fs::path(out_dir, paste0(taxa, "__", hold_prop, "__", repeats, "__", stretch))
                   , out_mcp = fs::path(taxa_dir, "mcp.parquet")
+                  , dens_ras = fs::path(taxa_dir, "density.tif")
+                  , prep_file = fs::path(taxa_dir, "prep.rds")
                   )
 
   # predictors -------
@@ -336,8 +339,9 @@ sampling density raster against which background points are assigned.
                     , data$presence
                     , data$out_mcp
                     , data$hold_prop
+                    , data$stretch
                     )
-               , function(a, b, c, d, e) prep_sdm(this_taxa = a
+               , function(a, b, c, d, e, f) prep_sdm(this_taxa = a
                                                , out_dir = b
                                                , presence = c
                                                , pres_x = "cell_long"
@@ -352,24 +356,23 @@ sampling density raster against which background points are assigned.
                                                , dens_res = 1000 # ignored as decimal degrees preds
                                                , reduce_env_thresh_corr = 0.95
                                                , reduce_env_quant_rf_imp = 0.2
+                                               , stretch_value = f
+                                               , num_bg = 1000
                                                #, force_new = TRUE
                                                )
                )
 #> prep for chg
-#> out_dir is /home/nwilloug/temp/R/RtmpFqKb5a/temp_libpath3c46d356bc9bf2/envSDM/examples/chg__0__1.
+#> out_dir is /home/nwilloug/temp/R/Rtmp9mmcg5/temp_libpath1add5a122b9c77/envSDM/examples/chg__0__5__10.
 #>  103 incoming presences
 #> prep for chg
-#> out_dir is /home/nwilloug/temp/R/RtmpFqKb5a/temp_libpath3c46d356bc9bf2/envSDM/examples/chg__0__5.
+#> out_dir is /home/nwilloug/temp/R/Rtmp9mmcg5/temp_libpath1add5a122b9c77/envSDM/examples/chg__0__5__20.
 #>  103 incoming presences
 #> prep for chg
-#> out_dir is /home/nwilloug/temp/R/RtmpFqKb5a/temp_libpath3c46d356bc9bf2/envSDM/examples/chg__0.3__1.
-#>  103 incoming presences
-#> prep for chg
-#> out_dir is /home/nwilloug/temp/R/RtmpFqKb5a/temp_libpath3c46d356bc9bf2/envSDM/examples/chg__0.3__5.
+#> out_dir is /home/nwilloug/temp/R/Rtmp9mmcg5/temp_libpath1add5a122b9c77/envSDM/examples/chg__0__5__100.
 #>  103 incoming presences
 
   # example of 'prep'
-  prep <- rio::import(fs::path(data$taxa_dir[[1]], "prep.rds"), trust = TRUE)
+  prep <- rio::import(data$prep_file[[1]], trust = TRUE)
 
   names(prep)
 #>  [1] "abandoned"        "finished"         "log"              "this_taxa"       
@@ -377,80 +380,48 @@ sampling density raster against which background points are assigned.
 #>  [9] "presence_ras"     "predict_boundary" "bg_points"        "env"             
 #> [13] "testing"          "training"         "prep_fold_corr"   "reduce_env"      
 
-  # env variables to remove prior to SDM
+  # variables to remove prior to SDM
   prep$reduce_env$remove
-#>  [1] "bio04"     "bio07"     "bio08"     "bio09"     "bio12"     "bio13"    
-#>  [7] "bio16"     "bio17"     "bio18"     "bio19"     "cell"      "cell_lat" 
-#> [13] "cell_long" "fold"      "id"        "pa"        "x"         "y"        
-
-  # Density raster
-  dens_ras <- terra::rast(fs::path(data$taxa_dir[[2]], "density.tif")) %>%
-    terra::mask(clip) %>%
-    terra::classify(matrix(c(0, NA), ncol = 2))
-
-  if(require("tmap")) {
-
-    m <-
-      tm_shape(dens_ras) +
-      tm_raster(col.legend = "Background point density"
-                , col.scale = c(0, 2, 4, 6, 8, 10)
-                , drop.levels = TRUE
-                ) +
-      tm_title(paste0("Background point density for ",  prep$this_taxa))
-
-    m
-
-    presences <- prep$pa_ras |>
-      dplyr::filter(pa == 1) %>%
-      sf::st_as_sf(coords = c("x", "y")
-                   , crs = 4326
-                   )
-
-    m +
-      tm_shape(presences) +
-        tm_dots(fill = "pa")
-
-  }
-#> Loading required package: tmap
-#> 
-#> ── tmap v3 code detected ───────────────────────────────────────────────────────
-#> [v3->v4] `tm_tm_raster()`: migrate the argument(s) related to the scale of the
-#> visual variable `col` namely 'drop.levels' to col.scale = tm_scale(<HERE>).
-#> ℹ For small multiples, specify a 'tm_scale_' for each multiple, and put them in
-#>   a list: 'col.scale = list(<scale1>, <scale2>, ...)'
-#> The visual variable `fill` of the layer "dots" and "symbols" contains a unique
-#> value. Therefore a discrete scale is applied (tm_scale_discrete).
+#>  [1] "bio04"     "bio07"     "bio08"     "bio09"     "bio12"     "bio16"    
+#>  [7] "bio17"     "bio18"     "bio19"     "cell"      "cell_lat"  "cell_long"
+#> [13] "fold"      "id"        "pa"        "x"         "y"        
 
 
   # Background points
   if(require("tmap")) {
 
-    folds <- prep$bg_points %>%
-      dplyr::inner_join(prep$training |>
-                         dplyr::select(rep, training) |>
-                         tidyr::unnest(cols = c(training))
-                       ) |>
-      dplyr::mutate(fold = factor(fold) # for map
-                    , rep = paste0("rep: ", rep)
-                    ) %>%
-      sf::st_as_sf(coords = c("x", "y")
-                   , crs = sf::st_crs(terra::rast(env_dat[[1]]))
-                   )
+    preps <- data$prep_file |>
+      purrr::map(readRDS)
+
+    b <- preps |>
+      purrr::map("bg_points") |>
+      purrr::set_names(data$stretch) |>
+      dplyr::bind_rows(.id = "stretch") |>
+      dplyr::mutate(stretch = as.numeric(stretch)
+                    , type = "background"
+                    )
+
+    p <- preps |>
+      purrr::map(\(x) sf::st_as_sf(x$presence_ras
+                                   , coords = c("x", "y")
+                                   , crs = x$epsg_out
+                                   )
+                 ) |>
+      purrr::set_names(data$stretch) |>
+      dplyr::bind_rows(.id = "stretch") |>
+      dplyr::mutate(stretch = as.numeric(stretch)
+                    , type = "presence"
+                    )
 
 
-    tm_shape(folds) +
-      tm_dots(fill = "fold"
-              , fill.scale = tm_scale(values = "viridis")
+
+    tm_shape(dplyr::bind_rows(b, p)) +
+      tm_dots(fill = "type"
+              , size = 0.5
               ) +
-      tm_facets(by = "rep") +
-      tm_legend(outside = TRUE)
+      tm_facets(by = "stretch")
 
 
   }
-#> Joining with `by = join_by(x, y)`
-#> 
-#> ── tmap v3 code detected ───────────────────────────────────────────────────────
-#> [v3->v4] `tm_legend()`: use 'tm_legend()' inside a layer function, e.g.
-#> 'tm_polygons(..., fill.legend = tm_legend())'
-#> This message is displayed once every 8 hours.
+#> Loading required package: tmap
 ```

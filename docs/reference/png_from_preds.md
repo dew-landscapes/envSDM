@@ -100,16 +100,13 @@ files
                                          )
                )
 #> [[1]]
-#> /home/nwilloug/temp/R/RtmpFqKb5a/temp_libpath3c46d356bc9bf2/envSDM/examples/chg__0.3__1/combo/full_run.rds
+#> /home/nwilloug/temp/R/Rtmp9mmcg5/temp_libpath1add5a122b9c77/envSDM/examples/chg__0__5__10/combo/full_run.rds
 #> 
 #> [[2]]
-#> /home/nwilloug/temp/R/RtmpFqKb5a/temp_libpath3c46d356bc9bf2/envSDM/examples/chg__0.3__5/combo/full_run.rds
+#> /home/nwilloug/temp/R/Rtmp9mmcg5/temp_libpath1add5a122b9c77/envSDM/examples/chg__0__5__100/combo/full_run.rds
 #> 
 #> [[3]]
-#> /home/nwilloug/temp/R/RtmpFqKb5a/temp_libpath3c46d356bc9bf2/envSDM/examples/chg__0__1/combo/full_run.rds
-#> 
-#> [[4]]
-#> /home/nwilloug/temp/R/RtmpFqKb5a/temp_libpath3c46d356bc9bf2/envSDM/examples/chg__0__5/combo/full_run.rds
+#> /home/nwilloug/temp/R/Rtmp9mmcg5/temp_libpath1add5a122b9c77/envSDM/examples/chg__0__5__20/combo/full_run.rds
 #> 
 
 
@@ -155,7 +152,6 @@ files
 
 
 
-
   # Best auc--------
   ## run full SDM --------
   data <- data %>%
@@ -176,16 +172,13 @@ files
                                          )
               )
 #> [[1]]
-#> /home/nwilloug/temp/R/RtmpFqKb5a/temp_libpath3c46d356bc9bf2/envSDM/examples/chg__0.3__1/auc_po/full_run.rds
+#> /home/nwilloug/temp/R/Rtmp9mmcg5/temp_libpath1add5a122b9c77/envSDM/examples/chg__0__5__10/auc_po/full_run.rds
 #> 
 #> [[2]]
-#> /home/nwilloug/temp/R/RtmpFqKb5a/temp_libpath3c46d356bc9bf2/envSDM/examples/chg__0.3__5/auc_po/full_run.rds
+#> /home/nwilloug/temp/R/Rtmp9mmcg5/temp_libpath1add5a122b9c77/envSDM/examples/chg__0__5__100/auc_po/full_run.rds
 #> 
 #> [[3]]
-#> /home/nwilloug/temp/R/RtmpFqKb5a/temp_libpath3c46d356bc9bf2/envSDM/examples/chg__0__1/auc_po/full_run.rds
-#> 
-#> [[4]]
-#> /home/nwilloug/temp/R/RtmpFqKb5a/temp_libpath3c46d356bc9bf2/envSDM/examples/chg__0__5/auc_po/full_run.rds
+#> /home/nwilloug/temp/R/Rtmp9mmcg5/temp_libpath1add5a122b9c77/envSDM/examples/chg__0__5__20/auc_po/full_run.rds
 #> 
 
   ## predict -------
@@ -211,7 +204,6 @@ files
                 terra::trim() %>%
                 terra::plot()
               )
-
 
 
 

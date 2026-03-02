@@ -115,34 +115,28 @@ Character path to threshold file, usually 'thresh.tif'. Output .tif and
                                        , force_new = TRUE
                                        )
                )
-#> create thresh.tif for chg__0.3__1 with threshold value: 0.7319
-#> create thresh.tif for chg__0.3__1 with threshold value: 0.7019
-#> create thresh.tif for chg__0.3__5 with threshold value: 0.5413
-#> create thresh.tif for chg__0.3__5 with threshold value: 0.4919
-#> create thresh.tif for chg__0__1 with threshold value: 0.5359
-#> create thresh.tif for chg__0__1 with threshold value: 0.6419
-#> create thresh.tif for chg__0__5 with threshold value: 0.6519
-#> create thresh.tif for chg__0__5 with threshold value: 0.6459
+#> create thresh.tif for chg__0__5__10 with threshold value: 0.5299
+#> create thresh.tif for chg__0__5__10 with threshold value: 0.5899
+#> create thresh.tif for chg__0__5__100 with threshold value: 0.5819
+#> create thresh.tif for chg__0__5__100 with threshold value: 0.5679
+#> create thresh.tif for chg__0__5__20 with threshold value: 0.5199
+#> create thresh.tif for chg__0__5__20 with threshold value: 0.6279
 
   ## visualise-------
   ### threshold -------
-  purrr::walk(data$out_dir
-              , \(x) fs::path(x, "thresh.tif") %>%
-                terra::rast() %>%
-                terra::trim() %>%
-                terra::plot()
-              )
+  plots <- data |>
+    dplyr::mutate(opts = basename(dirname(out_dir))) |>
+    tidyr::separate(opts, into = c("taxa", "hold_prop", "repeats", "stretch"), sep = "__") |>
+    dplyr::filter(hold_prop == 0, repeats == 5, metric == "combo") |>
+    dplyr::mutate(stretch = as.numeric(stretch)) |>
+    dplyr::arrange(stretch)
+
+  r <- fs::path(plots$out_dir, "thresh.tif") |>
+    terra::rast()
+
+  terra::plot(r, main = plots$stretch, nc = 1)
 
 
-
-
-
-
-
-
-
-
-
-
+  tm_shape(r) + tm_raster()
 
 ```

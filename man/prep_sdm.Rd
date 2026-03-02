@@ -226,10 +226,13 @@ against which background points are assigned.
     dplyr::mutate(taxa = gsub("\\\\.csv", "", basename(path))
                   , presence = purrr::map(path, rio::import, setclass = "tibble", trust = TRUE)
                   ) |>
-    dplyr::cross_join(tibble::tibble(hold_prop = c(0, 0.3))) |>
-    dplyr::cross_join(tibble::tibble(repeats = c(1, 5))) |>
-    dplyr::mutate(taxa_dir = fs::path(out_dir, paste0(taxa, "__", hold_prop, "__", repeats))
+    dplyr::cross_join(tibble::tibble(hold_prop = c(0))) |>
+    dplyr::cross_join(tibble::tibble(repeats = c(5))) |>
+    dplyr::cross_join(tibble::tibble(stretch = c(10, 20, 100))) |>
+    dplyr::mutate(taxa_dir = fs::path(out_dir, paste0(taxa, "__", hold_prop, "__", repeats, "__", stretch))
                   , out_mcp = fs::path(taxa_dir, "mcp.parquet")
+                  , dens_ras = fs::path(taxa_dir, "density.tif")
+                  , prep_file = fs::path(taxa_dir, "prep.rds")
                   )
 
   # predictors -------
@@ -260,8 +263,9 @@ against which background points are assigned.
                     , data$presence
                     , data$out_mcp
                     , data$hold_prop
+                    , data$stretch
                     )
-               , function(a, b, c, d, e) prep_sdm(this_taxa = a
+               , function(a, b, c, d, e, f) prep_sdm(this_taxa = a
                                                , out_dir = b
                                                , presence = c
                                                , pres_x = "cell_long"
@@ -276,69 +280,54 @@ against which background points are assigned.
                                                , dens_res = 1000 # ignored as decimal degrees preds
                                                , reduce_env_thresh_corr = 0.95
                                                , reduce_env_quant_rf_imp = 0.2
+                                               , stretch_value = f
+                                               , num_bg = 1000
                                                #, force_new = TRUE
                                                )
                )
 
   # example of 'prep'
-  prep <- rio::import(fs::path(data$taxa_dir[[1]], "prep.rds"), trust = TRUE)
+  prep <- rio::import(data$prep_file[[1]], trust = TRUE)
 
   names(prep)
 
-  # env variables to remove prior to SDM
+  # variables to remove prior to SDM
   prep$reduce_env$remove
 
-  # Density raster
-  dens_ras <- terra::rast(fs::path(data$taxa_dir[[2]], "density.tif")) \%>\%
-    terra::mask(clip) \%>\%
-    terra::classify(matrix(c(0, NA), ncol = 2))
-
-  if(require("tmap")) {
-
-    m <-
-      tm_shape(dens_ras) +
-      tm_raster(col.legend = "Background point density"
-                , col.scale = c(0, 2, 4, 6, 8, 10)
-                , drop.levels = TRUE
-                ) +
-      tm_title(paste0("Background point density for ",  prep$this_taxa))
-
-    m
-
-    presences <- prep$pa_ras |>
-      dplyr::filter(pa == 1) \%>\%
-      sf::st_as_sf(coords = c("x", "y")
-                   , crs = 4326
-                   )
-
-    m +
-      tm_shape(presences) +
-        tm_dots(fill = "pa")
-
-  }
 
   # Background points
   if(require("tmap")) {
 
-    folds <- prep$bg_points \%>\%
-      dplyr::inner_join(prep$training |>
-                         dplyr::select(rep, training) |>
-                         tidyr::unnest(cols = c(training))
-                       ) |>
-      dplyr::mutate(fold = factor(fold) # for map
-                    , rep = paste0("rep: ", rep)
-                    ) \%>\%
-      sf::st_as_sf(coords = c("x", "y")
-                   , crs = sf::st_crs(terra::rast(env_dat[[1]]))
-                   )
+    preps <- data$prep_file |>
+      purrr::map(readRDS)
+
+    b <- preps |>
+      purrr::map("bg_points") |>
+      purrr::set_names(data$stretch) |>
+      dplyr::bind_rows(.id = "stretch") |>
+      dplyr::mutate(stretch = as.numeric(stretch)
+                    , type = "background"
+                    )
+
+    p <- preps |>
+      purrr::map(\(x) sf::st_as_sf(x$presence_ras
+                                   , coords = c("x", "y")
+                                   , crs = x$epsg_out
+                                   )
+                 ) |>
+      purrr::set_names(data$stretch) |>
+      dplyr::bind_rows(.id = "stretch") |>
+      dplyr::mutate(stretch = as.numeric(stretch)
+                    , type = "presence"
+                    )
 
 
-    tm_shape(folds) +
-      tm_dots(fill = "fold"
-              , fill.scale = tm_scale(values = "viridis")
+
+    tm_shape(dplyr::bind_rows(b, p)) +
+      tm_dots(fill = "type"
+              , size = 0.5
               ) +
-      tm_facets(by = "rep") +
-      tm_legend(outside = TRUE)
+      tm_facets(by = "stretch")
 
 
   }
