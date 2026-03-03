@@ -315,7 +315,7 @@
         terra::xyFromCell(prep_preds[[1]], .) %>%
         tibble::as_tibble() %>%
         # 'pres_col' is 'pa' from here on
-        {if(pres_col %in% names(presence)) (.) %>% dplyr::mutate(pa = presence$pa) else (.) |> dplyr::mutate(pa = pres_val)} %>%
+        {if(pres_col %in% names(presence)) (.) %>% dplyr::mutate(pa = presence[[pres_col]]) else (.) |> dplyr::mutate(pa = pres_val)} %>%
         stats::na.omit()
 
       ## raster presence ------
