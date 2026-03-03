@@ -304,7 +304,7 @@
       prep$original <- presence
 
       ## raster pa -------
-      prep$pa_ras <- terra::cellFromXY(prep_preds
+      prep$pa_ras <- terra::cellFromXY(prep_preds[[1]]
                                        , presence %>%
                                          sf::st_as_sf(coords = c(pres_x, pres_y)
                                                       , crs = pres_crs
@@ -312,16 +312,16 @@
                                          sf::st_transform(crs = prep$epsg_out) %>%
                                          sf::st_coordinates()
                                        ) %>%
-        terra::xyFromCell(prep_preds, .) %>%
+        terra::xyFromCell(prep_preds[[1]], .) %>%
         tibble::as_tibble() %>%
-        {if(pres_col %in% names(presence)) (.) %>% dplyr::mutate(pa = presence$pa) else (.) |> dplyr::mutate(!!rlang::ensym(pres_col) := pres_val)} %>%
+        # 'pres_col' is 'pa' from here on
+        {if(pres_col %in% names(presence)) (.) %>% dplyr::mutate(pa = presence$pa) else (.) |> dplyr::mutate(pa = pres_val)} %>%
         stats::na.omit()
 
       ## raster presence ------
       # not limited to raster yet though
       prep$presence_ras <- prep$pa_ras |>
-        dplyr::filter(!!rlang::ensym(pres_col) == pres_val) |>
-        dplyr::select(- !!rlang::ensym(pres_col))
+        dplyr::filter(pa == pres_val)
 
 
       # predict_boundary -------
@@ -569,7 +569,7 @@
 
             target_density2 <- raster::raster(bw_p_only) %>%
               terra::rast() %>%
-              terra::resample(temp_ras) %>%
+              terra::project(temp_ras) %>%
               terra::focal(3
                            , mean
                            , na.policy = "only"
