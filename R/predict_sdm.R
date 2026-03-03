@@ -323,14 +323,11 @@ predict_sdm <- function(prep
 
   } else {
 
-    # if prep abandoned but pred_file exists rename it, then delete it
-    # to the same for any thresh_ file
+    # if prep abandoned but pred_file exists delete pred_file
     # this can happen occasionally when adjusting the incoming data so that a taxa that previously had an SDM is now abandoned
     if(all(prep$abandoned, file.exists(pred_file))) {
 
-      fs::file_copy(pred_file
-                    , gsub(basename(pred_file), paste0("renamed__", basename(pred_file)), x = pred_file)
-                    )
+      warning(pred_file, " was deleted as prep$abandoned is TRUE but ", pred_file, " exists")
 
       fs::file_delete(pred_file)
 
