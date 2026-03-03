@@ -555,7 +555,9 @@
 
           }
 
-          target_density <- raster::raster(bw) %>%
+          target_density <- raster::raster(bw
+                                           , crs = paste0("epsg:", prep$epsg_out)
+                                           ) %>%
             terra::rast() %>%
             terra::project(temp_ras) %>%
             terra::focal(3
@@ -567,7 +569,9 @@
 
           if(exists("bw_p_only", inherits = FALSE)) {
 
-            target_density2 <- raster::raster(bw_p_only) %>%
+            target_density2 <- raster::raster(bw_p_only
+                                              , crs = paste0("epsg:", prep$epsg_out)
+                                              ) %>%
               terra::rast() %>%
               terra::project(temp_ras) %>%
               terra::focal(3
