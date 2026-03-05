@@ -143,6 +143,7 @@
                        , is_env_pred = TRUE
                        , terra_options = NULL
                        , cat_preds = NULL
+                       , cat_preds_max_levels = 32
                        , num_bg = 10000
                        , prop_abs = "abs"
                        , many_p_prop = 2
@@ -750,8 +751,43 @@
 
           if(!is.null(cat_preds)) {
 
+            prep$cat_pred_levels <- purrr::set_names(cat_preds) |>
+              purrr::map(\(x) levels(prep_preds[[x]])[[1]] |>
+                           tibble::as_tibble() |>
+                           dplyr::rename(old_levels = 2) |>
+                           dplyr::mutate(old_levels = forcats::fct_inorder(old_levels)) |>
+                           dplyr::left_join(prep$env |>
+                                              dplyr::filter(pa == 1) |>
+                                              dplyr::count(!!rlang::ensym(x)) |>
+                                              dplyr::rename(old_levels = !!rlang::ensym(x))
+                                            ) |>
+                           dplyr::mutate(n = dplyr::if_else(is.na(n), 0, n)) %>%
+                           dplyr::mutate(new_levels = forcats::fct_lump_n(old_levels
+                                                                          , n = cat_preds_max_levels
+                                                                          , ties.method = "max"
+                                                                          , w = .$n
+                                                                          )
+                                         ) |>
+                           dplyr::distinct() |>
+                           dplyr::mutate(old_nr = as.numeric(old_levels)
+                                         , new_nr = as.numeric(new_levels)
+                                         ) |>
+                           dplyr::arrange(old_levels)
+                         )
+
             prep$env <- prep$env %>%
-              dplyr::mutate(dplyr::across(tidyselect::any_of(cat_preds), as.factor))
+              dplyr::mutate(dplyr::across(tidyselect::any_of(cat_preds)
+                                          , \(x) as.factor(as.numeric(x))
+                                          )
+                            )
+
+            for(x in cat_preds) {
+
+              lu <- prep$cat_pred_levels[[x]]
+
+              prep$env[[x]] <- lu$new_nr[match(prep$env[[x]], lu$old_nr)]
+
+            }
 
           }
 
@@ -1150,7 +1186,13 @@
 
               start_reduce_env <- Sys.time()
 
-              prep$reduce_env <- envModel::reduce_env(env_df = prep$env
+              use_env <- prep$env |>
+                dplyr::mutate(dplyr::across(dplyr::where(is.factor)
+                                            , \(x) as.numeric(x)
+                                            )
+                              )
+
+              prep$reduce_env <- envModel::reduce_env(env_df = use_env
                                                       , env_cols = names(prep_preds)
                                                       , y_col = "pa"
                                                       , imp_col = "1"

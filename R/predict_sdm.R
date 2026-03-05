@@ -84,14 +84,7 @@ predict_sdm <- function(prep
 
     pred_df <- envRaster::name_env_tif(tibble::tibble(path = predictors), parse = TRUE)
 
-    pred_names <- pred_df %>%
-      dplyr::pull(name)
-
     min_date <- min(as.Date(pred_df$start_date))
-
-    x <- terra::rast(predictors)
-
-    names(x) <- pred_names
 
     if(use_env_naming) {
 
@@ -100,10 +93,6 @@ predict_sdm <- function(prep
                             )
 
     }
-
-  } else {
-
-    x <- terra::rast(predictors)
 
   }
 
@@ -195,8 +184,8 @@ predict_sdm <- function(prep
 
       }
 
-      ## predict_stack---------
-      use_boundary <- if(! identical(terra::crs(x), terra::crs(prep$predict_boundary))) {
+      ## predict boundary ------
+      use_boundary <- if(! identical(terra::crs(terra::rast(predictors[[1]])), terra::crs(prep$predict_boundary))) {
 
         prep$predict_boundary |>
           terra::vect() |>
@@ -207,7 +196,12 @@ predict_sdm <- function(prep
 
       } else prep$predict_boundary
 
-      terra::window(x) <- terra::ext(terra::vect(use_boundary))
+      ## predict_stack---------
+      x <- envRaster::make_env_stack(predictors
+                                     , is_env_pred = is_env_pred
+                                     , aoi = use_boundary
+                                     , cat_pred_levels = prep$cat_pred_levels
+                                     )
 
       ## predict--------
       pred_start <-  Sys.time()
