@@ -720,7 +720,7 @@
           if(!is.null(cat_preds)) {
 
             prep$cat_pred_levels <- purrr::set_names(cat_preds) |>
-              purrr::map(\(x) levels(prep_preds[[x]])[[1]] |>
+              purrr::map(\(x) terra::levels(prep_preds[[x]])[[1]] |>
                            tibble::as_tibble() |>
                            dplyr::rename(old_levels = 2) |>
                            dplyr::mutate(old_levels = forcats::fct_inorder(old_levels)) |>
