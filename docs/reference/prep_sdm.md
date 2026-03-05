@@ -25,6 +25,7 @@ prep_sdm(
   is_env_pred = TRUE,
   terra_options = NULL,
   cat_preds = NULL,
+  cat_preds_max_levels = 32,
   num_bg = 10000,
   prop_abs = "abs",
   many_p_prop = 2,
@@ -362,13 +363,13 @@ sampling density raster against which background points are assigned.
                                                )
                )
 #> prep for chg
-#> out_dir is /home/nwilloug/temp/R/Rtmp9mmcg5/temp_libpath1add5a122b9c77/envSDM/examples/chg__0__5__10.
+#> out_dir is /home/nwilloug/temp/R/Rtmp8S3fd2/temp_libpath1e44d9712079af/envSDM/examples/chg__0__5__10.
 #>  103 incoming presences
 #> prep for chg
-#> out_dir is /home/nwilloug/temp/R/Rtmp9mmcg5/temp_libpath1add5a122b9c77/envSDM/examples/chg__0__5__20.
+#> out_dir is /home/nwilloug/temp/R/Rtmp8S3fd2/temp_libpath1e44d9712079af/envSDM/examples/chg__0__5__20.
 #>  103 incoming presences
 #> prep for chg
-#> out_dir is /home/nwilloug/temp/R/Rtmp9mmcg5/temp_libpath1add5a122b9c77/envSDM/examples/chg__0__5__100.
+#> out_dir is /home/nwilloug/temp/R/Rtmp8S3fd2/temp_libpath1e44d9712079af/envSDM/examples/chg__0__5__100.
 #>  103 incoming presences
 
   # example of 'prep'

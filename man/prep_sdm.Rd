@@ -21,6 +21,7 @@ prep_sdm(
   is_env_pred = TRUE,
   terra_options = NULL,
   cat_preds = NULL,
+  cat_preds_max_levels = 32,
   num_bg = 10000,
   prop_abs = "abs",
   many_p_prop = 2,
