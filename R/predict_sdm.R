@@ -184,8 +184,11 @@ predict_sdm <- function(prep
 
       }
 
+      # small, temp 'x' here. will be remade as full stack just after this step
+      x <- terra::rast(predictors[[1]])
+
       ## predict boundary ------
-      use_boundary <- if(! identical(terra::crs(terra::rast(predictors[[1]])), terra::crs(prep$predict_boundary))) {
+      use_boundary <- if(! identical(terra::crs(x), terra::crs(prep$predict_boundary))) {
 
         prep$predict_boundary |>
           terra::vect() |>
