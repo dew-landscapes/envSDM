@@ -267,17 +267,39 @@
                          )
 
       ## predictors -----
+      stack_desc <- predictors |>
+        tibble::enframe(name = NULL, value = "path") |>
+        dplyr::mutate(r = purrr::map(path, terra::rast)
+                      , crs = purrr::map_dbl(r, \(x) as.numeric(terra::crs(x, describe = TRUE)$code))
+                      , extent = purrr::map(r, \(x) terra::ext(x))
+                      , res_x = purrr::map_dbl(r, \(x) terra::res(x)[[1]])
+                      , res_y = purrr::map_dbl(r, \(x) terra::res(x)[[2]])
+                      , xmin = purrr::map_dbl(extent, \(x) x$xmin)
+                      , xmax = purrr::map_dbl(extent, \(x) x$xmax)
+                      , ymin = purrr::map_dbl(extent, \(x) x$ymin)
+                      , ymax = purrr::map_dbl(extent, \(x) x$ymax)
+                      )
+
+      stack_extent <- stack_desc |>
+        dplyr::count(crs, xmin, xmax, ymin, ymax, res_x, res_y) |>
+        dplyr::filter(n == max(n)) |>
+        dplyr::inner_join(stack_desc) |>
+        dplyr::slice(1) |>
+        dplyr::pull(extent) |>
+        purrr::pluck(1)
+
+      prep_preds <- purrr::map(stack_desc$path
+                               , terra::rast
+                               ) |>
+        purrr::map(\(x) terra::extend(x, y = stack_extent)) |>
+        terra::rast()
+
       if(is_env_pred) {
 
         pred_names <- envRaster::name_env_tif(tibble::tibble(path = predictors), parse = TRUE) |>
           dplyr::pull(name)
 
-        prep_preds <- terra::rast(predictors)
         names(prep_preds) <- pred_names
-
-      } else {
-
-        prep_preds <- terra::rast(predictors)
 
       }
 
