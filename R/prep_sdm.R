@@ -43,6 +43,9 @@
 #' @param pred_clip sf. Optional sf to clip the pred_limit back to (e.g. to
 #' prevent prediction into ocean).
 #' @param predictors Character. Vector of paths to predictor `.tif` files.
+#' @param max_na_predictor_prop Proportion. A predictor will be dropped if the
+#' proportion of presences with `NA` values for that predictor exceeds
+#' `max_na_predictor_prop`
 #' @param is_env_pred Logical. Does the naming of the directory and files in
 #' `predictors` follow the pattern required by `envRaster::parse_env_tif()`?
 #' @param cat_preds Character. Vector of predictor names that are character.
@@ -140,6 +143,7 @@
                        , limit_buffer = 0
                        , pred_clip = NULL
                        , predictors
+                       , max_na_predictor_prop = 0.05
                        , is_env_pred = TRUE
                        , terra_options = NULL
                        , cat_preds = NULL
@@ -708,13 +712,32 @@
                                        dplyr::mutate(pa = 0)
                                      )
 
-          prep$env <- terra::extract(prep_preds
-                                     , y = terra::vect(spp_pa)
-                                     , include_cols = "pa"
-                                     , ID = FALSE
-                                     , bind = TRUE
-                                     ) %>%
-            tibble::as_tibble() |>
+          env <- terra::extract(prep_preds
+                                , y = terra::vect(spp_pa)
+                                , include_cols = "pa"
+                                , ID = FALSE
+                                , bind = TRUE
+                                ) %>%
+            tibble::as_tibble()
+
+          test_na <- env |>
+            dplyr::filter(pa == 1) |>
+            dplyr::mutate(dplyr::across(tidyselect::where(is.factor)
+                                        , as.numeric
+                                        )
+                          ) |>
+            tidyr::pivot_longer(cols = tidyselect::any_of(names(prep_preds))) |>
+            dplyr::group_by(name) |>
+            dplyr::summarise(nas = sum(is.na(value))
+                             , n = dplyr::n()
+                             , prop_na = nas / n
+                             ) |>
+            dplyr::ungroup()
+
+          remove_na <- test_na$name[test_na$prop_na > max_na_predictor_prop]
+
+          prep$env <- env |>
+            dplyr::select(! tidyselect::any_of(remove_na)) |>
             na.omit()
 
           if(!is.null(cat_preds)) {
