@@ -115,12 +115,12 @@ Character path to threshold file, usually 'thresh.tif'. Output .tif and
                                        , force_new = TRUE
                                        )
                )
-#> create thresh.tif for chg__0__5__10 with threshold value: 0.5299
-#> create thresh.tif for chg__0__5__10 with threshold value: 0.5899
-#> create thresh.tif for chg__0__5__100 with threshold value: 0.5819
-#> create thresh.tif for chg__0__5__100 with threshold value: 0.5679
-#> create thresh.tif for chg__0__5__20 with threshold value: 0.5199
-#> create thresh.tif for chg__0__5__20 with threshold value: 0.6279
+#> create thresh.tif for chg__0__5__10 with threshold value: 0.6539
+#> create thresh.tif for chg__0__5__10 with threshold value: 0.6519
+#> create thresh.tif for chg__0__5__100 with threshold value: 0.5859
+#> create thresh.tif for chg__0__5__100 with threshold value: 0.5959
+#> create thresh.tif for chg__0__5__20 with threshold value: 0.5379
+#> create thresh.tif for chg__0__5__20 with threshold value: 0.6159
 
   ## visualise-------
   ### threshold -------
@@ -135,8 +135,4 @@ Character path to threshold file, usually 'thresh.tif'. Output .tif and
     terra::rast()
 
   terra::plot(r, main = plots$stretch, nc = 1)
-
-
-  tm_shape(r) + tm_raster()
-
 ```

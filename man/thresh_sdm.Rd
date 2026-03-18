@@ -108,7 +108,4 @@ Threshold a previously predicted SDM
     terra::rast()
 
   terra::plot(r, main = plots$stretch, nc = 1)
-
-  tm_shape(r) + tm_raster()
-
 }

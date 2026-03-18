@@ -188,13 +188,13 @@ elements:
                               )
               )
 #> [[1]]
-#> /home/nwilloug/temp/R/Rtmp8S3fd2/temp_libpath1e44d9712079af/envSDM/examples/chg__0__5__10/tune.rds
+#> /home/nwilloug/tmp/R/Rtmpz25GLu/temp_libpath113213224bbddf/envSDM/examples/chg__0__5__10/tune.rds
 #> 
 #> [[2]]
-#> /home/nwilloug/temp/R/Rtmp8S3fd2/temp_libpath1e44d9712079af/envSDM/examples/chg__0__5__100/tune.rds
+#> /home/nwilloug/tmp/R/Rtmpz25GLu/temp_libpath113213224bbddf/envSDM/examples/chg__0__5__100/tune.rds
 #> 
 #> [[3]]
-#> /home/nwilloug/temp/R/Rtmp8S3fd2/temp_libpath1e44d9712079af/envSDM/examples/chg__0__5__20/tune.rds
+#> /home/nwilloug/tmp/R/Rtmpz25GLu/temp_libpath113213224bbddf/envSDM/examples/chg__0__5__20/tune.rds
 #> 
 
   # which tune args were best for each taxa using 'combo'?
@@ -209,9 +209,9 @@ elements:
 #> # A tibble: 3 × 8
 #>   taxa           algo  tune_args          combo auc_po  IMAE   CBI max_spec_sens
 #>   <chr>          <chr> <chr>              <dbl>  <dbl> <dbl> <dbl>         <dbl>
-#> 1 chg__0__5__10  rf    tr: 500. mt: 2. n… 0.539  0.822 0.786 0.668         0.287
-#> 2 chg__0__5__100 rf    tr: 500. mt: 2. n… 0.431  0.710 0.743 0.632         0.326
-#> 3 chg__0__5__20  rf    tr: 500. mt: 1. n… 0.413  0.743 0.781 0.424         0.258
+#> 1 chg__0__5__10  rf    tr: 500. mt: 1. n… 0.489  0.792 0.777 0.587         0.274
+#> 2 chg__0__5__100 rf    tr: 500. mt: 3. n… 0.445  0.726 0.744 0.649         0.281
+#> 3 chg__0__5__20  rf    tr: 500. mt: 1. n… 0.447  0.721 0.760 0.631         0.287
 
   # or best tune args choosing on just auc_po?
   data %>%
@@ -227,7 +227,7 @@ elements:
 #> # A tibble: 3 × 7
 #>   taxa           algo  tune_args             auc_po  IMAE   CBI max_spec_sens
 #>   <chr>          <chr> <chr>                  <dbl> <dbl> <dbl>         <dbl>
-#> 1 chg__0__5__10  rf    tr: 500. mt: 2. ns: 3  0.822 0.786 0.668         0.287
-#> 2 chg__0__5__100 rf    tr: 500. mt: 2. ns: 3  0.714 0.739 0.618         0.308
-#> 3 chg__0__5__20  rf    tr: 500. mt: 2. ns: 3  0.744 0.781 0.321         0.251
+#> 1 chg__0__5__10  rf    tr: 500. mt: 1. ns: 1  0.792 0.777 0.587         0.274
+#> 2 chg__0__5__100 rf    tr: 500. mt: 2. ns: 2  0.730 0.743 0.625         0.279
+#> 3 chg__0__5__20  rf    tr: 500. mt: 1. ns: 3  0.734 0.758 0.543         0.267
 ```

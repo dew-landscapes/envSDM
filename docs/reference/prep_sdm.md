@@ -22,6 +22,7 @@ prep_sdm(
   limit_buffer = 0,
   pred_clip = NULL,
   predictors,
+  max_na_predictor_prop = 0.05,
   is_env_pred = TRUE,
   terra_options = NULL,
   cat_preds = NULL,
@@ -115,6 +116,11 @@ prep_sdm(
 - predictors:
 
   Character. Vector of paths to predictor `.tif` files.
+
+- max_na_predictor_prop:
+
+  Proportion. A predictor will be dropped if the proportion of presences
+  with `NA` values for that predictor exceeds `max_na_predictor_prop`
 
 - is_env_pred:
 
@@ -363,13 +369,13 @@ sampling density raster against which background points are assigned.
                                                )
                )
 #> prep for chg
-#> out_dir is /home/nwilloug/temp/R/Rtmp8S3fd2/temp_libpath1e44d9712079af/envSDM/examples/chg__0__5__10.
+#> out_dir is /home/nwilloug/tmp/R/Rtmpz25GLu/temp_libpath113213224bbddf/envSDM/examples/chg__0__5__10.
 #>  103 incoming presences
 #> prep for chg
-#> out_dir is /home/nwilloug/temp/R/Rtmp8S3fd2/temp_libpath1e44d9712079af/envSDM/examples/chg__0__5__20.
+#> out_dir is /home/nwilloug/tmp/R/Rtmpz25GLu/temp_libpath113213224bbddf/envSDM/examples/chg__0__5__20.
 #>  103 incoming presences
 #> prep for chg
-#> out_dir is /home/nwilloug/temp/R/Rtmp8S3fd2/temp_libpath1e44d9712079af/envSDM/examples/chg__0__5__100.
+#> out_dir is /home/nwilloug/tmp/R/Rtmpz25GLu/temp_libpath113213224bbddf/envSDM/examples/chg__0__5__100.
 #>  103 incoming presences
 
   # example of 'prep'

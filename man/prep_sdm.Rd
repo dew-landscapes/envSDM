@@ -18,6 +18,7 @@ prep_sdm(
   limit_buffer = 0,
   pred_clip = NULL,
   predictors,
+  max_na_predictor_prop = 0.05,
   is_env_pred = TRUE,
   terra_options = NULL,
   cat_preds = NULL,
@@ -80,6 +81,10 @@ will be used); path to existing .parquet to use; or sf object.}
 prevent prediction into ocean).}
 
 \item{predictors}{Character. Vector of paths to predictor \code{.tif} files.}
+
+\item{max_na_predictor_prop}{Proportion. A predictor will be dropped if the
+proportion of presences with \code{NA} values for that predictor exceeds
+\code{max_na_predictor_prop}}
 
 \item{is_env_pred}{Logical. Does the naming of the directory and files in
 \code{predictors} follow the pattern required by \code{envRaster::parse_env_tif()}?}
