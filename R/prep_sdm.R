@@ -1184,13 +1184,15 @@
                               )
 
               prep$reduce_env <- envModel::reduce_env(env_df = use_env
-                                                      , env_cols = names(prep_preds)
+                                                      , env_cols = names(prep_preds)[names(prep_preds) %in% names(use_env)]
                                                       , y_col = "pa"
                                                       , imp_col = "1"
                                                       , thresh_corr = reduce_env_thresh_corr
                                                       , quant_rf_imp = reduce_env_quant_rf_imp
                                                       , remove_always = c(pres_x, pres_y, "x", "y", "pa", "fold", "cell", "id")
                                                       )
+
+              prep$reduce_env$remove_max_na_predictor_prop <- remove_na
 
               prep$log <- paste0(prep$log
                                  , "\n"
