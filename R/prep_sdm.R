@@ -52,8 +52,9 @@
 #' @param terra_options Passed to `terra::terraOptions()`. e.g. list(memfrac =
 #' 0.6)
 #' @param num_bg Numeric. How many background points?
-#' @param prop_abs Character. Is `num_bg` a proportion (`prop`) of the number of
-#' records in `presence` or an absolute (`abs`) number?
+#' @param bg_prop_cells Proportion. Ensure `num_bg` reaches `prop_cells` (`num_bg`
+#' as a proportion of the number of non-NA cells within the predict/calibration
+#' boundary).
 #' @param many_p_prop Numeric. Ensure the number of background points is at
 #' least `many_p_prop * number of presences`. e.g. If there are more than 5000
 #' presences and num_bg is set at `10000` and `many_p_prop` is `2`, then num_bg
@@ -149,7 +150,7 @@
                        , cat_preds = NULL
                        , cat_preds_max_levels = 32
                        , num_bg = 10000
-                       , prop_abs = "abs"
+                       , bg_prop_cells = 0
                        , many_p_prop = 2
                        , folds = 5
                        , spatial_folds = TRUE
@@ -481,15 +482,34 @@
 
         k_folds_adj <- k_folds # use k_folds_adj if need to revert to non-spatial cv later (see folds/non-spatial)
 
-        # num_bg adj------
+        # bg adj --------
 
-        if(prop_abs == "prop") {
-
-          num_bg <- num_bg * n_p
-
-        }
+        orig_bg <- num_bg
 
         if(num_bg < many_p_prop * n_p) num_bg <- many_p_prop * n_p
+
+        n_cells <- terra::global(prep_preds[[1]], "notNA")[[1]]
+
+        if(num_bg / n_cells < bg_prop_cells) {
+
+          num_bg <- floor(n_cells * bg_prop_cells)
+
+          prep$log <- paste0(prep$log
+                             , "\n"
+                             , "Number of non-NA cells within predict/callibration boundary is "
+                             , format(n_cells, big.mark = ",")
+                             , " which is more than bg_prop_cells ("
+                             , bg_prop_cells
+                             , "). Background points increased from "
+                             , format(orig_bg, big.mark = ",")
+                             , " to "
+                             , format(num_bg, big.mark = ",")
+                             , " to achieve "
+                             , bg_prop_cells
+                             , " proportion of cells in background."
+                             )
+
+        }
 
         # density raster ------
 
