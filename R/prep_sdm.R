@@ -937,23 +937,16 @@
 
           rm(to_split)
 
-          text_one <- paste0("test/training split\n "
-                             , as.character(nrow(prep$testing))
-                             , " test data, including "
-                             , as.character(sum(prep$testing$pa == 1))
-                             , " presences."
-                             )
-
-          text_two <- paste0(" repeat: "
-                             , 1:repeats_adj
-                             , ". "
-                             , purrr::map_chr(prep$training$training, \(x) as.character(nrow(x)))
-                             , " training data, including "
-                             , purrr::map_chr(prep$training$training, \(x) as.character(sum(x$pa == 1)))
-                             , " presences."
-                             )
-
-          text <- paste0(c(text_one, text_two), collapse = "\n")
+          text <- paste0("test/training split\n "
+                         , as.character(nrow(prep$testing))
+                         , " test data, including "
+                         , as.character(sum(prep$testing$pa == 1))
+                         , " presences.\n"
+                         , as.character(nrow(prep$training$training[[1]]))
+                         , " training data, including "
+                         , as.character(sum(prep$training$training[[1]]$pa == 1))
+                         , " presences."
+                         )
 
           prep$log <- paste0(prep$log
                              , "\n"
