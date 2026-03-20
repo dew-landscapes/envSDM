@@ -94,6 +94,16 @@ predict_sdm <- function(prep
 
     }
 
+    # make sure predictors are used in full run model
+    use_predictors <- pred_df$path[pred_df$name %in% full_run$preds[[1]]]
+
+  } else {
+
+    use_predictors <- predictors[grepl(paste0(full_run$preds[[1]], collapse = "|")
+                                       , basename(predictors)
+                                       )
+                                 ]
+
   }
 
   ### new -------
@@ -167,7 +177,7 @@ predict_sdm <- function(prep
 
     run <- if(file.exists(pred_file)) force_new else TRUE
 
-    if(all(!is.null(predictors), run)) {
+    if(all(!is.null(use_predictors), run)) {
 
       gc()
 
@@ -185,7 +195,7 @@ predict_sdm <- function(prep
       }
 
       # small, temp 'x' here. will be remade as full stack just after this step
-      x <- terra::rast(predictors[[1]])
+      x <- terra::rast(use_predictors[[1]])
 
       ## predict boundary ------
       use_boundary <- if(! identical(terra::crs(x), terra::crs(prep$predict_boundary))) {
@@ -200,7 +210,7 @@ predict_sdm <- function(prep
       } else prep$predict_boundary
 
       ## predict_stack---------
-      x <- envRaster::make_env_stack(predictors
+      x <- envRaster::make_env_stack(use_predictors
                                      , is_env_pred = is_env_pred
                                      , aoi = use_boundary
                                      , cat_pred_levels = prep$cat_pred_levels
