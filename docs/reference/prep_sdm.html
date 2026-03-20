@@ -67,7 +67,7 @@ by user <a href="https://gis.stackexchange.com/users/865/spacedman" class="exter
 <span>  cat_preds <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  cat_preds_max_levels <span class="op">=</span> <span class="fl">32</span>,</span>
 <span>  num_bg <span class="op">=</span> <span class="fl">10000</span>,</span>
-<span>  prop_abs <span class="op">=</span> <span class="st">"abs"</span>,</span>
+<span>  bg_prop_cells <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  many_p_prop <span class="op">=</span> <span class="fl">2</span>,</span>
 <span>  folds <span class="op">=</span> <span class="fl">5</span>,</span>
 <span>  spatial_folds <span class="op">=</span> <span class="cn">TRUE</span>,</span>
@@ -177,9 +177,10 @@ proportion of presences with <code>NA</code> values for that predictor exceeds
 <dd><p>Numeric. How many background points?</p></dd>
 
 
-<dt id="arg-prop-abs">prop_abs<a class="anchor" aria-label="anchor" href="#arg-prop-abs"></a></dt>
-<dd><p>Character. Is <code>num_bg</code> a proportion (<code>prop</code>) of the number of
-records in <code>presence</code> or an absolute (<code>abs</code>) number?</p></dd>
+<dt id="arg-bg-prop-cells">bg_prop_cells<a class="anchor" aria-label="anchor" href="#arg-bg-prop-cells"></a></dt>
+<dd><p>Proportion. Ensure <code>num_bg</code> reaches <code>prop_cells</code> (<code>num_bg</code>
+as a proportion of the number of non-NA cells within the predict/calibration
+boundary).</p></dd>
 
 
 <dt id="arg-many-p-prop">many_p_prop<a class="anchor" aria-label="anchor" href="#arg-many-p-prop"></a></dt>
@@ -379,13 +380,13 @@ against which background points are assigned.</p>
 <span class="r-in"><span>                                               <span class="op">)</span></span></span>
 <span class="r-in"><span>               <span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> prep for chg</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> out_dir is /home/nwilloug/tmp/R/Rtmpz25GLu/temp_libpath113213224bbddf/envSDM/examples/chg__0__5__10.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> out_dir is /home/nwilloug/tmp/R/RtmpQcBywk/temp_libpath23d74128eba30a/envSDM/examples/chg__0__5__10.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>  103 incoming presences</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> prep for chg</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> out_dir is /home/nwilloug/tmp/R/Rtmpz25GLu/temp_libpath113213224bbddf/envSDM/examples/chg__0__5__20.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> out_dir is /home/nwilloug/tmp/R/RtmpQcBywk/temp_libpath23d74128eba30a/envSDM/examples/chg__0__5__20.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>  103 incoming presences</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> prep for chg</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> out_dir is /home/nwilloug/tmp/R/Rtmpz25GLu/temp_libpath113213224bbddf/envSDM/examples/chg__0__5__100.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> out_dir is /home/nwilloug/tmp/R/RtmpQcBywk/temp_libpath23d74128eba30a/envSDM/examples/chg__0__5__100.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>  103 incoming presences</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>  <span class="co"># example of 'prep'</span></span></span>
@@ -399,8 +400,8 @@ against which background points are assigned.</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>  <span class="co"># variables to remove prior to SDM</span></span></span>
 <span class="r-in"><span>  <span class="va">prep</span><span class="op">$</span><span class="va">reduce_env</span><span class="op">$</span><span class="va">remove</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [1] "bio04"     "bio07"     "bio08"     "bio09"     "bio12"     "bio16"    </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [7] "bio17"     "bio18"     "bio19"     "cell"      "cell_lat"  "cell_long"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [1] "bio04"     "bio07"     "bio08"     "bio09"     "bio12"     "bio13"    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [7] "bio16"     "bio17"     "bio19"     "cell"      "cell_lat"  "cell_long"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [13] "fold"      "id"        "pa"        "x"         "y"        </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span></span></span>

@@ -154,13 +154,13 @@ Character path to predicted file, usually 'pred.tif'. Output .tif and
                                          )
                )
 #> [[1]]
-#> /home/nwilloug/tmp/R/Rtmpz25GLu/temp_libpath113213224bbddf/envSDM/examples/chg__0__5__10/combo/full_run.rds
+#> /home/nwilloug/tmp/R/RtmpQcBywk/temp_libpath23d74128eba30a/envSDM/examples/chg__0__5__10/combo/full_run.rds
 #> 
 #> [[2]]
-#> /home/nwilloug/tmp/R/Rtmpz25GLu/temp_libpath113213224bbddf/envSDM/examples/chg__0__5__100/combo/full_run.rds
+#> /home/nwilloug/tmp/R/RtmpQcBywk/temp_libpath23d74128eba30a/envSDM/examples/chg__0__5__100/combo/full_run.rds
 #> 
 #> [[3]]
-#> /home/nwilloug/tmp/R/Rtmpz25GLu/temp_libpath113213224bbddf/envSDM/examples/chg__0__5__20/combo/full_run.rds
+#> /home/nwilloug/tmp/R/RtmpQcBywk/temp_libpath23d74128eba30a/envSDM/examples/chg__0__5__20/combo/full_run.rds
 #> 
 
 
@@ -226,13 +226,13 @@ Character path to predicted file, usually 'pred.tif'. Output .tif and
                                          )
               )
 #> [[1]]
-#> /home/nwilloug/tmp/R/Rtmpz25GLu/temp_libpath113213224bbddf/envSDM/examples/chg__0__5__10/auc_po/full_run.rds
+#> /home/nwilloug/tmp/R/RtmpQcBywk/temp_libpath23d74128eba30a/envSDM/examples/chg__0__5__10/auc_po/full_run.rds
 #> 
 #> [[2]]
-#> /home/nwilloug/tmp/R/Rtmpz25GLu/temp_libpath113213224bbddf/envSDM/examples/chg__0__5__100/auc_po/full_run.rds
+#> /home/nwilloug/tmp/R/RtmpQcBywk/temp_libpath23d74128eba30a/envSDM/examples/chg__0__5__100/auc_po/full_run.rds
 #> 
 #> [[3]]
-#> /home/nwilloug/tmp/R/Rtmpz25GLu/temp_libpath113213224bbddf/envSDM/examples/chg__0__5__20/auc_po/full_run.rds
+#> /home/nwilloug/tmp/R/RtmpQcBywk/temp_libpath23d74128eba30a/envSDM/examples/chg__0__5__20/auc_po/full_run.rds
 #> 
 
   ## predict -------

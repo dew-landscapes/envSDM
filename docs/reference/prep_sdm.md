@@ -28,7 +28,7 @@ prep_sdm(
   cat_preds = NULL,
   cat_preds_max_levels = 32,
   num_bg = 10000,
-  prop_abs = "abs",
+  bg_prop_cells = 0,
   many_p_prop = 2,
   folds = 5,
   spatial_folds = TRUE,
@@ -141,10 +141,11 @@ prep_sdm(
 
   Numeric. How many background points?
 
-- prop_abs:
+- bg_prop_cells:
 
-  Character. Is `num_bg` a proportion (`prop`) of the number of records
-  in `presence` or an absolute (`abs`) number?
+  Proportion. Ensure `num_bg` reaches `prop_cells` (`num_bg` as a
+  proportion of the number of non-NA cells within the
+  predict/calibration boundary).
 
 - many_p_prop:
 
@@ -369,13 +370,13 @@ sampling density raster against which background points are assigned.
                                                )
                )
 #> prep for chg
-#> out_dir is /home/nwilloug/tmp/R/Rtmpz25GLu/temp_libpath113213224bbddf/envSDM/examples/chg__0__5__10.
+#> out_dir is /home/nwilloug/tmp/R/RtmpQcBywk/temp_libpath23d74128eba30a/envSDM/examples/chg__0__5__10.
 #>  103 incoming presences
 #> prep for chg
-#> out_dir is /home/nwilloug/tmp/R/Rtmpz25GLu/temp_libpath113213224bbddf/envSDM/examples/chg__0__5__20.
+#> out_dir is /home/nwilloug/tmp/R/RtmpQcBywk/temp_libpath23d74128eba30a/envSDM/examples/chg__0__5__20.
 #>  103 incoming presences
 #> prep for chg
-#> out_dir is /home/nwilloug/tmp/R/Rtmpz25GLu/temp_libpath113213224bbddf/envSDM/examples/chg__0__5__100.
+#> out_dir is /home/nwilloug/tmp/R/RtmpQcBywk/temp_libpath23d74128eba30a/envSDM/examples/chg__0__5__100.
 #>  103 incoming presences
 
   # example of 'prep'
@@ -389,8 +390,8 @@ sampling density raster against which background points are assigned.
 
   # variables to remove prior to SDM
   prep$reduce_env$remove
-#>  [1] "bio04"     "bio07"     "bio08"     "bio09"     "bio12"     "bio16"    
-#>  [7] "bio17"     "bio18"     "bio19"     "cell"      "cell_lat"  "cell_long"
+#>  [1] "bio04"     "bio07"     "bio08"     "bio09"     "bio12"     "bio13"    
+#>  [7] "bio16"     "bio17"     "bio19"     "cell"      "cell_lat"  "cell_long"
 #> [13] "fold"      "id"        "pa"        "x"         "y"        
 
 

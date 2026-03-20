@@ -115,12 +115,12 @@ Character path to threshold file, usually 'thresh.tif'. Output .tif and
                                        , force_new = TRUE
                                        )
                )
-#> create thresh.tif for chg__0__5__10 with threshold value: 0.6539
-#> create thresh.tif for chg__0__5__10 with threshold value: 0.6519
-#> create thresh.tif for chg__0__5__100 with threshold value: 0.5859
-#> create thresh.tif for chg__0__5__100 with threshold value: 0.5959
-#> create thresh.tif for chg__0__5__20 with threshold value: 0.5379
-#> create thresh.tif for chg__0__5__20 with threshold value: 0.6159
+#> create thresh.tif for chg__0__5__10 with threshold value: 0.5179
+#> create thresh.tif for chg__0__5__10 with threshold value: 0.5519
+#> create thresh.tif for chg__0__5__100 with threshold value: 0.5579
+#> create thresh.tif for chg__0__5__100 with threshold value: 0.5699
+#> create thresh.tif for chg__0__5__20 with threshold value: 0.5619
+#> create thresh.tif for chg__0__5__20 with threshold value: 0.5259
 
   ## visualise-------
   ### threshold -------

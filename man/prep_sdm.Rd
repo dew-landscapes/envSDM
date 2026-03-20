@@ -24,7 +24,7 @@ prep_sdm(
   cat_preds = NULL,
   cat_preds_max_levels = 32,
   num_bg = 10000,
-  prop_abs = "abs",
+  bg_prop_cells = 0,
   many_p_prop = 2,
   folds = 5,
   spatial_folds = TRUE,
@@ -96,8 +96,9 @@ proportion of presences with \code{NA} values for that predictor exceeds
 
 \item{num_bg}{Numeric. How many background points?}
 
-\item{prop_abs}{Character. Is \code{num_bg} a proportion (\code{prop}) of the number of
-records in \code{presence} or an absolute (\code{abs}) number?}
+\item{bg_prop_cells}{Proportion. Ensure \code{num_bg} reaches \code{prop_cells} (\code{num_bg}
+as a proportion of the number of non-NA cells within the predict/calibration
+boundary).}
 
 \item{many_p_prop}{Numeric. Ensure the number of background points is at
 least \verb{many_p_prop * number of presences}. e.g. If there are more than 5000
