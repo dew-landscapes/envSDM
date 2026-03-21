@@ -881,6 +881,10 @@
                   prep$testing <- to_split |>
                     dplyr::slice_sample(prop = hold_prop_adj, by = pa)
 
+                  # training split is all data that did not make it into prep$testing
+                  training_split <- to_split |>
+                    dplyr::anti_join(prep$testing)
+
                 } else {
 
                   # new presences, new backgound
@@ -893,12 +897,16 @@
                     dplyr::filter(pa == 1) |>
                     dplyr::slice_sample(prop = hold_prop_adj)
 
-                  as <- to_split |>
+                  bs <- to_split |>
                     dplyr::filter(pa == 0) |>
                     dplyr::slice_sample(prop = 0.5)
 
                   prep$testing <- ps |>
-                    dplyr::bind_rows(as)
+                    dplyr::bind_rows(bs)
+
+                  # training split is all data that did not make it into prep$testing
+                  training_split <- to_split |>
+                    dplyr::anti_join(prep$testing)
 
                 }
 
@@ -919,28 +927,36 @@
 
                 prep$testing <- to_split
 
+                # training split is the same as the testing split
+                training_split <- to_split
+
               } else {
+
+                # same presences, new background
+                # test data is made up of:
+                  # all the presences
+                  # new background data of equal size to the training background data
+                  # this is a 'holdout' only for the background data
 
                 ps <- to_split |>
                   dplyr::filter(pa == 1)
 
-                as <- to_split |>
+                bs <- to_split |>
                   dplyr::filter(pa == 0) |>
                   dplyr::sample_n(num_bg / 2)
 
-                # same presences, new background
-                # test data is made up of:
-                  # the same presences that were used in training
-                  # new background data of equal size to the training background data
-                  # this is a 'holdout' only for the background data
-
                 prep$testing <- ps |>
-                  dplyr::bind_rows(as)
+                  dplyr::bind_rows(bs)
+
+                # training split has the same presences but unused background
+                training_split <- to_split |>
+                  dplyr::anti_join(bs)
 
               }
 
             }
 
+            # add the used hold_prop into prep$testing
             prep$testing <- prep$testing |>
               dplyr::mutate(hold_prop = hold_prop_adj)
 
@@ -995,10 +1011,7 @@
 
         if(!prep$abandoned) {
 
-          to_split <- to_split |>
-            dplyr::anti_join(prep$testing |>
-                               dplyr::distinct(id)
-                             )
+          to_split <- training_split
 
           if(! as.logical(nrow(to_split))) to_split <- prep$testing # ? catch for no rows left?
 
