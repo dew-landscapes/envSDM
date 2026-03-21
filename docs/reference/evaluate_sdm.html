@@ -86,7 +86,7 @@ from <code><a href="https://sjevelazco.github.io/flexsdm/reference/sdm_eval.html
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>  <span class="va">prep</span> <span class="op">&lt;-</span> <span class="fu">rio</span><span class="fu">::</span><span class="fu"><a href="http://gesistsa.github.io/rio/reference/import.html" class="external-link">import</a></span><span class="op">(</span><span class="va">preps</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span>, trust <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span>  <span class="va">full_run</span> <span class="op">&lt;-</span> <span class="fu">rio</span><span class="fu">::</span><span class="fu"><a href="http://gesistsa.github.io/rio/reference/import.html" class="external-link">import</a></span><span class="op">(</span><span class="fu">fs</span><span class="fu">::</span><span class="fu"><a href="https://fs.r-lib.org/reference/path.html" class="external-link">path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/basename.html" class="external-link">dirname</a></span><span class="op">(</span><span class="va">preps</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">)</span>, <span class="st">"combo"</span>, <span class="st">"full_run.rds"</span><span class="op">)</span>, trust <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="va">full_run</span> <span class="op">&lt;-</span> <span class="fu">rio</span><span class="fu">::</span><span class="fu"><a href="http://gesistsa.github.io/rio/reference/import.html" class="external-link">import</a></span><span class="op">(</span><span class="fu">fs</span><span class="fu">::</span><span class="fu"><a href="https://fs.r-lib.org/reference/path.html" class="external-link">path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/basename.html" class="external-link">dirname</a></span><span class="op">(</span><span class="va">preps</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">)</span>, <span class="st">"full_run.rds"</span><span class="op">)</span>, trust <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
 <span class="r-in"><span>  <span class="va">algo</span> <span class="op">&lt;-</span> <span class="va">full_run</span><span class="op">$</span><span class="va">tune_mean</span><span class="op">$</span><span class="va">algo</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span></span>
 <span class="r-in"><span>  <span class="va">model</span> <span class="op">&lt;-</span> <span class="va">full_run</span><span class="op">[[</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"tune_"</span>, <span class="va">algo</span><span class="op">)</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">m</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span></span>
 <span class="r-in"><span></span></span>
@@ -98,24 +98,24 @@ from <code><a href="https://sjevelazco.github.io/flexsdm/reference/sdm_eval.html
 <span class="r-in"><span>               , b_test <span class="op">=</span> <span class="va">background</span></span></span>
 <span class="r-in"><span>               <span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> @stats</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   np   na prevalence   auc   cor pcor   ODP auc_po auc_po_flexsdm   CBI</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1 92 1000      0.084 0.991 0.738    0 0.916  0.991          0.991 0.808</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   np  na prevalence   auc   cor pcor   ODP auc_po auc_po_flexsdm   CBI</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 97 184      0.345 0.984 0.871    0 0.655  0.984          0.984 0.946</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   CBI_rescale  IMAE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1       0.904 0.862</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1       0.973 0.888</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> @thresholds</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   max_kappa max_spec_sens no_omission equal_prevalence equal_sens_spec or10</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1     0.902         0.552       0.552            0.084           0.652 0.72</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   max_kappa max_spec_sens no_omission equal_prevalence equal_sens_spec  or10</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1      0.89         0.762       0.054             0.34           0.746 0.892</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> @tr_stats</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     treshold kappa  CCR  TPR  TNR  FPR  FNR  PPP  NPP  MCR     OR</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1          0     0 0.08    1    0    1    0 0.08  NaN 0.92    NaN</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2          0  0.03 0.21    1 0.13 0.87    0  0.1    1 0.79    Inf</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3          0  0.04 0.27    1 0.21 0.79    0  0.1    1 0.73    Inf</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4        ...   ...  ...  ...  ...  ...  ...  ...  ...  ...    ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 282        1  0.29 0.93 0.18    1    0 0.82 0.89 0.93 0.07 113.11</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 283        1  0.29 0.93 0.18    1    0 0.82 0.89 0.93 0.07 113.11</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 284        1     0 0.92    0    1    0    1  NaN 0.92 0.08    NaN</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     treshold kappa  CCR  TPR  TNR  FPR  FNR  PPP  NPP  MCR  OR</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1          0     0 0.35    1    0    1    0 0.35  NaN 0.65 NaN</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2          0  0.15 0.48    1  0.2  0.8    0  0.4    1 0.52 Inf</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3          0  0.17  0.5    1 0.23 0.77    0 0.41    1  0.5 Inf</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4        ...   ...  ...  ...  ...  ...  ...  ...  ...  ... ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 105        1  0.57 0.83 0.51    1    0 0.49    1 0.79 0.17 Inf</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 106        1  0.57 0.83 0.51    1    0 0.49    1 0.79 0.17 Inf</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 107        1     0 0.65    0    1    0    1  NaN 0.65 0.35 NaN</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

@@ -28,6 +28,7 @@ prep_sdm(
   cat_preds = NULL,
   cat_preds_max_levels = 32,
   num_bg = 10000,
+  new_bg_test = TRUE,
   bg_prop_cells = 0,
   many_p_prop = 2,
   folds = 5,
@@ -141,10 +142,15 @@ prep_sdm(
 
   Numeric. How many background points?
 
+- new_bg_test:
+
+  Logical. Use an entirely new set of background points for testing the
+  full model?
+
 - bg_prop_cells:
 
-  Proportion. Ensure `num_bg` reaches `prop_cells` (`num_bg` as a
-  proportion of the number of non-NA cells within the
+  Proportion. Ensure `num_bg` reaches `prop_cells` (background points as
+  a proportion of the number of non-NA cells within the
   predict/calibration boundary).
 
 - many_p_prop:
@@ -305,18 +311,29 @@ sampling density raster against which background points are assigned.
   out_dir <- file.path(system.file(package = "envSDM"), "examples")
 
   # data ---------
+  hold_prop <- c(0, 0.3)
+  stretch <- c(10, 30)
+  new_bg_test <- c(T, F)
+
+  sdms <- expand.grid(hold_prop = hold_prop, stretch = stretch, new_bg_test = new_bg_test)
+
   data <- fs::dir_ls(out_dir, regexp = "\\.csv$")[[1]] |>
     tibble::enframe(name = NULL, value = "path") |>
-    dplyr::mutate(taxa = gsub("\\.csv", "", basename(path))
-                  , presence = purrr::map(path, rio::import, setclass = "tibble", trust = TRUE)
-                  ) |>
-    dplyr::cross_join(tibble::tibble(hold_prop = c(0))) |>
-    dplyr::cross_join(tibble::tibble(repeats = c(5))) |>
-    dplyr::cross_join(tibble::tibble(stretch = c(10, 20, 100))) |>
-    dplyr::mutate(taxa_dir = fs::path(out_dir, paste0(taxa, "__", hold_prop, "__", repeats, "__", stretch))
-                  , out_mcp = fs::path(taxa_dir, "mcp.parquet")
-                  , dens_ras = fs::path(taxa_dir, "density.tif")
-                  , prep_file = fs::path(taxa_dir, "prep.rds")
+    dplyr::mutate(taxa = gsub("\\.csv", "", basename(path))) |>
+    dplyr::cross_join(sdms) |>
+    tidyr::unite(col = "out_dir"
+                 , tidyselect::any_of(names(sdms))
+                 , sep = "__"
+                 , remove = FALSE
+                 ) |>
+    dplyr::mutate(out_dir = fs::path(dirname(path), out_dir)
+                  , out_mcp = fs::path(out_dir, "mcp.parquet")
+                  , dens_ras = fs::path(out_dir, "density.tif")
+                  , prep = fs::path(out_dir, "prep.rds")
+                  , tune = fs::path(out_dir, "tune.rds")
+                  , full_run = fs::path(out_dir, "full_run.rds")
+                  , pred = fs::path(out_dir, "pred.tif")
+                  , thresh = fs::path(out_dir, "thresh.tif")
                   )
 
   # predictors -------
@@ -329,10 +346,10 @@ sampling density raster against which background points are assigned.
 
   # mcps --------
 
-  purrr::pwalk(list(data$presence
+  purrr::pwalk(list(data$path
                    , data$out_mcp
                    )
-               , \(x, y) envDistribution::make_mcp(x, y, pres_x = "cell_long", pres_y = "cell_lat"
+               , \(x, y) envDistribution::make_mcp(readr::read_csv(x), y, pres_x = "cell_long", pres_y = "cell_lat"
                                                    , clip = clip
                                                    , dens_int = 50000
                                                    )
@@ -343,15 +360,15 @@ sampling density raster against which background points are assigned.
   # use the just created mcps (this allows using, say, a different spatial reliability threshold for the mcps)
 
   purrr::pwalk(list(data$taxa
-                    , data$taxa_dir
-                    , data$presence
+                    , data$out_dir
+                    , data$path
                     , data$out_mcp
                     , data$hold_prop
                     , data$stretch
                     )
                , function(a, b, c, d, e, f) prep_sdm(this_taxa = a
                                                , out_dir = b
-                                               , presence = c
+                                               , presence = readr::read_csv(c)
                                                , pres_x = "cell_long"
                                                , pres_y = "cell_lat"
                                                , predictors = preds
@@ -365,22 +382,94 @@ sampling density raster against which background points are assigned.
                                                , reduce_env_thresh_corr = 0.95
                                                , reduce_env_quant_rf_imp = 0.2
                                                , stretch_value = f
-                                               , num_bg = 1000
+                                               , num_bg = 100 # way too few
+                                               , bg_prop_cells = 0.01 # but ensure there are at least 1% of cells with backgrounds
                                                #, force_new = TRUE
                                                )
                )
+#> Rows: 103 Columns: 2
+#> ── Column specification ────────────────────────────────────────────────────────
+#> Delimiter: ","
+#> dbl (2): cell_lat, cell_long
+#> 
+#> ℹ Use `spec()` to retrieve the full column specification for this data.
+#> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 #> prep for chg
-#> out_dir is /home/nwilloug/tmp/R/RtmpQcBywk/temp_libpath23d74128eba30a/envSDM/examples/chg__0__5__10.
+#> out_dir is /home/nwilloug/tmp/R/Rtmp8rrkes/temp_libpath2d36a25b9e3887/envSDM/examples/0__10__TRUE.
 #>  103 incoming presences
+#> Rows: 103 Columns: 2
+#> ── Column specification ────────────────────────────────────────────────────────
+#> Delimiter: ","
+#> dbl (2): cell_lat, cell_long
+#> 
+#> ℹ Use `spec()` to retrieve the full column specification for this data.
+#> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 #> prep for chg
-#> out_dir is /home/nwilloug/tmp/R/RtmpQcBywk/temp_libpath23d74128eba30a/envSDM/examples/chg__0__5__20.
+#> out_dir is /home/nwilloug/tmp/R/Rtmp8rrkes/temp_libpath2d36a25b9e3887/envSDM/examples/0.3__10__TRUE.
 #>  103 incoming presences
+#> Rows: 103 Columns: 2
+#> ── Column specification ────────────────────────────────────────────────────────
+#> Delimiter: ","
+#> dbl (2): cell_lat, cell_long
+#> 
+#> ℹ Use `spec()` to retrieve the full column specification for this data.
+#> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 #> prep for chg
-#> out_dir is /home/nwilloug/tmp/R/RtmpQcBywk/temp_libpath23d74128eba30a/envSDM/examples/chg__0__5__100.
+#> out_dir is /home/nwilloug/tmp/R/Rtmp8rrkes/temp_libpath2d36a25b9e3887/envSDM/examples/0__30__TRUE.
+#>  103 incoming presences
+#> Rows: 103 Columns: 2
+#> ── Column specification ────────────────────────────────────────────────────────
+#> Delimiter: ","
+#> dbl (2): cell_lat, cell_long
+#> 
+#> ℹ Use `spec()` to retrieve the full column specification for this data.
+#> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+#> prep for chg
+#> out_dir is /home/nwilloug/tmp/R/Rtmp8rrkes/temp_libpath2d36a25b9e3887/envSDM/examples/0.3__30__TRUE.
+#>  103 incoming presences
+#> Rows: 103 Columns: 2
+#> ── Column specification ────────────────────────────────────────────────────────
+#> Delimiter: ","
+#> dbl (2): cell_lat, cell_long
+#> 
+#> ℹ Use `spec()` to retrieve the full column specification for this data.
+#> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+#> prep for chg
+#> out_dir is /home/nwilloug/tmp/R/Rtmp8rrkes/temp_libpath2d36a25b9e3887/envSDM/examples/0__10__FALSE.
+#>  103 incoming presences
+#> Rows: 103 Columns: 2
+#> ── Column specification ────────────────────────────────────────────────────────
+#> Delimiter: ","
+#> dbl (2): cell_lat, cell_long
+#> 
+#> ℹ Use `spec()` to retrieve the full column specification for this data.
+#> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+#> prep for chg
+#> out_dir is /home/nwilloug/tmp/R/Rtmp8rrkes/temp_libpath2d36a25b9e3887/envSDM/examples/0.3__10__FALSE.
+#>  103 incoming presences
+#> Rows: 103 Columns: 2
+#> ── Column specification ────────────────────────────────────────────────────────
+#> Delimiter: ","
+#> dbl (2): cell_lat, cell_long
+#> 
+#> ℹ Use `spec()` to retrieve the full column specification for this data.
+#> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+#> prep for chg
+#> out_dir is /home/nwilloug/tmp/R/Rtmp8rrkes/temp_libpath2d36a25b9e3887/envSDM/examples/0__30__FALSE.
+#>  103 incoming presences
+#> Rows: 103 Columns: 2
+#> ── Column specification ────────────────────────────────────────────────────────
+#> Delimiter: ","
+#> dbl (2): cell_lat, cell_long
+#> 
+#> ℹ Use `spec()` to retrieve the full column specification for this data.
+#> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+#> prep for chg
+#> out_dir is /home/nwilloug/tmp/R/Rtmp8rrkes/temp_libpath2d36a25b9e3887/envSDM/examples/0.3__30__FALSE.
 #>  103 incoming presences
 
   # example of 'prep'
-  prep <- rio::import(data$prep_file[[1]], trust = TRUE)
+  prep <- rio::import(data$prep[[1]], trust = TRUE)
 
   names(prep)
 #>  [1] "abandoned"        "finished"         "log"              "this_taxa"       
@@ -391,14 +480,14 @@ sampling density raster against which background points are assigned.
   # variables to remove prior to SDM
   prep$reduce_env$remove
 #>  [1] "bio04"     "bio07"     "bio08"     "bio09"     "bio12"     "bio13"    
-#>  [7] "bio16"     "bio17"     "bio19"     "cell"      "cell_lat"  "cell_long"
-#> [13] "fold"      "id"        "pa"        "x"         "y"        
+#>  [7] "bio16"     "bio17"     "bio18"     "bio19"     "cell"      "cell_lat" 
+#> [13] "cell_long" "fold"      "id"        "pa"        "x"         "y"        
 
 
   # Background points
   if(require("tmap")) {
 
-    preps <- data$prep_file |>
+    preps <- data$prep |>
       purrr::map(readRDS)
 
     b <- preps |>
@@ -425,7 +514,7 @@ sampling density raster against which background points are assigned.
 
     tm_shape(dplyr::bind_rows(b, p)) +
       tm_dots(fill = "type"
-              , size = 0.5
+              , size = 0.05
               ) +
       tm_facets(by = "stretch")
 

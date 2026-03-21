@@ -111,16 +111,8 @@ Tune, and evaluate, species distribution models
 }
 \examples{
 
-  out_dir <- file.path(system.file(package = "envSDM"), "examples")
-
-  data <- fs::path(system.file(package = "envSDM"), "examples") |>
-    fs::dir_ls(regexp = "prep\\\\.rds$"
-               , recurse = TRUE
-               ) |>
-    tibble::enframe(name = NULL, value = "prep") |>
-    dplyr::mutate(taxa = gsub("\\\\.rds", "", basename(dirname(prep)))
-                  , out_dir = fs::path(out_dir, taxa)
-                  )
+  # setup -------
+  source(fs::path("inst", "examples", "prep_sdm_ex.R")) # need 'data' object
 
   purrr::map(data$out_dir
               , \(x) tune_sdm(prep = fs::path(x, "prep.rds")
@@ -136,25 +128,14 @@ Tune, and evaluate, species distribution models
                               )
               )
 
-  # which tune args were best for each taxa using 'combo'?
+  # which tune args were best using 'combo'?
   data \%>\%
-    dplyr::mutate(tune = fs::path(out_dir, "tune.rds")
-                  , tune = purrr::map(tune, rio::import, trust = TRUE)
+    dplyr::mutate(tune = purrr::map(tune, rio::import, trust = TRUE)
                   , tune_mean = purrr::map(tune, "tune_mean")
                   ) \%>\%
     tidyr::unnest(cols = c(tune_mean)) \%>\%
-    dplyr::filter(best) \%>\% # used 'combo' to determine 'best' as default in tune_sdm
-    dplyr::select(taxa, algo, tune_args, combo, auc_po, IMAE, CBI, max_spec_sens)
+    dplyr::filter(best) |> # used 'combo' to determine 'best' as default in tune_sdm
+    dplyr::select(taxa, algo, tidyselect::any_of(names(sdms)), tidyselect::where(is.numeric))
 
-  # or best tune args choosing on just auc_po?
-  data \%>\%
-    dplyr::mutate(tune = fs::path(out_dir, "tune.rds")
-                  , tune = purrr::map(tune, rio::import, trust = TRUE)
-                  , all = purrr::map(tune, "tune_mean")
-                  ) \%>\%
-    tidyr::unnest(cols = c(all)) \%>\%
-    dplyr::group_by(taxa) \%>\%
-    dplyr::filter(auc_po == max(auc_po)) \%>\%
-    dplyr::ungroup() \%>\%
-    dplyr::select(taxa, algo, tune_args, auc_po, IMAE, CBI, max_spec_sens)
+  # random forest always 'won' with both nodeside and mtry varying
 }

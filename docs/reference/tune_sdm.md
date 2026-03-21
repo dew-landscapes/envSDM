@@ -163,16 +163,10 @@ elements:
 ## Examples
 
 ``` r
-  out_dir <- file.path(system.file(package = "envSDM"), "examples")
-
-  data <- fs::path(system.file(package = "envSDM"), "examples") |>
-    fs::dir_ls(regexp = "prep\\.rds$"
-               , recurse = TRUE
-               ) |>
-    tibble::enframe(name = NULL, value = "prep") |>
-    dplyr::mutate(taxa = gsub("\\.rds", "", basename(dirname(prep)))
-                  , out_dir = fs::path(out_dir, taxa)
-                  )
+  # setup -------
+  source(fs::path("inst", "examples", "prep_sdm_ex.R")) # need 'data' object
+#> Warning: cannot open file 'inst/examples/prep_sdm_ex.R': No such file or directory
+#> Error in file(filename, "r", encoding = encoding): cannot open the connection
 
   purrr::map(data$out_dir
               , \(x) tune_sdm(prep = fs::path(x, "prep.rds")
@@ -187,47 +181,17 @@ elements:
                               #, force_new = TRUE
                               )
               )
-#> [[1]]
-#> /home/nwilloug/tmp/R/RtmpQcBywk/temp_libpath23d74128eba30a/envSDM/examples/chg__0__5__10/tune.rds
-#> 
-#> [[2]]
-#> /home/nwilloug/tmp/R/RtmpQcBywk/temp_libpath23d74128eba30a/envSDM/examples/chg__0__5__100/tune.rds
-#> 
-#> [[3]]
-#> /home/nwilloug/tmp/R/RtmpQcBywk/temp_libpath23d74128eba30a/envSDM/examples/chg__0__5__20/tune.rds
-#> 
+#> Error in data$out_dir: object of type 'closure' is not subsettable
 
-  # which tune args were best for each taxa using 'combo'?
+  # which tune args were best using 'combo'?
   data %>%
-    dplyr::mutate(tune = fs::path(out_dir, "tune.rds")
-                  , tune = purrr::map(tune, rio::import, trust = TRUE)
+    dplyr::mutate(tune = purrr::map(tune, rio::import, trust = TRUE)
                   , tune_mean = purrr::map(tune, "tune_mean")
                   ) %>%
     tidyr::unnest(cols = c(tune_mean)) %>%
-    dplyr::filter(best) %>% # used 'combo' to determine 'best' as default in tune_sdm
-    dplyr::select(taxa, algo, tune_args, combo, auc_po, IMAE, CBI, max_spec_sens)
-#> # A tibble: 3 × 8
-#>   taxa           algo  tune_args          combo auc_po  IMAE   CBI max_spec_sens
-#>   <chr>          <chr> <chr>              <dbl>  <dbl> <dbl> <dbl>         <dbl>
-#> 1 chg__0__5__10  rf    tr: 500. mt: 2. n… 0.519  0.793 0.777 0.686         0.296
-#> 2 chg__0__5__100 rf    tr: 500. mt: 3. n… 0.431  0.731 0.762 0.549         0.314
-#> 3 chg__0__5__20  rf    tr: 500. mt: 2. n… 0.502  0.789 0.776 0.641         0.295
+    dplyr::filter(best) |> # used 'combo' to determine 'best' as default in tune_sdm
+    dplyr::select(taxa, algo, tidyselect::any_of(names(sdms)), tidyselect::where(is.numeric))
+#> Error in UseMethod("mutate"): no applicable method for 'mutate' applied to an object of class "function"
 
-  # or best tune args choosing on just auc_po?
-  data %>%
-    dplyr::mutate(tune = fs::path(out_dir, "tune.rds")
-                  , tune = purrr::map(tune, rio::import, trust = TRUE)
-                  , all = purrr::map(tune, "tune_mean")
-                  ) %>%
-    tidyr::unnest(cols = c(all)) %>%
-    dplyr::group_by(taxa) %>%
-    dplyr::filter(auc_po == max(auc_po)) %>%
-    dplyr::ungroup() %>%
-    dplyr::select(taxa, algo, tune_args, auc_po, IMAE, CBI, max_spec_sens)
-#> # A tibble: 3 × 7
-#>   taxa           algo  tune_args             auc_po  IMAE   CBI max_spec_sens
-#>   <chr>          <chr> <chr>                  <dbl> <dbl> <dbl>         <dbl>
-#> 1 chg__0__5__10  rf    tr: 500. mt: 2. ns: 3  0.793 0.777 0.686         0.296
-#> 2 chg__0__5__100 rf    tr: 500. mt: 3. ns: 3  0.731 0.762 0.549         0.314
-#> 3 chg__0__5__20  rf    tr: 500. mt: 2. ns: 2  0.795 0.779 0.604         0.303
+  # random forest always 'won' with both nodeside and mtry varying
 ```

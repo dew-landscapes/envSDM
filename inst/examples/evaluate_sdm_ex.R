@@ -5,7 +5,7 @@
 
   prep <- rio::import(preps[[1]], trust = TRUE)
 
-  full_run <- rio::import(fs::path(dirname(preps[[1]]), "combo", "full_run.rds"), trust = TRUE)
+  full_run <- rio::import(fs::path(dirname(preps[[1]]), "full_run.rds"), trust = TRUE)
   algo <- full_run$tune_mean$algo[[1]]
   model <- full_run[[paste0("tune_", algo)]]$m[[1]]
 

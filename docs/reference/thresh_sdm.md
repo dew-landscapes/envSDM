@@ -75,10 +75,12 @@ Character path to threshold file, usually 'thresh.tif'. Output .tif and
 
 ``` r
   # setup -------
-  out_dir <- file.path(system.file(package = "envSDM"), "examples")
+  source(fs::path("inst", "examples", "prep_sdm_ex.R")) # need 'data' object
+#> Warning: cannot open file 'inst/examples/prep_sdm_ex.R': No such file or directory
+#> Error in file(filename, "r", encoding = encoding): cannot open the connection
 
   # data ------
-  extract_thresh <- function(tune, metric, thresh_type = "max_spec_sens") {
+  extract_thresh <- function(tune, metric = "combo", thresh_type = "max_spec_sens") {
 
     tune |>
       dplyr::filter(!!rlang::ensym(metric) == max(!!rlang::ensym(metric))) |>
@@ -86,53 +88,48 @@ Character path to threshold file, usually 'thresh.tif'. Output .tif and
 
   }
 
-  data <- fs::path(system.file(package = "envSDM"), "examples") |>
-    fs::dir_ls(regexp = "pred\\.tif"
-               , recurse = TRUE
-               ) |>
-    tibble::enframe(name = NULL, value = "pred") |>
-    dplyr::mutate(out_dir = dirname(pred)
-                  , taxa = basename(dirname(out_dir))
-                  , metric = basename(out_dir)
-                  , tune = fs::dir_ls(out_dir, regexp = "full_run.rds")
-                  , tune_mean = purrr::map(tune, \(x) rio::import(x, trust = TRUE)$tune_mean |> dplyr::select(algo, tune_args, auc_po, combo, max_spec_sens))
-                  , thresh = purrr::map2_dbl(tune_mean
-                                             , metric
-                                             , extract_thresh
-                                             )
-
+  data <- data |>
+    dplyr::mutate(tune_mean = purrr::map(full_run, \(x) rio::import(x, trust = TRUE)$tune_mean |> dplyr::select(algo, combo, tune_args, auc_po, max_spec_sens))
+                  , threshold = purrr::map_dbl(tune_mean
+                                               , extract_thresh
+                                               )
+                  , info = basename(dirname(out_dir))
                   )
+#> Error in UseMethod("mutate"): no applicable method for 'mutate' applied to an object of class "function"
+
 
   ## thresh -------
   purrr::pwalk(list(data$pred
-                    , data$thresh
+                    , data$threshold
                     , data$taxa
                     )
                , \(a, b, c) thresh_sdm(pred_file = a
                                        , threshold = b
                                        , this_taxa = c
                                        , thresh_file = "thresh.tif"
-                                       , force_new = TRUE
+                                       #, force_new = TRUE
                                        )
                )
-#> create thresh.tif for chg__0__5__10 with threshold value: 0.5179
-#> create thresh.tif for chg__0__5__10 with threshold value: 0.5519
-#> create thresh.tif for chg__0__5__100 with threshold value: 0.5579
-#> create thresh.tif for chg__0__5__100 with threshold value: 0.5699
-#> create thresh.tif for chg__0__5__20 with threshold value: 0.5619
-#> create thresh.tif for chg__0__5__20 with threshold value: 0.5259
+#> Error in data$pred: object of type 'closure' is not subsettable
 
   ## visualise-------
-  ### threshold -------
-  plots <- data |>
-    dplyr::mutate(opts = basename(dirname(out_dir))) |>
-    tidyr::separate(opts, into = c("taxa", "hold_prop", "repeats", "stretch"), sep = "__") |>
-    dplyr::filter(hold_prop == 0, repeats == 5, metric == "combo") |>
-    dplyr::mutate(stretch = as.numeric(stretch)) |>
-    dplyr::arrange(stretch)
 
-  r <- fs::path(plots$out_dir, "thresh.tif") |>
-    terra::rast()
+  tifs <- data$thresh
+#> Error in data$thresh: object of type 'closure' is not subsettable
 
-  terra::plot(r, main = plots$stretch, nc = 1)
+  names <- paste0("hold_prop "
+                  , data$hold_prop
+                  , "; stretch "
+                  , data$stretch
+                  , "; new_bg "
+                  , data$new_bg_test
+                  )
+#> Error in data$hold_prop: object of type 'closure' is not subsettable
+
+  r <- terra::rast(tifs)
+#> Error in h(simpleError(msg, call)): error in evaluating the argument 'x' in selecting a method for function 'rast': object 'tifs' not found
+  names(r) <- names
+#> Error: object 'r' not found
+  terra::plot(r, cex.main = 0.7, nc = 2)
+#> Error in h(simpleError(msg, call)): error in evaluating the argument 'x' in selecting a method for function 'plot': object 'r' not found
 ```

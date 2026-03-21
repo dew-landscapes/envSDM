@@ -120,22 +120,9 @@ Character path to predicted file, usually 'pred.tif'. Output .tif and
 
 ``` r
   # setup -------
-  out_dir <- file.path(system.file(package = "envSDM"), "examples")
-
-  # predictors -------
-  preds <- fs::dir_ls(fs::path(out_dir, "tif"))
-
-
-  # data ------
-  data <- fs::path(system.file(package = "envSDM"), "examples") |>
-    fs::dir_ls(regexp = "prep\\.rds$"
-               , recurse = TRUE
-               ) |>
-    tibble::enframe(name = NULL, value = "prep") |>
-    dplyr::mutate(taxa = gsub("\\.rds", "", basename(dirname(prep)))
-                  , tune = gsub("prep", "tune", prep)
-                  , out_dir = fs::path(out_dir, taxa, "combo")
-                  )
+  source(fs::path("inst", "examples", "prep_sdm_ex.R")) # need 'data' object
+#> Warning: cannot open file 'inst/examples/prep_sdm_ex.R': No such file or directory
+#> Error in file(filename, "r", encoding = encoding): cannot open the connection
 
   # Best combo--------
   ## run full SDM --------
@@ -150,18 +137,10 @@ Character path to predicted file, usually 'pred.tif'. Output .tif and
 
                                          # passed to tune_sdm via dots
                                          , metrics_df = envSDM::sdm_metrics
-                                         , force_new = FALSE
+                                         #, force_new = FALSE
                                          )
                )
-#> [[1]]
-#> /home/nwilloug/tmp/R/RtmpQcBywk/temp_libpath23d74128eba30a/envSDM/examples/chg__0__5__10/combo/full_run.rds
-#> 
-#> [[2]]
-#> /home/nwilloug/tmp/R/RtmpQcBywk/temp_libpath23d74128eba30a/envSDM/examples/chg__0__5__100/combo/full_run.rds
-#> 
-#> [[3]]
-#> /home/nwilloug/tmp/R/RtmpQcBywk/temp_libpath23d74128eba30a/envSDM/examples/chg__0__5__20/combo/full_run.rds
-#> 
+#> Error in data$prep: object of type 'closure' is not subsettable
 
 
   ## predict -------
@@ -173,95 +152,28 @@ Character path to predicted file, usually 'pred.tif'. Output .tif and
                                      , out_dir = b
                                      , predictors = preds
                                      , check_tifs = TRUE
-                                     , force_new = FALSE
+                                     #, force_new = FALSE
                                      )
                )
-
-  ## .pngs -------
-  if(FALSE) {
-
-    # not working for binary 'thresh' rasters (due to an issue with number of 'classes"?):
-      # Error in if (any(na.omit(x) < min(breaks)) && show.warnings) warning("Values have found that are less than the lowest break",  :
-      # missing value where TRUE/FALSE needed
-    purrr::walk2(data$out_dir
-                 , data$out_dir
-                 , \(x, y) png_from_preds(pred_dir = x
-                                          , tune_dir = y
-                                          , trim = FALSE
-                                          , recurse = 1
-                                          )
-                 )
-
-  }
+#> Error in data$prep: object of type 'closure' is not subsettable
 
   ## visualise-------
-  ### mask -------
-  purrr::walk(data$out_dir[file.exists(fs::path(data$out_dir, "pred.tif"))]
-              , \(x) fs::path(x, "pred.tif") %>%
-                terra::rast() %>%
-                terra::trim() %>%
-                terra::plot()
-              )
+  tifs <- fs::path(data$out_dir[file.exists(fs::path(data$out_dir, "pred.tif"))], "pred.tif")
+#> Error in data$out_dir: object of type 'closure' is not subsettable
 
+  names <- paste0("hold_prop "
+                  , data$hold_prop
+                  , "; stretch "
+                  , data$stretch
+                  , "; new_bg "
+                  , data$new_bg_test
+                  )
+#> Error in data$hold_prop: object of type 'closure' is not subsettable
 
-
-
-  # Best auc--------
-  ## run full SDM --------
-  data <- data %>%
-    dplyr::mutate(out_dir = gsub("combo", "auc_po", out_dir))
-
-  purrr::pmap(list(data$prep
-                    , data$tune
-                    , data$out_dir
-                    )
-               , \(a, b, c) run_full_sdm(prep = a
-                                         , tune = b
-                                         , out_dir = c
-                                         , use_metric = "auc_po"
-
-                                         # passed to tune_sdm via dots
-                                         , metrics_df = envSDM::sdm_metrics
-                                         , force_new = FALSE
-                                         )
-              )
-#> [[1]]
-#> /home/nwilloug/tmp/R/RtmpQcBywk/temp_libpath23d74128eba30a/envSDM/examples/chg__0__5__10/auc_po/full_run.rds
-#> 
-#> [[2]]
-#> /home/nwilloug/tmp/R/RtmpQcBywk/temp_libpath23d74128eba30a/envSDM/examples/chg__0__5__100/auc_po/full_run.rds
-#> 
-#> [[3]]
-#> /home/nwilloug/tmp/R/RtmpQcBywk/temp_libpath23d74128eba30a/envSDM/examples/chg__0__5__20/auc_po/full_run.rds
-#> 
-
-  ## predict -------
-  purrr::pwalk(list(data$prep
-                    , data$out_dir
-                    )
-               , \(a, b) predict_sdm(prep = a
-                                     , full_run = fs::path(b, "full_run.rds")
-                                     , out_dir = b
-                                     , predictors = preds
-                                     , is_env_pred = FALSE
-                                     , check_tifs = TRUE
-                                     , force_new = FALSE
-                                     )
-               )
-
-
-  ## visualise-------
-  ### mask -------
-  purrr::walk(data$out_dir[file.exists(fs::path(data$out_dir, "pred.tif"))]
-              , \(x) fs::path(x, "pred.tif") %>%
-                terra::rast() %>%
-                terra::trim() %>%
-                terra::plot()
-              )
-
-
-
-
-
-
+  r <- terra::rast(tifs)
+#> Error in h(simpleError(msg, call)): error in evaluating the argument 'x' in selecting a method for function 'rast': object 'tifs' not found
+  names(r) <- names
+#> Error: object 'r' not found
+  terra::panel(r, cex.main = 0.6, nc = 2)
+#> Error in h(simpleError(msg, call)): error in evaluating the argument 'x' in selecting a method for function 'panel': object 'r' not found
 ```
