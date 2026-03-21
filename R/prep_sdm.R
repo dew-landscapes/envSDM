@@ -52,9 +52,11 @@
 #' @param terra_options Passed to `terra::terraOptions()`. e.g. list(memfrac =
 #' 0.6)
 #' @param num_bg Numeric. How many background points?
-#' @param bg_prop_cells Proportion. Ensure `num_bg` reaches `prop_cells` (`num_bg`
-#' as a proportion of the number of non-NA cells within the predict/calibration
-#' boundary).
+#' @param new_bg_test Logical. Use an entirely new set of background points for
+#' testing the full model?
+#' @param bg_prop_cells Proportion. Ensure `num_bg` reaches `prop_cells`
+#' (background points as a proportion of the number of non-NA cells within the
+#' predict/calibration boundary).
 #' @param many_p_prop Numeric. Ensure the number of background points is at
 #' least `many_p_prop * number of presences`. e.g. If there are more than 5000
 #' presences and num_bg is set at `10000` and `many_p_prop` is `2`, then num_bg
@@ -150,6 +152,7 @@
                        , cat_preds = NULL
                        , cat_preds_max_levels = 32
                        , num_bg = 10000
+                       , new_bg_test = TRUE
                        , bg_prop_cells = 0
                        , many_p_prop = 2
                        , folds = 5
@@ -511,6 +514,12 @@
 
         }
 
+        if(new_bg_test) {
+
+          num_bg = num_bg * 2
+
+        }
+
         # density raster ------
 
         density_file <- fs::path(out_dir
@@ -693,13 +702,6 @@
             # filter back to only those within predict_boundary
             sf::st_filter(prep$predict_boundary)
 
-          if(nrow(prep$bg_points) > num_bg) {
-
-            prep$bg_points <- prep$bg_points %>%
-              dplyr::sample_n(num_bg)
-
-          }
-
           prep$log <- paste0(prep$log
                              , "\n"
                              , num_bg
@@ -760,6 +762,27 @@
             dplyr::select(! tidyselect::any_of(remove_na)) |>
             na.omit()
 
+          if(nrow(prep$env[prep$env$pa == 0,]) > num_bg) {
+
+            prep$bg_points <- prep$bg_points %>%
+              dplyr::sample_n(num_bg)
+
+            prep$env <- prep$env |>
+              dplyr::inner_join(prep$presence_ras |>
+                                  dplyr::bind_rows(sf::st_set_geometry(prep$bg_points, NULL))
+                                )
+
+          }
+
+          prep$log <- paste0(prep$log
+                             , "\n"
+                             , "env data extracted in: "
+                             , round(difftime(Sys.time(), start_bg, units = "mins"), 2)
+                             , " minutes.\n"
+                             , nrow(prep$env[prep$env$pa != 1,])
+                             , " background points with env values."
+                             )
+
           if(!is.null(cat_preds)) {
 
             prep$cat_pred_levels <- purrr::set_names(cat_preds) |>
@@ -802,15 +825,6 @@
 
           }
 
-          prep$log <- paste0(prep$log
-                             , "\n"
-                             , "env data extracted in: "
-                             , round(difftime(Sys.time(), start_bg, units = "mins"), 2)
-                             , " minutes.\n"
-                             , nrow(prep$env[prep$env$pa != 1,])
-                             , " background points with env values."
-                             )
-
         }
 
         # Abandon if too few presences with env data
@@ -849,15 +863,44 @@
             hold_prop_adj <- hold_prop
             if(hold_prop_adj >= 0.5) hold_prop_adj = 0.49
 
-            # Try to get min_fold_n presences within prep$testing
             if(hold_prop > 0) {
 
+              # Try to get min_fold_n presences within prep$testing
               while(any(sum(prep$testing$pa == 1) < min_fold_n, hold_prop_adj >= 0.5)) {
 
                 hold_prop_adj <- hold_prop_adj + counter * 0.01
 
-                prep$testing <- to_split %>%
-                  dplyr::slice_sample(prop = hold_prop_adj, by = pa)
+                if(! new_bg_test) {
+
+                  # new presences, subset backgound
+                  # test data is made up of:
+                    # a new subset of the presences available for training + testing
+                    # a new subset of the background points available for training + testing
+                    # this is genuine 'holdout' but with less testing background than if new_bg_test is TRUE
+
+                  prep$testing <- to_split |>
+                    dplyr::slice_sample(prop = hold_prop_adj, by = pa)
+
+                } else {
+
+                  # new presences, new backgound
+                  # test data is made up of:
+                    # a new subset of the presences available for training + testing
+                    # new background data of equal size to the training background data
+                    # this is genuine 'holdout' with more testing background than if new_bg_test is FALSE
+
+                  ps <- to_split |>
+                    dplyr::filter(pa == 1) |>
+                    dplyr::slice_sample(prop = hold_prop_adj)
+
+                  as <- to_split |>
+                    dplyr::filter(pa == 0) |>
+                    dplyr::slice_sample(prop = 0.5)
+
+                  prep$testing <- ps |>
+                    dplyr::bind_rows(as)
+
+                }
 
                 counter <- counter + 1
 
@@ -865,7 +908,36 @@
 
             } else {
 
-              prep$testing <- to_split
+              # hold_prop = 0
+              if(! new_bg_test) {
+
+                # same presences, same backgound
+                # test data is made up of:
+                  # the same presences that were used in training
+                  # the same background that was used in training
+                  # no 'holdout' for either presences or background
+
+                prep$testing <- to_split
+
+              } else {
+
+                ps <- to_split |>
+                  dplyr::filter(pa == 1)
+
+                as <- to_split |>
+                  dplyr::filter(pa == 0) |>
+                  dplyr::sample_n(num_bg / 2)
+
+                # same presences, new background
+                # test data is made up of:
+                  # the same presences that were used in training
+                  # new background data of equal size to the training background data
+                  # this is a 'holdout' only for the background data
+
+                prep$testing <- ps |>
+                  dplyr::bind_rows(as)
+
+              }
 
             }
 
@@ -928,7 +1000,7 @@
                                dplyr::distinct(id)
                              )
 
-          if(! as.logical(nrow(to_split))) to_split <- prep$testing
+          if(! as.logical(nrow(to_split))) to_split <- prep$testing # ? catch for no rows left?
 
           prep$training <- tibble::tibble(rep = 1:repeats_adj
                                           , training = list(to_split)
