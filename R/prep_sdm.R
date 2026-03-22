@@ -491,8 +491,18 @@
 
         if(num_bg < many_p_prop * n_p) num_bg <- many_p_prop * n_p
 
+        ## n cells --------
+        # estimate non-NA cells using just the first layer of prep_preds
         n_cells <- terra::global(prep_preds[[1]], "notNA")[[1]]
 
+        # if n_cells is not a lot more than num_bg then check all layers to get a more accurate n_cells
+        if(n_cells < 4 * num_bg) {
+
+          n_cells <- min(terra::global(prep_preds, "notNA"))
+
+        }
+
+        # if the number of background cells is less than bg_prop_cells, increase it
         if(num_bg / n_cells < bg_prop_cells) {
 
           num_bg <- floor(n_cells * bg_prop_cells)
@@ -522,8 +532,12 @@
 
         }
 
-        # catch for more background than available cells
-        if(num_bg >= n_cells) num_bg <- n_cells - n_p
+        # if the number of background cells is too close to n_cells, decrease it
+        if(num_bg < 3 * n_cells) {
+
+          num_bg <- (n_cells - n_p) * 0.9
+
+        }
 
         # density raster ------
 
@@ -681,7 +695,7 @@
           if(!exists("target_density")) target_density <- terra::rast(density_file)
 
           ptscell <- sample(1:terra::ncell(target_density)
-                           , num_bg * 2 # over generate here as terra::window only crops - it does not mask
+                           , num_bg * 1.1 # over generate here as terra::window only crops - it does not mask
                            , prob = target_density[]
                            , replace = TRUE
                            )
@@ -948,7 +962,10 @@
 
                 bs <- to_split |>
                   dplyr::filter(pa == 0) |>
-                  dplyr::sample_n(num_bg / 2)
+                  dplyr::sample_n(num_bg / 2, replace = TRUE) |>
+                  # replace = TRUE then distinct() is a hack to prevent an error when there are not enough cells
+                  # needs a better method as with a small prep$boundary the training backgrounds can end up too small
+                  dplyr::distinct()
 
                 prep$testing <- ps |>
                   dplyr::bind_rows(bs)
