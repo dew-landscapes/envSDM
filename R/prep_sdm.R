@@ -526,6 +526,7 @@
 
         }
 
+        # If using new backgrounds in the test data multiply by 2
         if(new_bg_test) {
 
           num_bg = num_bg * 2
@@ -533,9 +534,9 @@
         }
 
         # if the number of background cells is too close to n_cells, decrease it
-        if(num_bg < 3 * n_cells) {
+        if(num_bg > 0.95 * n_cells) {
 
-          num_bg <- (n_cells - n_p) * 0.9
+          num_bg <- (n_cells - n_p) * 0.95
 
         }
 
