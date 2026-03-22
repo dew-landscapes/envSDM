@@ -501,7 +501,9 @@
                              , "\n"
                              , "Number of non-NA cells within predict/callibration boundary is "
                              , format(n_cells, big.mark = ",")
-                             , " which is more than bg_prop_cells ("
+                             , " which is more than "
+                             , orig_bg
+                             , " * bg_prop_cells ("
                              , bg_prop_cells
                              , "). Background points increased from "
                              , format(orig_bg, big.mark = ",")
@@ -519,6 +521,9 @@
           num_bg = num_bg * 2
 
         }
+
+        # catch for more background than available cells
+        if(num_bg >= n_cells) num_bg <- n_cells - n_p
 
         # density raster ------
 
@@ -1012,8 +1017,6 @@
         if(!prep$abandoned) {
 
           to_split <- training_split
-
-          if(! as.logical(nrow(to_split))) to_split <- prep$testing # ? catch for no rows left?
 
           prep$training <- tibble::tibble(rep = 1:repeats_adj
                                           , training = list(to_split)
