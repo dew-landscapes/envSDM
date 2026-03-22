@@ -696,7 +696,7 @@
           if(!exists("target_density")) target_density <- terra::rast(density_file)
 
           ptscell <- sample(1:terra::ncell(target_density)
-                           , num_bg * 1.1 # over generate here as terra::window only crops - it does not mask
+                           , num_bg * 2 # over generate here as terra::window only crops - it does not mask
                            , prob = target_density[]
                            , replace = TRUE
                            )
@@ -963,9 +963,7 @@
 
                 bs <- to_split |>
                   dplyr::filter(pa == 0) |>
-                  dplyr::sample_n(num_bg / 2, replace = TRUE) |>
-                  # replace = TRUE then distinct() is a hack to prevent an error when there are not enough cells
-                  # needs a better method as with a small prep$boundary the training backgrounds can end up too small
+                  dplyr::sample_n((nrow(to_split) / 2)) |>
                   dplyr::distinct()
 
                 prep$testing <- ps |>
@@ -1064,11 +1062,23 @@
                  )
              ) {
 
-            prep$log <- paste0(prep$log
-                               , "\n"
-                               , "WARNING: no holdout data\n"
-                               , " full model will be tested against the same data that was used to train it!"
-                               )
+            if(! new_bg_test) {
+
+              prep$log <- paste0(prep$log
+                                 , "\n"
+                                 , "WARNING: no holdout data\n"
+                                 , " full model will be tested against the data used to train it!"
+                                 )
+
+            } else {
+
+              prep$log <- paste0(prep$log
+                                 , "\n"
+                                 , "WARNING: no holdout presences\n"
+                                 , " full model will be tested against the presences used to train it!"
+                                 )
+
+            }
 
           }
 
