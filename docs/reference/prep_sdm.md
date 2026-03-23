@@ -395,7 +395,7 @@ sampling density raster against which background points are assigned.
 #> ℹ Use `spec()` to retrieve the full column specification for this data.
 #> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 #> prep for chg
-#> out_dir is /home/nwilloug/tmp/R/Rtmp8rrkes/temp_libpath2d36a25b9e3887/envSDM/examples/0__10__TRUE.
+#> out_dir is /home/nwilloug/tmp/R/RtmpW54ve1/temp_libpath13645b38c42c8c/envSDM/examples/0__10__TRUE.
 #>  103 incoming presences
 #> Rows: 103 Columns: 2
 #> ── Column specification ────────────────────────────────────────────────────────
@@ -405,7 +405,7 @@ sampling density raster against which background points are assigned.
 #> ℹ Use `spec()` to retrieve the full column specification for this data.
 #> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 #> prep for chg
-#> out_dir is /home/nwilloug/tmp/R/Rtmp8rrkes/temp_libpath2d36a25b9e3887/envSDM/examples/0.3__10__TRUE.
+#> out_dir is /home/nwilloug/tmp/R/RtmpW54ve1/temp_libpath13645b38c42c8c/envSDM/examples/0.3__10__TRUE.
 #>  103 incoming presences
 #> Rows: 103 Columns: 2
 #> ── Column specification ────────────────────────────────────────────────────────
@@ -415,7 +415,7 @@ sampling density raster against which background points are assigned.
 #> ℹ Use `spec()` to retrieve the full column specification for this data.
 #> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 #> prep for chg
-#> out_dir is /home/nwilloug/tmp/R/Rtmp8rrkes/temp_libpath2d36a25b9e3887/envSDM/examples/0__30__TRUE.
+#> out_dir is /home/nwilloug/tmp/R/RtmpW54ve1/temp_libpath13645b38c42c8c/envSDM/examples/0__30__TRUE.
 #>  103 incoming presences
 #> Rows: 103 Columns: 2
 #> ── Column specification ────────────────────────────────────────────────────────
@@ -425,7 +425,7 @@ sampling density raster against which background points are assigned.
 #> ℹ Use `spec()` to retrieve the full column specification for this data.
 #> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 #> prep for chg
-#> out_dir is /home/nwilloug/tmp/R/Rtmp8rrkes/temp_libpath2d36a25b9e3887/envSDM/examples/0.3__30__TRUE.
+#> out_dir is /home/nwilloug/tmp/R/RtmpW54ve1/temp_libpath13645b38c42c8c/envSDM/examples/0.3__30__TRUE.
 #>  103 incoming presences
 #> Rows: 103 Columns: 2
 #> ── Column specification ────────────────────────────────────────────────────────
@@ -435,7 +435,7 @@ sampling density raster against which background points are assigned.
 #> ℹ Use `spec()` to retrieve the full column specification for this data.
 #> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 #> prep for chg
-#> out_dir is /home/nwilloug/tmp/R/Rtmp8rrkes/temp_libpath2d36a25b9e3887/envSDM/examples/0__10__FALSE.
+#> out_dir is /home/nwilloug/tmp/R/RtmpW54ve1/temp_libpath13645b38c42c8c/envSDM/examples/0__10__FALSE.
 #>  103 incoming presences
 #> Rows: 103 Columns: 2
 #> ── Column specification ────────────────────────────────────────────────────────
@@ -445,7 +445,7 @@ sampling density raster against which background points are assigned.
 #> ℹ Use `spec()` to retrieve the full column specification for this data.
 #> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 #> prep for chg
-#> out_dir is /home/nwilloug/tmp/R/Rtmp8rrkes/temp_libpath2d36a25b9e3887/envSDM/examples/0.3__10__FALSE.
+#> out_dir is /home/nwilloug/tmp/R/RtmpW54ve1/temp_libpath13645b38c42c8c/envSDM/examples/0.3__10__FALSE.
 #>  103 incoming presences
 #> Rows: 103 Columns: 2
 #> ── Column specification ────────────────────────────────────────────────────────
@@ -455,7 +455,7 @@ sampling density raster against which background points are assigned.
 #> ℹ Use `spec()` to retrieve the full column specification for this data.
 #> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 #> prep for chg
-#> out_dir is /home/nwilloug/tmp/R/Rtmp8rrkes/temp_libpath2d36a25b9e3887/envSDM/examples/0__30__FALSE.
+#> out_dir is /home/nwilloug/tmp/R/RtmpW54ve1/temp_libpath13645b38c42c8c/envSDM/examples/0__30__FALSE.
 #>  103 incoming presences
 #> Rows: 103 Columns: 2
 #> ── Column specification ────────────────────────────────────────────────────────
@@ -465,7 +465,7 @@ sampling density raster against which background points are assigned.
 #> ℹ Use `spec()` to retrieve the full column specification for this data.
 #> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 #> prep for chg
-#> out_dir is /home/nwilloug/tmp/R/Rtmp8rrkes/temp_libpath2d36a25b9e3887/envSDM/examples/0.3__30__FALSE.
+#> out_dir is /home/nwilloug/tmp/R/RtmpW54ve1/temp_libpath13645b38c42c8c/envSDM/examples/0.3__30__FALSE.
 #>  103 incoming presences
 
   # example of 'prep'
@@ -479,9 +479,9 @@ sampling density raster against which background points are assigned.
 
   # variables to remove prior to SDM
   prep$reduce_env$remove
-#>  [1] "bio04"     "bio07"     "bio08"     "bio09"     "bio12"     "bio13"    
-#>  [7] "bio16"     "bio17"     "bio18"     "bio19"     "cell"      "cell_lat" 
-#> [13] "cell_long" "fold"      "id"        "pa"        "x"         "y"        
+#>  [1] "bio02"     "bio04"     "bio08"     "bio09"     "bio12"     "bio16"    
+#>  [7] "bio17"     "bio18"     "bio19"     "cell"      "cell_lat"  "cell_long"
+#> [13] "fold"      "id"        "pa"        "x"         "y"        
 
 
   # Background points

@@ -61,8 +61,11 @@ CBI_rescale is 0 to 1); and IMAE.
   prep <- rio::import(preps[[1]], trust = TRUE)
 
   full_run <- rio::import(fs::path(dirname(preps[[1]]), "full_run.rds"), trust = TRUE)
+#> Error: No such file: /home/nwilloug/tmp/R/RtmpW54ve1/temp_libpath13645b38c42c8c/envSDM/examples/0.3__10__FALSE/full_run.rds
   algo <- full_run$tune_mean$algo[[1]]
+#> Error: object 'full_run' not found
   model <- full_run[[paste0("tune_", algo)]]$m[[1]]
+#> Error: object 'full_run' not found
 
   presences <- prep$testing[prep$testing$pa == 1, ]
   background <- prep$testing[prep$testing$pa == 0, ]
@@ -71,23 +74,5 @@ CBI_rescale is 0 to 1); and IMAE.
                , p_test = presences
                , b_test = background
                )
-#> @stats
-#>   np  na prevalence   auc   cor pcor   ODP auc_po auc_po_flexsdm   CBI
-#> 1 97 184      0.345 0.984 0.871    0 0.655  0.984          0.984 0.946
-#>   CBI_rescale  IMAE
-#> 1       0.973 0.888
-#> 
-#> @thresholds
-#>   max_kappa max_spec_sens no_omission equal_prevalence equal_sens_spec  or10
-#> 1      0.89         0.762       0.054             0.34           0.746 0.892
-#> 
-#> @tr_stats
-#>     treshold kappa  CCR  TPR  TNR  FPR  FNR  PPP  NPP  MCR  OR
-#> 1          0     0 0.35    1    0    1    0 0.35  NaN 0.65 NaN
-#> 2          0  0.15 0.48    1  0.2  0.8    0  0.4    1 0.52 Inf
-#> 3          0  0.17  0.5    1 0.23 0.77    0 0.41    1  0.5 Inf
-#> 4        ...   ...  ...  ...  ...  ...  ...  ...  ...  ... ...
-#> 105        1  0.57 0.83 0.51    1    0 0.49    1 0.79 0.17 Inf
-#> 106        1  0.57 0.83 0.51    1    0 0.49    1 0.79 0.17 Inf
-#> 107        1     0 0.65    0    1    0    1  NaN 0.65 0.35 NaN
+#> Error: object 'full_run' not found
 ```
