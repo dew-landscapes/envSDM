@@ -760,12 +760,13 @@
                                                  )
                             ) %>%
               tidyr::unnest(cols = c(stats, tr)) %>%
-              dplyr::group_by(dplyr::across(tidyselect::any_of(keeps))) %>%
-              dplyr::summarise(reps = dplyr::n_distinct(rep)
+              dplyr::summarise(.by = tidyselect::any_of(keeps)
+                               , reps = dplyr::n_distinct(rep)
                                , tunes = dplyr::n()
                                , dplyr::across(dplyr::where(is.numeric), mean)
-                               ) %>%
-              dplyr::ungroup()
+                               , spatial_tunes = sum(spatial_folds)
+                               , non_spatial_tunes = tunes - spatial_tunes
+                               )
 
           }
 
@@ -785,6 +786,7 @@
                             ) |>
               dplyr::mutate(best = combo == max(combo, na.rm = TRUE)) |>
               dplyr::select(tidyselect::any_of(keeps)
+                            , tidyselect::matches("tunes")
                             , tidyselect::any_of(metrics_df$metric)
                             , combo, best
                             ) %>%
