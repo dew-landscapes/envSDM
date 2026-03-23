@@ -581,14 +581,14 @@
             ### mtry ------
             use_mtry <- if(isTRUE(mtry)) {
 
-              if(! all(training$spatial_folds)) {
+              if(all(! training$spatial_folds)) {
 
                 # rf default for classification
                 seq(1, floor(sqrt(length(preds$rf))), 1)
 
               } else {
 
-                # limit if spatial folds used
+                # limit if any spatial folds used
                 xm <- seq(1, floor(sqrt(length(preds$rf))), 1)
 
                 xm <- xm[xm <= limit_spat_mtry]
