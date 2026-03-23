@@ -1084,8 +1084,8 @@
 
           if(k_folds > 1) {
 
-          ## spatial ------
-          safe_cv_spatial <- purrr::safely(blockCV::cv_spatial)
+            ## spatial ------
+            safe_cv_spatial <- purrr::safely(blockCV::cv_spatial)
 
             prep$training <- prep$training |>
               dplyr::mutate(point_sf = purrr::map(training
@@ -1226,6 +1226,11 @@
                           , single_fold = purrr::map_lgl(folds
                                                          , \(x) length(unique(x)) == 1
                                                          )
+                          # adjust spatial_folds to account for single_fold (previous line)
+                          , spatial_folds = purrr::map2_lgl(spatial_folds
+                                                            , single_fold
+                                                            , \(x, y) isTRUE(x) & isFALSE(y)
+                                                            )
                           # again, if only one fold left, go to non-spatial
                           , folds = purrr::pmap(list(single_fold
                                                      , folds
