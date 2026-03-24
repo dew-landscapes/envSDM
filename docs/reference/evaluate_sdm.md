@@ -54,25 +54,40 @@ CBI_rescale is 0 to 1); and IMAE.
 ## Examples
 
 ``` r
-  out_dir <- file.path(system.file(package = "envSDM"), "examples")
+out_dir <- file.path(system.file(package = "envSDM"), "examples")
 
-  preps <- fs::dir_ls(out_dir, regexp = "prep.rds", recurse = TRUE)
+preps <- fs::dir_ls(out_dir, regexp = "prep.rds", recurse = TRUE)
 
-  prep <- rio::import(preps[[1]], trust = TRUE)
+prep <- rio::import(preps[[1]], trust = TRUE)
 
-  full_run <- rio::import(fs::path(dirname(preps[[1]]), "full_run.rds"), trust = TRUE)
-#> Error: No such file: /home/nwilloug/tmp/R/RtmpW54ve1/temp_libpath13645b38c42c8c/envSDM/examples/0.3__10__FALSE/full_run.rds
-  algo <- full_run$tune_mean$algo[[1]]
-#> Error: object 'full_run' not found
-  model <- full_run[[paste0("tune_", algo)]]$m[[1]]
-#> Error: object 'full_run' not found
+full_run <- rio::import(fs::path(dirname(preps[[1]]), "full_run.rds"), trust = TRUE)
+algo <- full_run$tune_mean$algo[[1]]
+model <- full_run[[paste0("tune_", algo)]]$m[[1]]
 
-  presences <- prep$testing[prep$testing$pa == 1, ]
-  background <- prep$testing[prep$testing$pa == 0, ]
+presences <- prep$testing[prep$testing$pa == 1, ]
+background <- prep$testing[prep$testing$pa == 0, ]
 
-  evaluate_sdm(full_run$tune_rf$m[[1]]
-               , p_test = presences
-               , b_test = background
-               )
-#> Error: object 'full_run' not found
+evaluate_sdm(full_run$tune_rf$m[[1]]
+             , p_test = presences
+             , b_test = background
+             )
+#> @stats
+#>   np  na prevalence   auc   cor pcor   ODP auc_po auc_po_flexsdm   CBI
+#> 1 97 184      0.345 0.976 0.873    0 0.655  0.976          0.976 0.949
+#>   CBI_rescale  IMAE
+#> 1       0.974 0.893
+#> 
+#> @thresholds
+#>   max_kappa max_spec_sens no_omission equal_prevalence equal_sens_spec  or10
+#> 1     0.918         0.606       0.052            0.346           0.606 0.642
+#> 
+#> @tr_stats
+#>     treshold kappa  CCR  TPR  TNR  FPR  FNR  PPP  NPP  MCR     OR
+#> 1          0     0 0.35    1    0    1    0 0.35  NaN 0.65    NaN
+#> 2          0   0.1 0.44    1 0.14 0.86    0 0.38    1 0.56    Inf
+#> 3          0  0.15 0.48    1  0.2  0.8    0  0.4    1 0.52    Inf
+#> 4        ...   ...  ...  ...  ...  ...  ...  ...  ...  ...    ...
+#> 102        1  0.77  0.9 0.74 0.99 0.01 0.26 0.97 0.88  0.1 262.08
+#> 103        1  0.77  0.9 0.74 0.99 0.01 0.26 0.97 0.88  0.1 262.08
+#> 104        1     0 0.65    0    1    0    1  NaN 0.65 0.35    NaN
 ```

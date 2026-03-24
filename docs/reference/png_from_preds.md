@@ -65,61 +65,81 @@ files
 ## Examples
 
 ``` r
-  # setup -------
-  source(fs::path("inst", "examples", "prep_sdm_ex.R")) # need 'data' object
-#> Warning: cannot open file 'inst/examples/prep_sdm_ex.R': No such file or directory
-#> Error in file(filename, "r", encoding = encoding): cannot open the connection
+out_dir <- file.path(system.file(package = "envSDM"), "examples")
 
-  # Best combo--------
-  ## run full SDM --------
-  purrr::pmap(list(data$prep
-                    , data$tune
-                    , data$out_dir
-                    )
-               , \(a, b, c) run_full_sdm(prep = a
-                                         , tune = b
-                                         , out_dir = c
-                                         , use_metric = "combo"
+# setup -------
+data <- readRDS(fs::path(out_dir, "data.rds"))
 
-                                         # passed to tune_sdm via dots
-                                         , metrics_df = envSDM::sdm_metrics
-                                         #, force_new = FALSE
-                                         )
-               )
-#> Error in data$prep: object of type 'closure' is not subsettable
-
-
-  ## predict -------
-  purrr::pwalk(list(data$prep
-                    , data$out_dir
-                    )
-               , \(a, b) predict_sdm(prep = a
-                                     , full_run = fs::path(b, "full_run.rds")
-                                     , out_dir = b
-                                     , predictors = preds
-                                     , check_tifs = TRUE
-                                     #, force_new = FALSE
-                                     )
-               )
-#> Error in data$prep: object of type 'closure' is not subsettable
-
-  ## visualise-------
-  tifs <- fs::path(data$out_dir[file.exists(fs::path(data$out_dir, "pred.tif"))], "pred.tif")
-#> Error in data$out_dir: object of type 'closure' is not subsettable
-
-  names <- paste0("hold_prop "
-                  , data$hold_prop
-                  , "; stretch "
-                  , data$stretch
-                  , "; new_bg "
-                  , data$new_bg_test
+# Best combo--------
+## run full SDM --------
+purrr::pmap(list(data$prep
+                  , data$tune
+                  , data$out_dir
                   )
-#> Error in data$hold_prop: object of type 'closure' is not subsettable
+             , \(a, b, c) run_full_sdm(prep = a
+                                       , tune = b
+                                       , out_dir = c
+                                       , use_metric = "combo"
 
-  r <- terra::rast(tifs)
-#> Error in h(simpleError(msg, call)): error in evaluating the argument 'x' in selecting a method for function 'rast': object 'tifs' not found
-  names(r) <- names
-#> Error: object 'r' not found
-  terra::panel(r, cex.main = 0.6, nc = 2)
-#> Error in h(simpleError(msg, call)): error in evaluating the argument 'x' in selecting a method for function 'panel': object 'r' not found
+                                       # passed to tune_sdm via dots
+                                       , metrics_df = envSDM::sdm_metrics
+                                       #, force_new = FALSE
+                                       )
+             )
+#> [[1]]
+#> /projects/dev/nige/packages/envSDM/inst/examples/0__10__TRUE/full_run.rds
+#> 
+#> [[2]]
+#> /projects/dev/nige/packages/envSDM/inst/examples/0.3__10__TRUE/full_run.rds
+#> 
+#> [[3]]
+#> /projects/dev/nige/packages/envSDM/inst/examples/0__30__TRUE/full_run.rds
+#> 
+#> [[4]]
+#> /projects/dev/nige/packages/envSDM/inst/examples/0.3__30__TRUE/full_run.rds
+#> 
+#> [[5]]
+#> /projects/dev/nige/packages/envSDM/inst/examples/0__10__FALSE/full_run.rds
+#> 
+#> [[6]]
+#> /projects/dev/nige/packages/envSDM/inst/examples/0.3__10__FALSE/full_run.rds
+#> 
+#> [[7]]
+#> /projects/dev/nige/packages/envSDM/inst/examples/0__30__FALSE/full_run.rds
+#> 
+#> [[8]]
+#> /projects/dev/nige/packages/envSDM/inst/examples/0.3__30__FALSE/full_run.rds
+#> 
+
+
+## predict -------
+purrr::pwalk(list(data$prep
+                  , data$out_dir
+                  )
+             , \(a, b) predict_sdm(prep = a
+                                   , full_run = fs::path(b, "full_run.rds")
+                                   , out_dir = b
+                                   , predictors = preds
+                                   , check_tifs = TRUE
+                                   #, force_new = FALSE
+                                   )
+             )
+#> Error in pmap(.l, .f, ..., .progress = .progress): ℹ In index: 1.
+#> Caused by error in `.f()`:
+#> ! object 'preds' not found
+
+## visualise-------
+tifs <- fs::path(data$out_dir[file.exists(fs::path(data$out_dir, "pred.tif"))], "pred.tif")
+
+names <- paste0("hold_prop "
+                , data$hold_prop
+                , "; stretch "
+                , data$stretch
+                , "; new_bg "
+                , data$new_bg_test
+                )
+
+r <- terra::rast(tifs)
+names(r) <- names
+terra::panel(r, cex.main = 0.6, nc = 2)
 ```

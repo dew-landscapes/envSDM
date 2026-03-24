@@ -163,36 +163,72 @@ elements:
 ## Examples
 
 ``` r
-  # setup -------
-  source(fs::path("inst", "examples", "prep_sdm_ex.R")) # need 'data' object
-#> Warning: cannot open file 'inst/examples/prep_sdm_ex.R': No such file or directory
-#> Error in file(filename, "r", encoding = encoding): cannot open the connection
+out_dir <- file.path(system.file(package = "envSDM"), "examples")
 
-  purrr::map(data$out_dir
-              , \(x) tune_sdm(prep = fs::path(x, "prep.rds")
-                              , out_dir = x
-                              , fc = "lq"
-                              , rm = c(1, 2)
-                              , trees = 500
-                              , mtry = c(1:3)
-                              , nodesize = c(1, 3)
-                              , limit_p = 3
-                              , use_metrics = c("auc_po", "CBI_rescale", "IMAE")
-                              #, force_new = TRUE
-                              )
-              )
-#> Error in data$out_dir: object of type 'closure' is not subsettable
+# setup -------
+data <- readRDS(fs::path(out_dir, "data.rds"))
 
-  # which tune args were best using 'combo'?
-  # BUT, not a sensible comparison as, between rows, the models are not all built on the same data!
-  data %>%
-    dplyr::mutate(tune = purrr::map(tune, rio::import, trust = TRUE)
-                  , tune_mean = purrr::map(tune, "tune_mean")
-                  ) %>%
-    tidyr::unnest(cols = c(tune_mean)) %>%
-    dplyr::filter(best) |> # used 'combo' to determine 'best' as default in tune_sdm
-    dplyr::select(taxa, algo, tidyselect::any_of(names(sdms)), tidyselect::where(is.numeric))
-#> Error in UseMethod("mutate"): no applicable method for 'mutate' applied to an object of class "function"
+purrr::map(data$out_dir
+            , \(x) tune_sdm(prep = fs::path(x, "prep.rds")
+                            , out_dir = x
+                            , fc = "lq"
+                            , rm = c(1, 2)
+                            , trees = 500
+                            , mtry = c(1:3)
+                            , nodesize = c(1, 3)
+                            , limit_p = 3
+                            , use_metrics = c("auc_po", "CBI_rescale", "IMAE")
+                            #, force_new = TRUE
+                            )
+            )
+#> [[1]]
+#> /home/nwilloug/tmp/R/RtmpF2Nnth/temp_libpath166a9855ca6d78/envSDM/examples/0__10__TRUE/tune.rds
+#> 
+#> [[2]]
+#> /home/nwilloug/tmp/R/RtmpF2Nnth/temp_libpath166a9855ca6d78/envSDM/examples/0.3__10__TRUE/tune.rds
+#> 
+#> [[3]]
+#> /home/nwilloug/tmp/R/RtmpF2Nnth/temp_libpath166a9855ca6d78/envSDM/examples/0__30__TRUE/tune.rds
+#> 
+#> [[4]]
+#> /home/nwilloug/tmp/R/RtmpF2Nnth/temp_libpath166a9855ca6d78/envSDM/examples/0.3__30__TRUE/tune.rds
+#> 
+#> [[5]]
+#> /home/nwilloug/tmp/R/RtmpF2Nnth/temp_libpath166a9855ca6d78/envSDM/examples/0__10__FALSE/tune.rds
+#> 
+#> [[6]]
+#> /home/nwilloug/tmp/R/RtmpF2Nnth/temp_libpath166a9855ca6d78/envSDM/examples/0.3__10__FALSE/tune.rds
+#> 
+#> [[7]]
+#> /home/nwilloug/tmp/R/RtmpF2Nnth/temp_libpath166a9855ca6d78/envSDM/examples/0__30__FALSE/tune.rds
+#> 
+#> [[8]]
+#> /home/nwilloug/tmp/R/RtmpF2Nnth/temp_libpath166a9855ca6d78/envSDM/examples/0.3__30__FALSE/tune.rds
+#> 
 
-  # random forest nearly always 'won' with both nodeside and mtry varying
+# which tune args were best using 'combo'?
+# BUT, not a sensible comparison as, between rows, the models are not all built on the same data!
+data %>%
+  dplyr::mutate(tune = purrr::map(tune, rio::import, trust = TRUE)
+                , tune_mean = purrr::map(tune, "tune_mean")
+                ) %>%
+  tidyr::unnest(cols = c(tune_mean)) %>%
+  dplyr::filter(best) |> # used 'combo' to determine 'best' as default in tune_sdm
+  dplyr::select(taxa, algo, hold_prop, stretch, new_bg_test, tidyselect::where(is.numeric))
+#> # A tibble: 8 × 25
+#>   taxa  algo   hold_prop stretch new_bg_test tunes  reps    rm trees nodesize
+#>   <chr> <chr>      <dbl>   <dbl> <lgl>       <dbl> <dbl> <dbl> <dbl>    <dbl>
+#> 1 chg   maxnet       0        10 TRUE           23     5     1    NA       NA
+#> 2 chg   rf           0.3      10 TRUE           23     5    NA   500        1
+#> 3 chg   maxnet       0        30 TRUE           23     5     1    NA       NA
+#> 4 chg   rf           0.3      30 TRUE           23     5    NA   500        1
+#> 5 chg   maxnet       0        10 FALSE          23     5     2    NA       NA
+#> 6 chg   rf           0.3      10 FALSE          19     5    NA   500        1
+#> 7 chg   maxnet       0        30 FALSE          22     5     1    NA       NA
+#> 8 chg   rf           0.3      30 FALSE          20     5    NA   500        3
+#> # ℹ 15 more variables: mtry <int>, spatial_tunes <int>,
+#> #   non_spatial_tunes <dbl>, max_spec_sens <dbl>, no_omission <dbl>,
+#> #   equal_prevalence <dbl>, equal_sens_spec <dbl>, auc_po <dbl>, ODP <dbl>,
+#> #   or10 <dbl>, CBI <dbl>, CBI_rescale <dbl>, IMAE <dbl>, auc_po_flexsdm <dbl>,
+#> #   combo <dbl>
 ```
