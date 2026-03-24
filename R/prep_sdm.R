@@ -1254,10 +1254,11 @@
           # Find correlation for log
           if(length(prep$training$folds) > 1) {
 
-            check_pres_corr <- purrr::map2(prep$training$folds
-                                           , prep$training$training
-                                           , \(x, y) x[y$pa == 1]
-                                           )
+            check_pres_corr <- purrr::map(prep$training$training
+                                          , \(x) x |>
+                                            dplyr::filter(pa == 1) |>
+                                            dplyr::pull(fold)
+                                          )
 
             prep$prep_fold_corr <- stats::cor(tibble::as_tibble(check_pres_corr, .name_repair = "unique_quiet"))
 
@@ -1271,13 +1272,13 @@
 
           prep$log <- paste0(prep$log
                              , "\n"
-                             , paste0("repeat: "
+                             , paste0(" repeat: "
                                       , prep$training$rep
-                                      , ", spatial folds = "
+                                      , ". spatial folds = "
                                       , prep$training$spatial_folds
                                       , ". Folds = "
-                                      , purrr::map(prep$training$folds
-                                                   , \(x) x |>
+                                      , purrr::map(prep$training$training
+                                                   , \(x) x$fold |>
                                                      unique() |>
                                                      length() |>
                                                      stringr::str_flatten_comma()
