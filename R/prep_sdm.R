@@ -769,12 +769,11 @@
                                         )
                           ) |>
             tidyr::pivot_longer(cols = tidyselect::any_of(names(prep_preds))) |>
-            dplyr::group_by(name) |>
-            dplyr::summarise(nas = sum(is.na(value))
+            dplyr::summarise(.by = name
+                             , nas = sum(is.na(value))
                              , n = dplyr::n()
                              , prop_na = nas / n
-                             ) |>
-            dplyr::ungroup()
+                             )
 
           remove_na <- test_na$name[test_na$prop_na > max_na_predictor_prop]
 
