@@ -24,12 +24,13 @@ fix_folds <- function(folds, pres, min_fold_n = 8, pres_val = 1) {
 
     k_folds <- old_k_folds - how_many_below_thresh
 
-    folds_adj <- tibble::tibble(fold = folds[pres == 1]) %>%
-      dplyr::mutate(fold_adj = forcats::fct_lump_n(as.factor(fold), n = k_folds - 1, ties.method = "random")) %>%
-      dplyr::mutate(fold_adj = as.numeric(fold_adj)) %>%
+    folds_adj <- tibble::tibble(fold_ids = 1:old_k_folds) |>
+      dplyr::mutate(n = purrr::map_dbl(fold_ids, \(x) sum(folds_p == x))) |>
+      dplyr::mutate(fold_ids_adj = forcats::fct_lump_n(as.factor(fold_ids), k_folds - 1, w = n, ties.method = "random")) |>
+      dplyr::mutate(fold_ids_adj = as.numeric(fold_ids_adj)) |>
       dplyr::distinct()
 
-    folds <- folds_adj$fold_adj[match(folds, folds_adj$fold)]
+    folds <- folds_adj$fold_ids_adj[match(folds, folds_adj$fold_ids)]
 
   }
 
