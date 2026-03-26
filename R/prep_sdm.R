@@ -1081,7 +1081,7 @@
 
           }
 
-          if(k_folds > 1) {
+          if(all(k_folds > 1, spatial_folds)) {
 
             ## spatial ------
             safe_cv_spatial <- purrr::safely(blockCV::cv_spatial)
@@ -1198,6 +1198,18 @@
               }
 
             }
+
+          } else {
+
+            # hack as folds_spat is actually non spatial in this case.
+            # this hack is used as folds_spat is needed in the following section
+            prep$training <- prep$training |>
+              dplyr::mutate(folds_spat = purrr::map(training
+                                                    , \(x) non_spatial_folds(k_folds
+                                                                             , x
+                                                                             )
+                                                    )
+                            )
 
           }
 
