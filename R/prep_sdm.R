@@ -1141,14 +1141,22 @@
             ### extract folds from cv_spatial --------
             prep$training <- prep$training |>
               dplyr::filter(purrr::map_lgl(error, \(x) is.null(x))) |> # remove errors
-              dplyr::mutate(folds = purrr::map(cv_spatial, \(x) x$result$folds_ids))
+              dplyr::mutate(folds_spat = purrr::map(cv_spatial, \(x) x$result$folds_ids))
+
+
+            ### fix spatial folds --------
+            prep$training <- prep$training |>
+              dplyr::mutate(folds_spat = purrr::map2(folds_spat, training
+                                                     , \(x, y) fix_folds(x, y$pa, min_fold_n)
+                                                     )
+                            )
 
             ### spatial cv correlation --------
             if(nrow(prep$training) > 1) {
 
               reps <- prep$training$rep
 
-              check_pres_corr <- purrr::map2(prep$training$folds
+              check_pres_corr <- purrr::map2(prep$training$folds_spat
                                              , prep$training$training
                                              , \(x, y) x[y$pa == 1]
                                              ) |>
@@ -1193,21 +1201,16 @@
 
           }
 
-          ## non-spatial option -------
+          ## folds to use -------
           prep$training <- prep$training %>%
-            dplyr::mutate(nsb = purrr::map(training
+            dplyr::mutate(folds_nonspat = purrr::map(training
                                            , \(x) non_spatial_folds(k_folds
                                                                      , x
                                                                      )
                                            )
-                          , folds = if(!"folds" %in% names(.)) {
-                            nsb
-                          } else {
-                            folds
-                          }
                           , folds = purrr::pmap(list(spatial_folds
-                                                     , folds
-                                                     , nsb
+                                                     , folds_spat
+                                                     , folds_nonspat
                                                      )
                                                 , \(x, y, z) {
 
@@ -1233,7 +1236,7 @@
                           # again, if only one fold left, go to non-spatial
                           , folds = purrr::pmap(list(single_fold
                                                      , folds
-                                                     , nsb
+                                                     , folds_nonspat
                                                      )
                                                 , \(x, y, z) {
 
