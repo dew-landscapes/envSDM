@@ -73,7 +73,8 @@ by user <a href="https://gis.stackexchange.com/users/865/spacedman" class="exter
 <span>  folds <span class="op">=</span> <span class="fl">5</span>,</span>
 <span>  spatial_folds <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  repeats <span class="op">=</span> <span class="fl">1</span>,</span>
-<span>  folds_div <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">2.1</span>, by <span class="op">=</span> <span class="fl">0.1</span>, length.out <span class="op">=</span> <span class="va">folds</span><span class="op">)</span>,</span>
+<span>  folds_div <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">2.1</span>, to <span class="op">=</span> <span class="fl">4.5</span>, length.out <span class="op">=</span> <span class="va">folds</span><span class="op">)</span>,</span>
+<span>  area_prop <span class="op">=</span> <span class="fl">0.9</span>,</span>
 <span>  max_repeat_corr <span class="op">=</span> <span class="fl">0.9</span>,</span>
 <span>  min_fold_n <span class="op">=</span> <span class="fl">8</span>,</span>
 <span>  hold_prop <span class="op">=</span> <span class="fl">0.3</span>,</span>
@@ -212,10 +213,17 @@ not enough presences to support more than one fold.</p></dd>
 
 
 <dt id="arg-folds-div">folds_div<a class="anchor" aria-label="anchor" href="#arg-folds-div"></a></dt>
-<dd><p>Numeric. The square root of the predict area is divided
-by this value before being passed to the <code>block_dist</code> argument of
+<dd><p>Numeric. The square root of the an area (see <code>area_prop</code>)
+is divided by this value before being passed to the <code>block_dist</code> argument of
 <code><a href="https://rdrr.io/pkg/blockCV/man/cv_spatial.html" class="external-link">blockCV::cv_spatial()</a></code>. If using cross validation, <code>fold_div</code>
-must be of the same length as <code>1:folds</code>.</p></dd>
+must be of the same length as <code>1:folds</code>. Ignored if not using spatial_folds.</p></dd>
+
+
+<dt id="arg-area-prop">area_prop<a class="anchor" aria-label="anchor" href="#arg-area-prop"></a></dt>
+<dd><p>Proportion. What proportion of the kernel density from
+presence points should be included in a minimum convex polygon (mcp) for use
+with <code>folds_div</code>? Passed (as %) to the <code>adehabtiatHR::kernel.area()</code>
+<code>percent</code> argument.</p></dd>
 
 
 <dt id="arg-max-repeat-corr">max_repeat_corr<a class="anchor" aria-label="anchor" href="#arg-max-repeat-corr"></a></dt>
@@ -408,7 +416,7 @@ against which background points are assigned.</p>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Use `spec()` to retrieve the full column specification for this data.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Specify the column types or set `show_col_types = FALSE` to quiet this message.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> prep for chg</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> out_dir is /home/nwilloug/tmp/R/RtmpF2Nnth/temp_libpath166a9855ca6d78/envSDM/examples/0__10__TRUE.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> out_dir is /home/nwilloug/tmp/R/RtmpIpCJvf/temp_libpath2a1c71270e52e6/envSDM/examples/0__10__TRUE.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>  103 incoming presences</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Rows: </span><span style="color: #0000BB;">103</span> <span style="font-weight: bold;">Columns: </span><span style="color: #0000BB;">2</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Column specification</span> <span style="color: #00BBBB;">────────────────────────────────────────────────────────</span></span>
@@ -418,7 +426,7 @@ against which background points are assigned.</p>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Use `spec()` to retrieve the full column specification for this data.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Specify the column types or set `show_col_types = FALSE` to quiet this message.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> prep for chg</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> out_dir is /home/nwilloug/tmp/R/RtmpF2Nnth/temp_libpath166a9855ca6d78/envSDM/examples/0.3__10__TRUE.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> out_dir is /home/nwilloug/tmp/R/RtmpIpCJvf/temp_libpath2a1c71270e52e6/envSDM/examples/0.3__10__TRUE.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>  103 incoming presences</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Rows: </span><span style="color: #0000BB;">103</span> <span style="font-weight: bold;">Columns: </span><span style="color: #0000BB;">2</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Column specification</span> <span style="color: #00BBBB;">────────────────────────────────────────────────────────</span></span>
@@ -428,7 +436,7 @@ against which background points are assigned.</p>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Use `spec()` to retrieve the full column specification for this data.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Specify the column types or set `show_col_types = FALSE` to quiet this message.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> prep for chg</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> out_dir is /home/nwilloug/tmp/R/RtmpF2Nnth/temp_libpath166a9855ca6d78/envSDM/examples/0__30__TRUE.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> out_dir is /home/nwilloug/tmp/R/RtmpIpCJvf/temp_libpath2a1c71270e52e6/envSDM/examples/0__30__TRUE.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>  103 incoming presences</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Rows: </span><span style="color: #0000BB;">103</span> <span style="font-weight: bold;">Columns: </span><span style="color: #0000BB;">2</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Column specification</span> <span style="color: #00BBBB;">────────────────────────────────────────────────────────</span></span>
@@ -438,7 +446,7 @@ against which background points are assigned.</p>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Use `spec()` to retrieve the full column specification for this data.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Specify the column types or set `show_col_types = FALSE` to quiet this message.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> prep for chg</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> out_dir is /home/nwilloug/tmp/R/RtmpF2Nnth/temp_libpath166a9855ca6d78/envSDM/examples/0.3__30__TRUE.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> out_dir is /home/nwilloug/tmp/R/RtmpIpCJvf/temp_libpath2a1c71270e52e6/envSDM/examples/0.3__30__TRUE.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>  103 incoming presences</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Rows: </span><span style="color: #0000BB;">103</span> <span style="font-weight: bold;">Columns: </span><span style="color: #0000BB;">2</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Column specification</span> <span style="color: #00BBBB;">────────────────────────────────────────────────────────</span></span>
@@ -448,7 +456,7 @@ against which background points are assigned.</p>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Use `spec()` to retrieve the full column specification for this data.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Specify the column types or set `show_col_types = FALSE` to quiet this message.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> prep for chg</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> out_dir is /home/nwilloug/tmp/R/RtmpF2Nnth/temp_libpath166a9855ca6d78/envSDM/examples/0__10__FALSE.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> out_dir is /home/nwilloug/tmp/R/RtmpIpCJvf/temp_libpath2a1c71270e52e6/envSDM/examples/0__10__FALSE.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>  103 incoming presences</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Rows: </span><span style="color: #0000BB;">103</span> <span style="font-weight: bold;">Columns: </span><span style="color: #0000BB;">2</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Column specification</span> <span style="color: #00BBBB;">────────────────────────────────────────────────────────</span></span>
@@ -458,7 +466,7 @@ against which background points are assigned.</p>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Use `spec()` to retrieve the full column specification for this data.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Specify the column types or set `show_col_types = FALSE` to quiet this message.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> prep for chg</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> out_dir is /home/nwilloug/tmp/R/RtmpF2Nnth/temp_libpath166a9855ca6d78/envSDM/examples/0.3__10__FALSE.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> out_dir is /home/nwilloug/tmp/R/RtmpIpCJvf/temp_libpath2a1c71270e52e6/envSDM/examples/0.3__10__FALSE.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>  103 incoming presences</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Rows: </span><span style="color: #0000BB;">103</span> <span style="font-weight: bold;">Columns: </span><span style="color: #0000BB;">2</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Column specification</span> <span style="color: #00BBBB;">────────────────────────────────────────────────────────</span></span>
@@ -468,7 +476,7 @@ against which background points are assigned.</p>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Use `spec()` to retrieve the full column specification for this data.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Specify the column types or set `show_col_types = FALSE` to quiet this message.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> prep for chg</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> out_dir is /home/nwilloug/tmp/R/RtmpF2Nnth/temp_libpath166a9855ca6d78/envSDM/examples/0__30__FALSE.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> out_dir is /home/nwilloug/tmp/R/RtmpIpCJvf/temp_libpath2a1c71270e52e6/envSDM/examples/0__30__FALSE.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>  103 incoming presences</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Rows: </span><span style="color: #0000BB;">103</span> <span style="font-weight: bold;">Columns: </span><span style="color: #0000BB;">2</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Column specification</span> <span style="color: #00BBBB;">────────────────────────────────────────────────────────</span></span>
@@ -478,7 +486,7 @@ against which background points are assigned.</p>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Use `spec()` to retrieve the full column specification for this data.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Specify the column types or set `show_col_types = FALSE` to quiet this message.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> prep for chg</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> out_dir is /home/nwilloug/tmp/R/RtmpF2Nnth/temp_libpath166a9855ca6d78/envSDM/examples/0.3__30__FALSE.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> out_dir is /home/nwilloug/tmp/R/RtmpIpCJvf/temp_libpath2a1c71270e52e6/envSDM/examples/0.3__30__FALSE.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>  103 incoming presences</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># example of 'prep'</span></span></span>
@@ -492,10 +500,16 @@ against which background points are assigned.</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># variables to remove prior to SDM</span></span></span>
 <span class="r-in"><span><span class="va">prep</span><span class="op">$</span><span class="va">reduce_env</span><span class="op">$</span><span class="va">remove</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [1] "bio04"     "bio07"     "bio08"     "bio09"     "bio12"     "bio13"    </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [7] "bio16"     "bio17"     "bio18"     "bio19"     "cell"      "cell_lat" </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [13] "cell_long" "fold"      "id"        "pa"        "x"         "y"        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [1] "bio02"     "bio04"     "bio08"     "bio09"     "bio12"     "bio16"    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [7] "bio17"     "bio18"     "bio19"     "cell"      "cell_lat"  "cell_long"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [13] "fold"      "id"        "pa"        "x"         "y"        </span>
 <span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># spatial blocks used</span></span></span>
+<span class="r-in"><span><span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">map</a></span><span class="op">(</span><span class="va">prep</span><span class="op">$</span><span class="va">training</span><span class="op">$</span><span class="va">cv_spatial</span>, \<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="va">x</span><span class="op">$</span><span class="va">result</span><span class="op">$</span><span class="va">blocks</span> <span class="op">|&gt;</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"size_"</span>, <span class="va">x</span><span class="op">$</span><span class="va">result</span><span class="op">$</span><span class="va">size</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind_rows.html" class="external-link">bind_rows</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>  <span class="fu">tm_shape</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span></span>
+<span class="r-in"><span>  <span class="fu">tm_borders</span><span class="op">(</span>col <span class="op">=</span> <span class="st">"size"</span><span class="op">)</span></span></span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in tm_shape(dplyr::bind_rows(purrr::map(prep$training$cv_spatial,     function(x) dplyr::mutate(x$result$blocks, size = paste0("size_",         x$result$size))))):</span> could not find function "tm_shape"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Background points</span></span></span>
 <span class="r-in"><span><span class="kw">if</span><span class="op">(</span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">require</a></span><span class="op">(</span><span class="st"><a href="https://github.com/r-tmap/tmap" class="external-link">"tmap"</a></span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span></span>

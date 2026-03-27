@@ -90,6 +90,11 @@ names(prep)
 # variables to remove prior to SDM
 prep$reduce_env$remove
 
+# spatial blocks used
+purrr::map(prep$training$cv_spatial, \(x) x$result$blocks |> dplyr::mutate(size = paste0("size_", x$result$size))) |>
+  dplyr::bind_rows() |>
+  tm_shape() +
+  tm_borders(col = "size")
 
 # Background points
 if(require("tmap")) {

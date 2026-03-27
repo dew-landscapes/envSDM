@@ -182,28 +182,28 @@ purrr::map(data$out_dir
                             )
             )
 #> [[1]]
-#> /home/nwilloug/tmp/R/RtmpF2Nnth/temp_libpath166a9855ca6d78/envSDM/examples/0__10__TRUE/tune.rds
+#> /home/nwilloug/tmp/R/RtmpIpCJvf/temp_libpath2a1c71270e52e6/envSDM/examples/0__10__TRUE/tune.rds
 #> 
 #> [[2]]
-#> /home/nwilloug/tmp/R/RtmpF2Nnth/temp_libpath166a9855ca6d78/envSDM/examples/0.3__10__TRUE/tune.rds
+#> /home/nwilloug/tmp/R/RtmpIpCJvf/temp_libpath2a1c71270e52e6/envSDM/examples/0.3__10__TRUE/tune.rds
 #> 
 #> [[3]]
-#> /home/nwilloug/tmp/R/RtmpF2Nnth/temp_libpath166a9855ca6d78/envSDM/examples/0__30__TRUE/tune.rds
+#> /home/nwilloug/tmp/R/RtmpIpCJvf/temp_libpath2a1c71270e52e6/envSDM/examples/0__30__TRUE/tune.rds
 #> 
 #> [[4]]
-#> /home/nwilloug/tmp/R/RtmpF2Nnth/temp_libpath166a9855ca6d78/envSDM/examples/0.3__30__TRUE/tune.rds
+#> /home/nwilloug/tmp/R/RtmpIpCJvf/temp_libpath2a1c71270e52e6/envSDM/examples/0.3__30__TRUE/tune.rds
 #> 
 #> [[5]]
-#> /home/nwilloug/tmp/R/RtmpF2Nnth/temp_libpath166a9855ca6d78/envSDM/examples/0__10__FALSE/tune.rds
+#> /home/nwilloug/tmp/R/RtmpIpCJvf/temp_libpath2a1c71270e52e6/envSDM/examples/0__10__FALSE/tune.rds
 #> 
 #> [[6]]
-#> /home/nwilloug/tmp/R/RtmpF2Nnth/temp_libpath166a9855ca6d78/envSDM/examples/0.3__10__FALSE/tune.rds
+#> /home/nwilloug/tmp/R/RtmpIpCJvf/temp_libpath2a1c71270e52e6/envSDM/examples/0.3__10__FALSE/tune.rds
 #> 
 #> [[7]]
-#> /home/nwilloug/tmp/R/RtmpF2Nnth/temp_libpath166a9855ca6d78/envSDM/examples/0__30__FALSE/tune.rds
+#> /home/nwilloug/tmp/R/RtmpIpCJvf/temp_libpath2a1c71270e52e6/envSDM/examples/0__30__FALSE/tune.rds
 #> 
 #> [[8]]
-#> /home/nwilloug/tmp/R/RtmpF2Nnth/temp_libpath166a9855ca6d78/envSDM/examples/0.3__30__FALSE/tune.rds
+#> /home/nwilloug/tmp/R/RtmpIpCJvf/temp_libpath2a1c71270e52e6/envSDM/examples/0.3__30__FALSE/tune.rds
 #> 
 
 # which tune args were best using 'combo'?
@@ -218,14 +218,14 @@ data %>%
 #> # A tibble: 8 × 25
 #>   taxa  algo   hold_prop stretch new_bg_test tunes  reps    rm trees nodesize
 #>   <chr> <chr>      <dbl>   <dbl> <lgl>       <dbl> <dbl> <dbl> <dbl>    <dbl>
-#> 1 chg   maxnet       0        10 TRUE           23     5     1    NA       NA
-#> 2 chg   rf           0.3      10 TRUE           23     5    NA   500        1
-#> 3 chg   maxnet       0        30 TRUE           23     5     1    NA       NA
-#> 4 chg   rf           0.3      30 TRUE           23     5    NA   500        1
-#> 5 chg   maxnet       0        10 FALSE          23     5     2    NA       NA
-#> 6 chg   rf           0.3      10 FALSE          19     5    NA   500        1
-#> 7 chg   maxnet       0        30 FALSE          22     5     1    NA       NA
-#> 8 chg   rf           0.3      30 FALSE          20     5    NA   500        3
+#> 1 chg   maxnet       0        10 TRUE           20     5     2    NA       NA
+#> 2 chg   rf           0.3      10 TRUE           19     5    NA   500        3
+#> 3 chg   rf           0        30 TRUE           20     5    NA   500        3
+#> 4 chg   rf           0.3      30 TRUE           22     5    NA   500        1
+#> 5 chg   rf           0        10 FALSE          20     5    NA   500        1
+#> 6 chg   rf           0.3      10 FALSE          19     5    NA   500        3
+#> 7 chg   rf           0        30 FALSE          22     5    NA   500        1
+#> 8 chg   rf           0.3      30 FALSE          22     5    NA   500        3
 #> # ℹ 15 more variables: mtry <int>, spatial_tunes <int>,
 #> #   non_spatial_tunes <dbl>, max_spec_sens <dbl>, no_omission <dbl>,
 #> #   equal_prevalence <dbl>, equal_sens_spec <dbl>, auc_po <dbl>, ODP <dbl>,

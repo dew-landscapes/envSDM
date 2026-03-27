@@ -109,14 +109,14 @@ purrr::pwalk(list(data$pred
                                      #, force_new = TRUE
                                      )
              )
-#> threshold file: /home/nwilloug/tmp/R/RtmpF2Nnth/temp_libpath166a9855ca6d78/envSDM/examples/0__10__TRUE/thresh.tif already exists
-#> threshold file: /home/nwilloug/tmp/R/RtmpF2Nnth/temp_libpath166a9855ca6d78/envSDM/examples/0.3__10__TRUE/thresh.tif already exists
-#> threshold file: /home/nwilloug/tmp/R/RtmpF2Nnth/temp_libpath166a9855ca6d78/envSDM/examples/0__30__TRUE/thresh.tif already exists
-#> threshold file: /home/nwilloug/tmp/R/RtmpF2Nnth/temp_libpath166a9855ca6d78/envSDM/examples/0.3__30__TRUE/thresh.tif already exists
-#> threshold file: /home/nwilloug/tmp/R/RtmpF2Nnth/temp_libpath166a9855ca6d78/envSDM/examples/0__10__FALSE/thresh.tif already exists
-#> threshold file: /home/nwilloug/tmp/R/RtmpF2Nnth/temp_libpath166a9855ca6d78/envSDM/examples/0.3__10__FALSE/thresh.tif already exists
-#> threshold file: /home/nwilloug/tmp/R/RtmpF2Nnth/temp_libpath166a9855ca6d78/envSDM/examples/0__30__FALSE/thresh.tif already exists
-#> threshold file: /home/nwilloug/tmp/R/RtmpF2Nnth/temp_libpath166a9855ca6d78/envSDM/examples/0.3__30__FALSE/thresh.tif already exists
+#> threshold file: /home/nwilloug/tmp/R/RtmpIpCJvf/temp_libpath2a1c71270e52e6/envSDM/examples/0__10__TRUE/thresh.tif already exists
+#> threshold file: /home/nwilloug/tmp/R/RtmpIpCJvf/temp_libpath2a1c71270e52e6/envSDM/examples/0.3__10__TRUE/thresh.tif already exists
+#> threshold file: /home/nwilloug/tmp/R/RtmpIpCJvf/temp_libpath2a1c71270e52e6/envSDM/examples/0__30__TRUE/thresh.tif already exists
+#> threshold file: /home/nwilloug/tmp/R/RtmpIpCJvf/temp_libpath2a1c71270e52e6/envSDM/examples/0.3__30__TRUE/thresh.tif already exists
+#> threshold file: /home/nwilloug/tmp/R/RtmpIpCJvf/temp_libpath2a1c71270e52e6/envSDM/examples/0__10__FALSE/thresh.tif already exists
+#> threshold file: /home/nwilloug/tmp/R/RtmpIpCJvf/temp_libpath2a1c71270e52e6/envSDM/examples/0.3__10__FALSE/thresh.tif already exists
+#> threshold file: /home/nwilloug/tmp/R/RtmpIpCJvf/temp_libpath2a1c71270e52e6/envSDM/examples/0__30__FALSE/thresh.tif already exists
+#> threshold file: /home/nwilloug/tmp/R/RtmpIpCJvf/temp_libpath2a1c71270e52e6/envSDM/examples/0.3__30__FALSE/thresh.tif already exists
 
 ## visualise-------
 

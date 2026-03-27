@@ -34,7 +34,8 @@ prep_sdm(
   folds = 5,
   spatial_folds = TRUE,
   repeats = 1,
-  folds_div = seq(2.1, by = 0.1, length.out = folds),
+  folds_div = seq(2.1, to = 4.5, length.out = folds),
+  area_prop = 0.9,
   max_repeat_corr = 0.9,
   min_fold_n = 8,
   hold_prop = 0.3,
@@ -177,11 +178,18 @@ prep_sdm(
 
 - folds_div:
 
-  Numeric. The square root of the predict area is divided by this value
-  before being passed to the `block_dist` argument of
+  Numeric. The square root of the an area (see `area_prop`) is divided
+  by this value before being passed to the `block_dist` argument of
   [`blockCV::cv_spatial()`](https://rdrr.io/pkg/blockCV/man/cv_spatial.html).
   If using cross validation, `fold_div` must be of the same length as
-  `1:folds`.
+  `1:folds`. Ignored if not using spatial_folds.
+
+- area_prop:
+
+  Proportion. What proportion of the kernel density from presence points
+  should be included in a minimum convex polygon (mcp) for use with
+  `folds_div`? Passed (as %) to the `adehabtiatHR::kernel.area()`
+  `percent` argument.
 
 - max_repeat_corr:
 
@@ -398,7 +406,7 @@ purrr::pwalk(list(data$taxa
 #> ℹ Use `spec()` to retrieve the full column specification for this data.
 #> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 #> prep for chg
-#> out_dir is /home/nwilloug/tmp/R/RtmpF2Nnth/temp_libpath166a9855ca6d78/envSDM/examples/0__10__TRUE.
+#> out_dir is /home/nwilloug/tmp/R/RtmpIpCJvf/temp_libpath2a1c71270e52e6/envSDM/examples/0__10__TRUE.
 #>  103 incoming presences
 #> Rows: 103 Columns: 2
 #> ── Column specification ────────────────────────────────────────────────────────
@@ -408,7 +416,7 @@ purrr::pwalk(list(data$taxa
 #> ℹ Use `spec()` to retrieve the full column specification for this data.
 #> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 #> prep for chg
-#> out_dir is /home/nwilloug/tmp/R/RtmpF2Nnth/temp_libpath166a9855ca6d78/envSDM/examples/0.3__10__TRUE.
+#> out_dir is /home/nwilloug/tmp/R/RtmpIpCJvf/temp_libpath2a1c71270e52e6/envSDM/examples/0.3__10__TRUE.
 #>  103 incoming presences
 #> Rows: 103 Columns: 2
 #> ── Column specification ────────────────────────────────────────────────────────
@@ -418,7 +426,7 @@ purrr::pwalk(list(data$taxa
 #> ℹ Use `spec()` to retrieve the full column specification for this data.
 #> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 #> prep for chg
-#> out_dir is /home/nwilloug/tmp/R/RtmpF2Nnth/temp_libpath166a9855ca6d78/envSDM/examples/0__30__TRUE.
+#> out_dir is /home/nwilloug/tmp/R/RtmpIpCJvf/temp_libpath2a1c71270e52e6/envSDM/examples/0__30__TRUE.
 #>  103 incoming presences
 #> Rows: 103 Columns: 2
 #> ── Column specification ────────────────────────────────────────────────────────
@@ -428,7 +436,7 @@ purrr::pwalk(list(data$taxa
 #> ℹ Use `spec()` to retrieve the full column specification for this data.
 #> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 #> prep for chg
-#> out_dir is /home/nwilloug/tmp/R/RtmpF2Nnth/temp_libpath166a9855ca6d78/envSDM/examples/0.3__30__TRUE.
+#> out_dir is /home/nwilloug/tmp/R/RtmpIpCJvf/temp_libpath2a1c71270e52e6/envSDM/examples/0.3__30__TRUE.
 #>  103 incoming presences
 #> Rows: 103 Columns: 2
 #> ── Column specification ────────────────────────────────────────────────────────
@@ -438,7 +446,7 @@ purrr::pwalk(list(data$taxa
 #> ℹ Use `spec()` to retrieve the full column specification for this data.
 #> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 #> prep for chg
-#> out_dir is /home/nwilloug/tmp/R/RtmpF2Nnth/temp_libpath166a9855ca6d78/envSDM/examples/0__10__FALSE.
+#> out_dir is /home/nwilloug/tmp/R/RtmpIpCJvf/temp_libpath2a1c71270e52e6/envSDM/examples/0__10__FALSE.
 #>  103 incoming presences
 #> Rows: 103 Columns: 2
 #> ── Column specification ────────────────────────────────────────────────────────
@@ -448,7 +456,7 @@ purrr::pwalk(list(data$taxa
 #> ℹ Use `spec()` to retrieve the full column specification for this data.
 #> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 #> prep for chg
-#> out_dir is /home/nwilloug/tmp/R/RtmpF2Nnth/temp_libpath166a9855ca6d78/envSDM/examples/0.3__10__FALSE.
+#> out_dir is /home/nwilloug/tmp/R/RtmpIpCJvf/temp_libpath2a1c71270e52e6/envSDM/examples/0.3__10__FALSE.
 #>  103 incoming presences
 #> Rows: 103 Columns: 2
 #> ── Column specification ────────────────────────────────────────────────────────
@@ -458,7 +466,7 @@ purrr::pwalk(list(data$taxa
 #> ℹ Use `spec()` to retrieve the full column specification for this data.
 #> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 #> prep for chg
-#> out_dir is /home/nwilloug/tmp/R/RtmpF2Nnth/temp_libpath166a9855ca6d78/envSDM/examples/0__30__FALSE.
+#> out_dir is /home/nwilloug/tmp/R/RtmpIpCJvf/temp_libpath2a1c71270e52e6/envSDM/examples/0__30__FALSE.
 #>  103 incoming presences
 #> Rows: 103 Columns: 2
 #> ── Column specification ────────────────────────────────────────────────────────
@@ -468,7 +476,7 @@ purrr::pwalk(list(data$taxa
 #> ℹ Use `spec()` to retrieve the full column specification for this data.
 #> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 #> prep for chg
-#> out_dir is /home/nwilloug/tmp/R/RtmpF2Nnth/temp_libpath166a9855ca6d78/envSDM/examples/0.3__30__FALSE.
+#> out_dir is /home/nwilloug/tmp/R/RtmpIpCJvf/temp_libpath2a1c71270e52e6/envSDM/examples/0.3__30__FALSE.
 #>  103 incoming presences
 
 # example of 'prep'
@@ -482,10 +490,16 @@ names(prep)
 
 # variables to remove prior to SDM
 prep$reduce_env$remove
-#>  [1] "bio04"     "bio07"     "bio08"     "bio09"     "bio12"     "bio13"    
-#>  [7] "bio16"     "bio17"     "bio18"     "bio19"     "cell"      "cell_lat" 
-#> [13] "cell_long" "fold"      "id"        "pa"        "x"         "y"        
+#>  [1] "bio02"     "bio04"     "bio08"     "bio09"     "bio12"     "bio16"    
+#>  [7] "bio17"     "bio18"     "bio19"     "cell"      "cell_lat"  "cell_long"
+#> [13] "fold"      "id"        "pa"        "x"         "y"        
 
+# spatial blocks used
+purrr::map(prep$training$cv_spatial, \(x) x$result$blocks |> dplyr::mutate(size = paste0("size_", x$result$size))) |>
+  dplyr::bind_rows() |>
+  tm_shape() +
+  tm_borders(col = "size")
+#> Error in tm_shape(dplyr::bind_rows(purrr::map(prep$training$cv_spatial,     function(x) dplyr::mutate(x$result$blocks, size = paste0("size_",         x$result$size))))): could not find function "tm_shape"
 
 # Background points
 if(require("tmap")) {

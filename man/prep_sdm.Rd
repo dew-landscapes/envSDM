@@ -30,7 +30,8 @@ prep_sdm(
   folds = 5,
   spatial_folds = TRUE,
   repeats = 1,
-  folds_div = seq(2.1, by = 0.1, length.out = folds),
+  folds_div = seq(2.1, to = 4.5, length.out = folds),
+  area_prop = 0.9,
   max_repeat_corr = 0.9,
   min_fold_n = 8,
   hold_prop = 0.3,
@@ -118,10 +119,15 @@ not enough presences to support more than one fold.}
 
 \item{repeats}{Numeric. Number of repeated cross validations.}
 
-\item{folds_div}{Numeric. The square root of the predict area is divided
-by this value before being passed to the \code{block_dist} argument of
+\item{folds_div}{Numeric. The square root of the an area (see \code{area_prop})
+is divided by this value before being passed to the \code{block_dist} argument of
 \code{blockCV::cv_spatial()}. If using cross validation, \code{fold_div}
-must be of the same length as \code{1:folds}.}
+must be of the same length as \code{1:folds}. Ignored if not using spatial_folds.}
+
+\item{area_prop}{Proportion. What proportion of the kernel density from
+presence points should be included in a minimum convex polygon (mcp) for use
+with \code{folds_div}? Passed (as \%) to the \code{adehabtiatHR::kernel.area()}
+\code{percent} argument.}
 
 \item{max_repeat_corr}{Numeric. Maximum correlation allowed between the folds
 of any two spatial folds before one of the correlated folds will be set to
@@ -320,6 +326,11 @@ names(prep)
 # variables to remove prior to SDM
 prep$reduce_env$remove
 
+# spatial blocks used
+purrr::map(prep$training$cv_spatial, \(x) x$result$blocks |> dplyr::mutate(size = paste0("size_", x$result$size))) |>
+  dplyr::bind_rows() |>
+  tm_shape() +
+  tm_borders(col = "size")
 
 # Background points
 if(require("tmap")) {
