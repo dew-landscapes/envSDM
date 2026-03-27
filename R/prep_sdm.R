@@ -67,10 +67,14 @@
 #' to non-spatial cv if presences per fold do not meet `min_fold_n` or there are
 #' not enough presences to support more than one fold.
 #' @param repeats Numeric. Number of repeated cross validations.
-#' @param folds_div Numeric. The square root of the predict area is divided
-#' by this value before being passed to the `block_dist` argument of
+#' @param folds_div Numeric. The square root of the an area (see `area_prop`)
+#' is divided by this value before being passed to the `block_dist` argument of
 #' `blockCV::cv_spatial()`. If using cross validation, `fold_div`
-#' must be of the same length as `1:folds`.
+#' must be of the same length as `1:folds`. Ignored if not using spatial_folds.
+#' @param area_prop Proportion. What proportion of the kernel density from
+#' presence points should be included in a minimum convex polygon (mcp) for use
+#' with `folds_div`? Passed (as %) to the `adehabtiatHR::kernel.area()`
+#' `percent` argument.
 #' @param max_repeat_corr Numeric. Maximum correlation allowed between the folds
 #' of any two spatial folds before one of the correlated folds will be set to
 #' non-spatial and the folds reallocated. Correlation tested on presences only.
@@ -158,7 +162,8 @@
                        , folds = 5
                        , spatial_folds = TRUE
                        , repeats = 1
-                       , folds_div = seq(2.1, by = 0.1, length.out = folds)
+                       , folds_div = seq(2.1, to = 4.5, length.out = folds)
+                       , area_prop = 0.9
                        , max_repeat_corr = 0.9
                        , min_fold_n = 8
                        , hold_prop = 0.3
@@ -1086,6 +1091,28 @@
             ## spatial ------
             safe_cv_spatial <- purrr::safely(blockCV::cv_spatial)
 
+            use_points <-
+              # need a projected crs so that the 'size' argument provided to blockCV::cv_spatial is in metres
+              sf::sf_project(from = paste0("epsg:", prep$epsg_out)
+                             , to = "esri:54034" # worldwide and good for area calculation
+                             , pts = prep$presence_ras
+                             ) |>
+              tibble::as_tibble() |>
+              purrr::set_names(c("x", "y")) |>
+              sf::st_as_sf(coords = c("x", "y"), crs = "esri:54034") |>
+              sf::as_Spatial()
+
+            ud <- adehabitatHR::kernelUD(use_points
+                                         , h = "href"
+                                         #, unout = "m2"
+                                         )
+
+            use_area <- adehabitatHR::kernel.area(x = ud
+                                                  , percent = area_prop * 100
+                                                  , unout = "m2"
+                                                  ) |>
+              as.numeric()
+
             prep$training <- prep$training |>
               dplyr::mutate(point_sf = purrr::map(training
                                                   , \(x) x |>
@@ -1096,12 +1123,10 @@
                                                   )
                             , folds_div = folds_div[1:nrow(prep$training)]
                             , fold_dist = purrr::map_dbl(folds_div
-                                                          , \(x) prep$predict_boundary %>%
-                                                            sf::st_area() %>%
-                                                            as.numeric() %>%
-                                                            sqrt() %>%
-                                                            `/` (x)
-                                                          )
+                                                         , \(x) use_area |>
+                                                           sqrt() |>
+                                                           magrittr::divide_by(x)
+                                                         )
                             , cv_spatial = purrr::map2(point_sf
                                                        , fold_dist
                                                        , \(x, y) suppressWarnings(
