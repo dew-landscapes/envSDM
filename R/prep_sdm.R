@@ -1104,7 +1104,6 @@
 
             ud <- adehabitatHR::kernelUD(use_points
                                          , h = "href"
-                                         #, unout = "m2"
                                          )
 
             use_area <- adehabitatHR::kernel.area(x = ud
