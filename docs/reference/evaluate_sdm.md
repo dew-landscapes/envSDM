@@ -73,21 +73,21 @@ evaluate_sdm(full_run$tune_rf$m[[1]]
              )
 #> @stats
 #>   np  na prevalence   auc   cor pcor   ODP auc_po auc_po_flexsdm   CBI
-#> 1 97 184      0.345 0.992 0.917    0 0.655  0.992          0.992 0.955
+#> 1 97 184      0.345 0.973 0.888    0 0.655  0.973          0.973 0.911
 #>   CBI_rescale  IMAE
-#> 1       0.978 0.912
+#> 1       0.955 0.901
 #> 
 #> @thresholds
-#>   max_kappa max_spec_sens no_omission equal_prevalence equal_sens_spec or10
-#> 1     0.714         0.714       0.128            0.352           0.714 0.98
+#>   max_kappa max_spec_sens no_omission equal_prevalence equal_sens_spec  or10
+#> 1     0.742         0.742       0.032            0.346           0.414 0.822
 #> 
 #> @tr_stats
-#>    treshold kappa  CCR  TPR  TNR  FPR  FNR  PPP  NPP  MCR  OR
-#> 1         0     0 0.35    1    0    1    0 0.35  NaN 0.65 NaN
-#> 2         0  0.12 0.45    1 0.16 0.84    0 0.39    1 0.55 Inf
-#> 3         0   0.2 0.52    1 0.27 0.73    0 0.42    1 0.48 Inf
-#> 4       ...   ...  ...  ...  ...  ...  ...  ...  ...  ... ...
-#> 95        1  0.83 0.93 0.79    1    0 0.21    1  0.9 0.07 Inf
-#> 96        1  0.83 0.93 0.79    1    0 0.21    1  0.9 0.07 Inf
-#> 97        1     0 0.65    0    1    0    1  NaN 0.65 0.35 NaN
+#>     treshold kappa  CCR  TPR  TNR  FPR  FNR  PPP  NPP  MCR     OR
+#> 1          0     0 0.35    1    0    1    0 0.35  NaN 0.65    NaN
+#> 2          0  0.12 0.45    1 0.16 0.84    0 0.39    1 0.55    Inf
+#> 3          0  0.18  0.5    1 0.24 0.76    0 0.41    1  0.5    Inf
+#> 4        ...   ...  ...  ...  ...  ...  ...  ...  ...  ...    ...
+#> 101        1  0.76  0.9 0.71 0.99 0.01 0.29 0.99 0.87  0.1 450.96
+#> 102        1  0.76  0.9 0.71 0.99 0.01 0.29 0.99 0.87  0.1 450.96
+#> 103        1     0 0.65    0    1    0    1  NaN 0.65 0.35    NaN
 ```

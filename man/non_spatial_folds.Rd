@@ -4,7 +4,14 @@
 \alias{non_spatial_folds}
 \title{Generate non spatial folds}
 \usage{
-non_spatial_folds(use_folds, data, pa_col = "pa", pres_val = 1)
+non_spatial_folds(
+  use_folds,
+  data,
+  pa_col = "pa",
+  pres_val = 1,
+  min_in_fold = 5,
+  max_attempts = 99
+)
 }
 \arguments{
 \item{use_folds}{Numeric. Total number of folds}
@@ -14,6 +21,11 @@ non_spatial_folds(use_folds, data, pa_col = "pa", pres_val = 1)
 \item{pa_col}{Name of column in data containing p/a values}
 
 \item{pres_val}{Value in \code{pa_col} identifying presences}
+
+\item{min_in_fold}{\code{min_fold_n}}
+
+\item{max_attempts}{How many attempts to make to achieve \code{min_in_fold}
+presences within each fold?}
 }
 \description{
 Generate non spatial folds

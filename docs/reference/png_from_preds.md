@@ -72,7 +72,13 @@ data <- readRDS(fs::path(out_dir, "data.rds"))
 
 # Best combo--------
 ## run full SDM --------
-purrr::pmap(list(data$prep
+max_cores <- nrow(data)
+use_cores <- min(max_cores, parallel::detectCores() - 1)
+
+future::plan(future::multisession(workers = use_cores))
+#> Error in future::plan(future::multisession(workers = use_cores)): object 'use_cores' not found
+
+furrr::future_pwalk(list(data$prep
                   , data$tune
                   , data$out_dir
                   )
@@ -86,34 +92,10 @@ purrr::pmap(list(data$prep
                                        #, force_new = FALSE
                                        )
              )
-#> [[1]]
-#> /projects/dev/nige/packages/envSDM/inst/examples/0__10__TRUE/full_run.rds
-#> 
-#> [[2]]
-#> /projects/dev/nige/packages/envSDM/inst/examples/0.3__10__TRUE/full_run.rds
-#> 
-#> [[3]]
-#> /projects/dev/nige/packages/envSDM/inst/examples/0__30__TRUE/full_run.rds
-#> 
-#> [[4]]
-#> /projects/dev/nige/packages/envSDM/inst/examples/0.3__30__TRUE/full_run.rds
-#> 
-#> [[5]]
-#> /projects/dev/nige/packages/envSDM/inst/examples/0__10__FALSE/full_run.rds
-#> 
-#> [[6]]
-#> /projects/dev/nige/packages/envSDM/inst/examples/0.3__10__FALSE/full_run.rds
-#> 
-#> [[7]]
-#> /projects/dev/nige/packages/envSDM/inst/examples/0__30__FALSE/full_run.rds
-#> 
-#> [[8]]
-#> /projects/dev/nige/packages/envSDM/inst/examples/0.3__30__FALSE/full_run.rds
-#> 
 
 
 ## predict -------
-purrr::pwalk(list(data$prep
+furrr::future_pwalk(list(data$prep
                   , data$out_dir
                   )
              , \(a, b) predict_sdm(prep = a
@@ -124,19 +106,25 @@ purrr::pwalk(list(data$prep
                                    #, force_new = FALSE
                                    )
              )
-#> Error in pmap(.l, .f, ..., .progress = .progress): ℹ In index: 1.
-#> Caused by error in `.f()`:
+#> Error in (function (.l, .f, ..., .progress = FALSE) {    pmap_("list", .l, .f, ..., .progress = .progress)})(.l = list(structure(c("/projects/dev/nige/packages/envSDM/inst/examples/chg__0__10__TRUE/prep.rds", "/projects/dev/nige/packages/envSDM/inst/examples/chg__0.3__10__TRUE/prep.rds", "/projects/dev/nige/packages/envSDM/inst/examples/chg__0__30__TRUE/prep.rds", "/projects/dev/nige/packages/envSDM/inst/examples/chg__0.3__30__TRUE/prep.rds", "/projects/dev/nige/packages/envSDM/inst/examples/chg__0__10__FALSE/prep.rds", "/projects/dev/nige/packages/envSDM/inst/examples/chg__0.3__10__FALSE/prep.rds", "/projects/dev/nige/packages/envSDM/inst/examples/chg__0__30__FALSE/prep.rds", "/projects/dev/nige/packages/envSDM/inst/examples/chg__0.3__30__FALSE/prep.rds", "/projects/dev/nige/packages/envSDM/inst/examples/mjs__0__10__TRUE/prep.rds", "/projects/dev/nige/packages/envSDM/inst/examples/mjs__0.3__10__TRUE/prep.rds", "/projects/dev/nige/packages/envSDM/inst/examples/mjs__0__30__TRUE/prep.rds", "/projects/dev/nige/packages/envSDM/inst/examples/mjs__0.3__30__TRUE/prep.rds", "/projects/dev/nige/packages/envSDM/inst/examples/mjs__0__10__FALSE/prep.rds", "/projects/dev/nige/packages/envSDM/inst/examples/mjs__0.3__10__FALSE/prep.rds", "/projects/dev/nige/packages/envSDM/inst/examples/mjs__0__30__FALSE/prep.rds", "/projects/dev/nige/packages/envSDM/inst/examples/mjs__0.3__30__FALSE/prep.rds", "/projects/dev/nige/packages/envSDM/inst/examples/wjb__0__10__TRUE/prep.rds", "/projects/dev/nige/packages/envSDM/inst/examples/wjb__0.3__10__TRUE/prep.rds", "/projects/dev/nige/packages/envSDM/inst/examples/wjb__0__30__TRUE/prep.rds", "/projects/dev/nige/packages/envSDM/inst/examples/wjb__0.3__30__TRUE/prep.rds", "/projects/dev/nige/packages/envSDM/inst/examples/wjb__0__10__FALSE/prep.rds", "/projects/dev/nige/packages/envSDM/inst/examples/wjb__0.3__10__FALSE/prep.rds", "/projects/dev/nige/packages/envSDM/inst/examples/wjb__0__30__FALSE/prep.rds", "/projects/dev/nige/packages/envSDM/inst/examples/wjb__0.3__30__FALSE/prep.rds"), class = c("fs_path", "character")), structure(c("/projects/dev/nige/packages/envSDM/inst/examples/chg__0__10__TRUE", "/projects/dev/nige/packages/envSDM/inst/examples/chg__0.3__10__TRUE", "/projects/dev/nige/packages/envSDM/inst/examples/chg__0__30__TRUE", "/projects/dev/nige/packages/envSDM/inst/examples/chg__0.3__30__TRUE", "/projects/dev/nige/packages/envSDM/inst/examples/chg__0__10__FALSE", "/projects/dev/nige/packages/envSDM/inst/examples/chg__0.3__10__FALSE", "/projects/dev/nige/packages/envSDM/inst/examples/chg__0__30__FALSE", "/projects/dev/nige/packages/envSDM/inst/examples/chg__0.3__30__FALSE", "/projects/dev/nige/packages/envSDM/inst/examples/mjs__0__10__TRUE", "/projects/dev/nige/packages/envSDM/inst/examples/mjs__0.3__10__TRUE", "/projects/dev/nige/packages/envSDM/inst/examples/mjs__0__30__TRUE", "/projects/dev/nige/packages/envSDM/inst/examples/mjs__0.3__30__TRUE", "/projects/dev/nige/packages/envSDM/inst/examples/mjs__0__10__FALSE", "/projects/dev/nige/packages/envSDM/inst/examples/mjs__0.3__10__FALSE", "/projects/dev/nige/packages/envSDM/inst/examples/mjs__0__30__FALSE", "/projects/dev/nige/packages/envSDM/inst/examples/mjs__0.3__30__FALSE", "/projects/dev/nige/packages/envSDM/inst/examples/wjb__0__10__TRUE", "/projects/dev/nige/packages/envSDM/inst/examples/wjb__0.3__10__TRUE", "/projects/dev/nige/packages/envSDM/inst/examples/wjb__0__30__TRUE", "/projects/dev/nige/packages/envSDM/inst/examples/wjb__0.3__30__TRUE", "/projects/dev/nige/packages/envSDM/inst/examples/wjb__0__10__FALSE", "/projects/dev/nige/packages/envSDM/inst/examples/wjb__0.3__10__FALSE", "/projects/dev/nige/packages/envSDM/inst/examples/wjb__0__30__FALSE", "/projects/dev/nige/packages/envSDM/inst/examples/wjb__0.3__30__FALSE"), class = c("fs_path", "character"))), .f = function (...) {    NULL    NULL    ...furrr_out <- ...furrr_fn(...)    NULL}): ℹ In index: 1.
+#> Caused by error in `...furrr_fn()`:
 #> ! object 'preds' not found
 
+future::plan(future::sequential())
+
 ## visualise-------
-tifs <- fs::path(data$out_dir[file.exists(fs::path(data$out_dir, "pred.tif"))], "pred.tif")
+# just use one taxa
+vis_data <- data |>
+  dplyr::filter(taxa == "chg")
+
+tifs <- fs::path(vis_data$out_dir[file.exists(fs::path(vis_data$out_dir, "pred.tif"))], "pred.tif")
 
 names <- paste0("hold_prop "
-                , data$hold_prop
+                , vis_data$hold_prop
                 , "; stretch "
-                , data$stretch
-                , "; new_bg "
-                , data$new_bg_test
+                , vis_data$stretch
+                , "; spatial_folds "
+                , vis_data$spatial_folds
                 )
 
 r <- terra::rast(tifs)

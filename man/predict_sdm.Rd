@@ -89,7 +89,12 @@ data <- readRDS(fs::path(out_dir, "data.rds"))
 
 # Best combo--------
 ## run full SDM --------
-purrr::pmap(list(data$prep
+max_cores <- nrow(data)
+use_cores <- min(max_cores, parallel::detectCores() - 1)
+
+future::plan(future::multisession(workers = use_cores))
+
+furrr::future_pwalk(list(data$prep
                   , data$tune
                   , data$out_dir
                   )
@@ -106,7 +111,7 @@ purrr::pmap(list(data$prep
 
 
 ## predict -------
-purrr::pwalk(list(data$prep
+furrr::future_pwalk(list(data$prep
                   , data$out_dir
                   )
              , \(a, b) predict_sdm(prep = a
@@ -118,15 +123,21 @@ purrr::pwalk(list(data$prep
                                    )
              )
 
+future::plan(future::sequential())
+
 ## visualise-------
-tifs <- fs::path(data$out_dir[file.exists(fs::path(data$out_dir, "pred.tif"))], "pred.tif")
+# just use one taxa
+vis_data <- data |>
+  dplyr::filter(taxa == "chg")
+
+tifs <- fs::path(vis_data$out_dir[file.exists(fs::path(vis_data$out_dir, "pred.tif"))], "pred.tif")
 
 names <- paste0("hold_prop "
-                , data$hold_prop
+                , vis_data$hold_prop
                 , "; stretch "
-                , data$stretch
-                , "; new_bg "
-                , data$new_bg_test
+                , vis_data$stretch
+                , "; spatial_folds "
+                , vis_data$spatial_folds
                 )
 
 r <- terra::rast(tifs)

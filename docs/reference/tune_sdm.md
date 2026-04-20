@@ -168,7 +168,13 @@ out_dir <- file.path(system.file(package = "envSDM"), "examples")
 # setup -------
 data <- readRDS(fs::path(out_dir, "data.rds"))
 
-purrr::map(data$out_dir
+max_cores <- nrow(data)
+use_cores <- min(max_cores, parallel::detectCores() - 1)
+
+future::plan(future::multisession(workers = use_cores))
+#> Error in future::plan(future::multisession(workers = use_cores)): object 'use_cores' not found
+
+furrr::future_walk(data$out_dir
             , \(x) tune_sdm(prep = fs::path(x, "prep.rds")
                             , out_dir = x
                             , fc = "lq"
@@ -181,51 +187,25 @@ purrr::map(data$out_dir
                             #, force_new = TRUE
                             )
             )
-#> [[1]]
-#> /home/nwilloug/tmp/R/RtmpIpCJvf/temp_libpath2a1c71270e52e6/envSDM/examples/0__10__TRUE/tune.rds
-#> 
-#> [[2]]
-#> /home/nwilloug/tmp/R/RtmpIpCJvf/temp_libpath2a1c71270e52e6/envSDM/examples/0.3__10__TRUE/tune.rds
-#> 
-#> [[3]]
-#> /home/nwilloug/tmp/R/RtmpIpCJvf/temp_libpath2a1c71270e52e6/envSDM/examples/0__30__TRUE/tune.rds
-#> 
-#> [[4]]
-#> /home/nwilloug/tmp/R/RtmpIpCJvf/temp_libpath2a1c71270e52e6/envSDM/examples/0.3__30__TRUE/tune.rds
-#> 
-#> [[5]]
-#> /home/nwilloug/tmp/R/RtmpIpCJvf/temp_libpath2a1c71270e52e6/envSDM/examples/0__10__FALSE/tune.rds
-#> 
-#> [[6]]
-#> /home/nwilloug/tmp/R/RtmpIpCJvf/temp_libpath2a1c71270e52e6/envSDM/examples/0.3__10__FALSE/tune.rds
-#> 
-#> [[7]]
-#> /home/nwilloug/tmp/R/RtmpIpCJvf/temp_libpath2a1c71270e52e6/envSDM/examples/0__30__FALSE/tune.rds
-#> 
-#> [[8]]
-#> /home/nwilloug/tmp/R/RtmpIpCJvf/temp_libpath2a1c71270e52e6/envSDM/examples/0.3__30__FALSE/tune.rds
-#> 
 
-# which tune args were best using 'combo'?
-# BUT, not a sensible comparison as, between rows, the models are not all built on the same data!
-data %>%
+future::plan(future::sequential())
+
+# which tune args were 'best' using combo?
+# BUT, possibly spurious comparison as, between rows, the models are not all built on the same data! Same presences though.
+data |>
+  dplyr::mutate(tuned = purrr::map_lgl(tune, file.exists)) |>
+  dplyr::filter(tuned) |>
   dplyr::mutate(tune = purrr::map(tune, rio::import, trust = TRUE)
                 , tune_mean = purrr::map(tune, "tune_mean")
-                ) %>%
-  tidyr::unnest(cols = c(tune_mean)) %>%
-  dplyr::filter(best) |> # used 'combo' to determine 'best' as default in tune_sdm
-  dplyr::select(taxa, algo, hold_prop, stretch, new_bg_test, tidyselect::where(is.numeric))
-#> # A tibble: 8 × 25
-#>   taxa  algo   hold_prop stretch new_bg_test tunes  reps    rm trees nodesize
-#>   <chr> <chr>      <dbl>   <dbl> <lgl>       <dbl> <dbl> <dbl> <dbl>    <dbl>
-#> 1 chg   maxnet       0        10 TRUE           20     5     2    NA       NA
-#> 2 chg   rf           0.3      10 TRUE           19     5    NA   500        3
-#> 3 chg   rf           0        30 TRUE           20     5    NA   500        3
-#> 4 chg   rf           0.3      30 TRUE           22     5    NA   500        1
-#> 5 chg   rf           0        10 FALSE          20     5    NA   500        1
-#> 6 chg   rf           0.3      10 FALSE          19     5    NA   500        3
-#> 7 chg   rf           0        30 FALSE          22     5    NA   500        1
-#> 8 chg   rf           0.3      30 FALSE          22     5    NA   500        3
+                ) |>
+  tidyr::unnest(cols = c(tune_mean)) |>
+  dplyr::filter(combo == max(combo), .by = taxa) |> # used 'combo' to determine 'best' as default in tune_sdm
+  dplyr::select(taxa, algo, hold_prop, stretch, spatial_folds, tidyselect::where(is.numeric))
+#> # A tibble: 2 × 25
+#>   taxa  algo  hold_prop stretch spatial_folds tunes  reps    rm trees nodesize
+#>   <chr> <chr>     <dbl>   <dbl> <lgl>         <dbl> <dbl> <dbl> <dbl>    <dbl>
+#> 1 chg   rf          0.3      10 FALSE            25     5    NA   500        1
+#> 2 mjs   rf          0        10 FALSE            25     5    NA   500        1
 #> # ℹ 15 more variables: mtry <int>, spatial_tunes <int>,
 #> #   non_spatial_tunes <dbl>, max_spec_sens <dbl>, no_omission <dbl>,
 #> #   equal_prevalence <dbl>, equal_sens_spec <dbl>, auc_po <dbl>, ODP <dbl>,

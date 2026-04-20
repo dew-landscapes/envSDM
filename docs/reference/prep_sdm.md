@@ -316,21 +316,23 @@ sampling density raster against which background points are assigned.
 ## Examples
 
 ``` r
+library("tmap")
+
 out_dir <- file.path(system.file(package = "envSDM"), "examples")
 
 # data ---------
 hold_prop <- c(0, 0.3)
 stretch <- c(10, 30)
-new_bg_test <- c(T, F)
+spatial_folds <- c(T, F)
 
-sdms <- expand.grid(hold_prop = hold_prop, stretch = stretch, new_bg_test = new_bg_test)
+sdms <- expand.grid(hold_prop = hold_prop, stretch = stretch, spatial_folds = spatial_folds)
 
-data <- fs::dir_ls(out_dir, regexp = "\\.csv$")[[1]] |>
+data <- fs::dir_ls(out_dir, regexp = "\\.csv$") |>
   tibble::enframe(name = NULL, value = "path") |>
   dplyr::mutate(taxa = gsub("\\.csv", "", basename(path))) |>
   dplyr::cross_join(sdms) |>
   tidyr::unite(col = "out_dir"
-               , tidyselect::any_of(names(sdms))
+               , c(taxa, tidyselect::any_of(names(sdms)))
                , sep = "__"
                , remove = FALSE
                ) |>
@@ -370,14 +372,21 @@ purrr::pwalk(list(data$path
 # prep -----------
 # use the just created mcps (this allows using, say, a different spatial reliability threshold for the mcps)
 
-purrr::pwalk(list(data$taxa
+max_cores <- nrow(data)
+use_cores <- min(max_cores, parallel::detectCores() - 1)
+
+future::plan(future::multisession(workers = use_cores))
+#> Error in future::plan(future::multisession(workers = use_cores)): object 'use_cores' not found
+
+furrr::future_pwalk(list(data$taxa
                   , data$out_dir
                   , data$path
                   , data$out_mcp
                   , data$hold_prop
                   , data$stretch
+                  , data$spatial_folds
                   )
-             , function(a, b, c, d, e, f) prep_sdm(this_taxa = a
+             , function(a, b, c, d, e, f, g) prep_sdm(this_taxa = a
                                              , out_dir = b
                                              , presence = readr::read_csv(c)
                                              , pres_x = "cell_long"
@@ -386,7 +395,9 @@ purrr::pwalk(list(data$taxa
                                              , is_env_pred = FALSE
                                              , pred_limit = d
                                              , limit_buffer = 10000
+                                             , min_fold_n = 5
                                              , folds = 5
+                                             , spatial_folds = g
                                              , repeats = 5
                                              , hold_prop = e
                                              , dens_res = 1000 # ignored as decimal degrees preds
@@ -406,7 +417,7 @@ purrr::pwalk(list(data$taxa
 #> ℹ Use `spec()` to retrieve the full column specification for this data.
 #> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 #> prep for chg
-#> out_dir is /home/nwilloug/tmp/R/RtmpIpCJvf/temp_libpath2a1c71270e52e6/envSDM/examples/0__10__TRUE.
+#> out_dir is /home/nwilloug/tmp/R/Rtmp8pIqU6/temp_libpathb0605789a6788/envSDM/examples/chg__0__10__TRUE.
 #>  103 incoming presences
 #> Rows: 103 Columns: 2
 #> ── Column specification ────────────────────────────────────────────────────────
@@ -416,7 +427,7 @@ purrr::pwalk(list(data$taxa
 #> ℹ Use `spec()` to retrieve the full column specification for this data.
 #> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 #> prep for chg
-#> out_dir is /home/nwilloug/tmp/R/RtmpIpCJvf/temp_libpath2a1c71270e52e6/envSDM/examples/0.3__10__TRUE.
+#> out_dir is /home/nwilloug/tmp/R/Rtmp8pIqU6/temp_libpathb0605789a6788/envSDM/examples/chg__0.3__10__TRUE.
 #>  103 incoming presences
 #> Rows: 103 Columns: 2
 #> ── Column specification ────────────────────────────────────────────────────────
@@ -426,7 +437,7 @@ purrr::pwalk(list(data$taxa
 #> ℹ Use `spec()` to retrieve the full column specification for this data.
 #> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 #> prep for chg
-#> out_dir is /home/nwilloug/tmp/R/RtmpIpCJvf/temp_libpath2a1c71270e52e6/envSDM/examples/0__30__TRUE.
+#> out_dir is /home/nwilloug/tmp/R/Rtmp8pIqU6/temp_libpathb0605789a6788/envSDM/examples/chg__0__30__TRUE.
 #>  103 incoming presences
 #> Rows: 103 Columns: 2
 #> ── Column specification ────────────────────────────────────────────────────────
@@ -436,7 +447,7 @@ purrr::pwalk(list(data$taxa
 #> ℹ Use `spec()` to retrieve the full column specification for this data.
 #> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 #> prep for chg
-#> out_dir is /home/nwilloug/tmp/R/RtmpIpCJvf/temp_libpath2a1c71270e52e6/envSDM/examples/0.3__30__TRUE.
+#> out_dir is /home/nwilloug/tmp/R/Rtmp8pIqU6/temp_libpathb0605789a6788/envSDM/examples/chg__0.3__30__TRUE.
 #>  103 incoming presences
 #> Rows: 103 Columns: 2
 #> ── Column specification ────────────────────────────────────────────────────────
@@ -446,7 +457,7 @@ purrr::pwalk(list(data$taxa
 #> ℹ Use `spec()` to retrieve the full column specification for this data.
 #> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 #> prep for chg
-#> out_dir is /home/nwilloug/tmp/R/RtmpIpCJvf/temp_libpath2a1c71270e52e6/envSDM/examples/0__10__FALSE.
+#> out_dir is /home/nwilloug/tmp/R/Rtmp8pIqU6/temp_libpathb0605789a6788/envSDM/examples/chg__0__10__FALSE.
 #>  103 incoming presences
 #> Rows: 103 Columns: 2
 #> ── Column specification ────────────────────────────────────────────────────────
@@ -456,7 +467,7 @@ purrr::pwalk(list(data$taxa
 #> ℹ Use `spec()` to retrieve the full column specification for this data.
 #> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 #> prep for chg
-#> out_dir is /home/nwilloug/tmp/R/RtmpIpCJvf/temp_libpath2a1c71270e52e6/envSDM/examples/0.3__10__FALSE.
+#> out_dir is /home/nwilloug/tmp/R/Rtmp8pIqU6/temp_libpathb0605789a6788/envSDM/examples/chg__0.3__10__FALSE.
 #>  103 incoming presences
 #> Rows: 103 Columns: 2
 #> ── Column specification ────────────────────────────────────────────────────────
@@ -466,7 +477,7 @@ purrr::pwalk(list(data$taxa
 #> ℹ Use `spec()` to retrieve the full column specification for this data.
 #> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 #> prep for chg
-#> out_dir is /home/nwilloug/tmp/R/RtmpIpCJvf/temp_libpath2a1c71270e52e6/envSDM/examples/0__30__FALSE.
+#> out_dir is /home/nwilloug/tmp/R/Rtmp8pIqU6/temp_libpathb0605789a6788/envSDM/examples/chg__0__30__FALSE.
 #>  103 incoming presences
 #> Rows: 103 Columns: 2
 #> ── Column specification ────────────────────────────────────────────────────────
@@ -476,8 +487,170 @@ purrr::pwalk(list(data$taxa
 #> ℹ Use `spec()` to retrieve the full column specification for this data.
 #> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 #> prep for chg
-#> out_dir is /home/nwilloug/tmp/R/RtmpIpCJvf/temp_libpath2a1c71270e52e6/envSDM/examples/0.3__30__FALSE.
+#> out_dir is /home/nwilloug/tmp/R/Rtmp8pIqU6/temp_libpathb0605789a6788/envSDM/examples/chg__0.3__30__FALSE.
 #>  103 incoming presences
+#> Rows: 677 Columns: 2
+#> ── Column specification ────────────────────────────────────────────────────────
+#> Delimiter: ","
+#> dbl (2): cell_lat, cell_long
+#> 
+#> ℹ Use `spec()` to retrieve the full column specification for this data.
+#> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+#> prep for mjs
+#> out_dir is /home/nwilloug/tmp/R/Rtmp8pIqU6/temp_libpathb0605789a6788/envSDM/examples/mjs__0__10__TRUE.
+#>  677 incoming presences
+#> Rows: 677 Columns: 2
+#> ── Column specification ────────────────────────────────────────────────────────
+#> Delimiter: ","
+#> dbl (2): cell_lat, cell_long
+#> 
+#> ℹ Use `spec()` to retrieve the full column specification for this data.
+#> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+#> prep for mjs
+#> out_dir is /home/nwilloug/tmp/R/Rtmp8pIqU6/temp_libpathb0605789a6788/envSDM/examples/mjs__0.3__10__TRUE.
+#>  677 incoming presences
+#> Rows: 677 Columns: 2
+#> ── Column specification ────────────────────────────────────────────────────────
+#> Delimiter: ","
+#> dbl (2): cell_lat, cell_long
+#> 
+#> ℹ Use `spec()` to retrieve the full column specification for this data.
+#> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+#> prep for mjs
+#> out_dir is /home/nwilloug/tmp/R/Rtmp8pIqU6/temp_libpathb0605789a6788/envSDM/examples/mjs__0__30__TRUE.
+#>  677 incoming presences
+#> Rows: 677 Columns: 2
+#> ── Column specification ────────────────────────────────────────────────────────
+#> Delimiter: ","
+#> dbl (2): cell_lat, cell_long
+#> 
+#> ℹ Use `spec()` to retrieve the full column specification for this data.
+#> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+#> prep for mjs
+#> out_dir is /home/nwilloug/tmp/R/Rtmp8pIqU6/temp_libpathb0605789a6788/envSDM/examples/mjs__0.3__30__TRUE.
+#>  677 incoming presences
+#> Rows: 677 Columns: 2
+#> ── Column specification ────────────────────────────────────────────────────────
+#> Delimiter: ","
+#> dbl (2): cell_lat, cell_long
+#> 
+#> ℹ Use `spec()` to retrieve the full column specification for this data.
+#> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+#> prep for mjs
+#> out_dir is /home/nwilloug/tmp/R/Rtmp8pIqU6/temp_libpathb0605789a6788/envSDM/examples/mjs__0__10__FALSE.
+#>  677 incoming presences
+#> Rows: 677 Columns: 2
+#> ── Column specification ────────────────────────────────────────────────────────
+#> Delimiter: ","
+#> dbl (2): cell_lat, cell_long
+#> 
+#> ℹ Use `spec()` to retrieve the full column specification for this data.
+#> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+#> prep for mjs
+#> out_dir is /home/nwilloug/tmp/R/Rtmp8pIqU6/temp_libpathb0605789a6788/envSDM/examples/mjs__0.3__10__FALSE.
+#>  677 incoming presences
+#> Rows: 677 Columns: 2
+#> ── Column specification ────────────────────────────────────────────────────────
+#> Delimiter: ","
+#> dbl (2): cell_lat, cell_long
+#> 
+#> ℹ Use `spec()` to retrieve the full column specification for this data.
+#> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+#> prep for mjs
+#> out_dir is /home/nwilloug/tmp/R/Rtmp8pIqU6/temp_libpathb0605789a6788/envSDM/examples/mjs__0__30__FALSE.
+#>  677 incoming presences
+#> Rows: 677 Columns: 2
+#> ── Column specification ────────────────────────────────────────────────────────
+#> Delimiter: ","
+#> dbl (2): cell_lat, cell_long
+#> 
+#> ℹ Use `spec()` to retrieve the full column specification for this data.
+#> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+#> prep for mjs
+#> out_dir is /home/nwilloug/tmp/R/Rtmp8pIqU6/temp_libpathb0605789a6788/envSDM/examples/mjs__0.3__30__FALSE.
+#>  677 incoming presences
+#> Rows: 5 Columns: 2
+#> ── Column specification ────────────────────────────────────────────────────────
+#> Delimiter: ","
+#> dbl (2): cell_lat, cell_long
+#> 
+#> ℹ Use `spec()` to retrieve the full column specification for this data.
+#> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+#> prep for wjb
+#> out_dir is /home/nwilloug/tmp/R/Rtmp8pIqU6/temp_libpathb0605789a6788/envSDM/examples/wjb__0__10__TRUE.
+#>  5 incoming presences
+#> Rows: 5 Columns: 2
+#> ── Column specification ────────────────────────────────────────────────────────
+#> Delimiter: ","
+#> dbl (2): cell_lat, cell_long
+#> 
+#> ℹ Use `spec()` to retrieve the full column specification for this data.
+#> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+#> prep for wjb
+#> out_dir is /home/nwilloug/tmp/R/Rtmp8pIqU6/temp_libpathb0605789a6788/envSDM/examples/wjb__0.3__10__TRUE.
+#>  5 incoming presences
+#> Rows: 5 Columns: 2
+#> ── Column specification ────────────────────────────────────────────────────────
+#> Delimiter: ","
+#> dbl (2): cell_lat, cell_long
+#> 
+#> ℹ Use `spec()` to retrieve the full column specification for this data.
+#> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+#> prep for wjb
+#> out_dir is /home/nwilloug/tmp/R/Rtmp8pIqU6/temp_libpathb0605789a6788/envSDM/examples/wjb__0__30__TRUE.
+#>  5 incoming presences
+#> Rows: 5 Columns: 2
+#> ── Column specification ────────────────────────────────────────────────────────
+#> Delimiter: ","
+#> dbl (2): cell_lat, cell_long
+#> 
+#> ℹ Use `spec()` to retrieve the full column specification for this data.
+#> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+#> prep for wjb
+#> out_dir is /home/nwilloug/tmp/R/Rtmp8pIqU6/temp_libpathb0605789a6788/envSDM/examples/wjb__0.3__30__TRUE.
+#>  5 incoming presences
+#> Rows: 5 Columns: 2
+#> ── Column specification ────────────────────────────────────────────────────────
+#> Delimiter: ","
+#> dbl (2): cell_lat, cell_long
+#> 
+#> ℹ Use `spec()` to retrieve the full column specification for this data.
+#> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+#> prep for wjb
+#> out_dir is /home/nwilloug/tmp/R/Rtmp8pIqU6/temp_libpathb0605789a6788/envSDM/examples/wjb__0__10__FALSE.
+#>  5 incoming presences
+#> Rows: 5 Columns: 2
+#> ── Column specification ────────────────────────────────────────────────────────
+#> Delimiter: ","
+#> dbl (2): cell_lat, cell_long
+#> 
+#> ℹ Use `spec()` to retrieve the full column specification for this data.
+#> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+#> prep for wjb
+#> out_dir is /home/nwilloug/tmp/R/Rtmp8pIqU6/temp_libpathb0605789a6788/envSDM/examples/wjb__0.3__10__FALSE.
+#>  5 incoming presences
+#> Rows: 5 Columns: 2
+#> ── Column specification ────────────────────────────────────────────────────────
+#> Delimiter: ","
+#> dbl (2): cell_lat, cell_long
+#> 
+#> ℹ Use `spec()` to retrieve the full column specification for this data.
+#> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+#> prep for wjb
+#> out_dir is /home/nwilloug/tmp/R/Rtmp8pIqU6/temp_libpathb0605789a6788/envSDM/examples/wjb__0__30__FALSE.
+#>  5 incoming presences
+#> Rows: 5 Columns: 2
+#> ── Column specification ────────────────────────────────────────────────────────
+#> Delimiter: ","
+#> dbl (2): cell_lat, cell_long
+#> 
+#> ℹ Use `spec()` to retrieve the full column specification for this data.
+#> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+#> prep for wjb
+#> out_dir is /home/nwilloug/tmp/R/Rtmp8pIqU6/temp_libpathb0605789a6788/envSDM/examples/wjb__0.3__30__FALSE.
+#>  5 incoming presences
+
+future::plan(future::sequential())
 
 # example of 'prep'
 prep <- rio::import(data$prep[[1]], trust = TRUE)
@@ -490,8 +663,8 @@ names(prep)
 
 # variables to remove prior to SDM
 prep$reduce_env$remove
-#>  [1] "bio02"     "bio04"     "bio08"     "bio09"     "bio12"     "bio16"    
-#>  [7] "bio17"     "bio18"     "bio19"     "cell"      "cell_lat"  "cell_long"
+#>  [1] "bio02"     "bio04"     "bio08"     "bio09"     "bio12"     "bio13"    
+#>  [7] "bio16"     "bio17"     "bio19"     "cell"      "cell_lat"  "cell_long"
 #> [13] "fold"      "id"        "pa"        "x"         "y"        
 
 # spatial blocks used
@@ -499,7 +672,7 @@ purrr::map(prep$training$cv_spatial, \(x) x$result$blocks |> dplyr::mutate(size 
   dplyr::bind_rows() |>
   tm_shape() +
   tm_borders(col = "size")
-#> Error in tm_shape(dplyr::bind_rows(purrr::map(prep$training$cv_spatial,     function(x) dplyr::mutate(x$result$blocks, size = paste0("size_",         x$result$size))))): could not find function "tm_shape"
+
 
 # Background points
 if(require("tmap")) {
@@ -537,5 +710,4 @@ if(require("tmap")) {
 
 
 }
-#> Loading required package: tmap
 ```

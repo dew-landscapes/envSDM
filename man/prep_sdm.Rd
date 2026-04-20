@@ -235,21 +235,23 @@ against which background points are assigned.
 }
 \examples{
 
+library("tmap")
+
 out_dir <- file.path(system.file(package = "envSDM"), "examples")
 
 # data ---------
 hold_prop <- c(0, 0.3)
 stretch <- c(10, 30)
-new_bg_test <- c(T, F)
+spatial_folds <- c(T, F)
 
-sdms <- expand.grid(hold_prop = hold_prop, stretch = stretch, new_bg_test = new_bg_test)
+sdms <- expand.grid(hold_prop = hold_prop, stretch = stretch, spatial_folds = spatial_folds)
 
-data <- fs::dir_ls(out_dir, regexp = "\\\\.csv$")[[1]] |>
+data <- fs::dir_ls(out_dir, regexp = "\\\\.csv$") |>
   tibble::enframe(name = NULL, value = "path") |>
   dplyr::mutate(taxa = gsub("\\\\.csv", "", basename(path))) |>
   dplyr::cross_join(sdms) |>
   tidyr::unite(col = "out_dir"
-               , tidyselect::any_of(names(sdms))
+               , c(taxa, tidyselect::any_of(names(sdms)))
                , sep = "__"
                , remove = FALSE
                ) |>
@@ -289,14 +291,20 @@ purrr::pwalk(list(data$path
 # prep -----------
 # use the just created mcps (this allows using, say, a different spatial reliability threshold for the mcps)
 
-purrr::pwalk(list(data$taxa
+max_cores <- nrow(data)
+use_cores <- min(max_cores, parallel::detectCores() - 1)
+
+future::plan(future::multisession(workers = use_cores))
+
+furrr::future_pwalk(list(data$taxa
                   , data$out_dir
                   , data$path
                   , data$out_mcp
                   , data$hold_prop
                   , data$stretch
+                  , data$spatial_folds
                   )
-             , function(a, b, c, d, e, f) prep_sdm(this_taxa = a
+             , function(a, b, c, d, e, f, g) prep_sdm(this_taxa = a
                                              , out_dir = b
                                              , presence = readr::read_csv(c)
                                              , pres_x = "cell_long"
@@ -305,7 +313,9 @@ purrr::pwalk(list(data$taxa
                                              , is_env_pred = FALSE
                                              , pred_limit = d
                                              , limit_buffer = 10000
+                                             , min_fold_n = 5
                                              , folds = 5
+                                             , spatial_folds = g
                                              , repeats = 5
                                              , hold_prop = e
                                              , dens_res = 1000 # ignored as decimal degrees preds
@@ -317,6 +327,8 @@ purrr::pwalk(list(data$taxa
                                              #, force_new = TRUE
                                              )
              )
+
+future::plan(future::sequential())
 
 # example of 'prep'
 prep <- rio::import(data$prep[[1]], trust = TRUE)
