@@ -168,11 +168,7 @@ out_dir <- file.path(system.file(package = "envSDM"), "examples")
 # setup -------
 data <- readRDS(fs::path(out_dir, "data.rds"))
 
-max_cores <- nrow(data)
-use_cores <- min(max_cores, parallel::detectCores() - 1)
-
-future::plan(future::multisession(workers = use_cores))
-#> Error in future::plan(future::multisession(workers = use_cores)): object 'use_cores' not found
+future::plan(future::multisession())
 
 furrr::future_walk(data$out_dir
             , \(x) tune_sdm(prep = fs::path(x, "prep.rds")

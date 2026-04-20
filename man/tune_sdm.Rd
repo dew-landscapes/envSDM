@@ -116,10 +116,7 @@ out_dir <- file.path(system.file(package = "envSDM"), "examples")
 # setup -------
 data <- readRDS(fs::path(out_dir, "data.rds"))
 
-max_cores <- nrow(data)
-use_cores <- min(max_cores, parallel::detectCores() - 1)
-
-future::plan(future::multisession(workers = use_cores))
+future::plan(future::multisession())
 
 furrr::future_walk(data$out_dir
             , \(x) tune_sdm(prep = fs::path(x, "prep.rds")

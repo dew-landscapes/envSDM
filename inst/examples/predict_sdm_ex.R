@@ -6,10 +6,7 @@ data <- readRDS(fs::path(out_dir, "data.rds"))
 
 # Best combo--------
 ## run full SDM --------
-max_cores <- nrow(data)
-use_cores <- min(max_cores, parallel::detectCores() - 1)
-
-future::plan(future::multisession(workers = use_cores))
+future::plan(future::multisession())
 
 furrr::future_pwalk(list(data$prep
                   , data$tune

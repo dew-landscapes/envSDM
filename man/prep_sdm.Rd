@@ -291,10 +291,7 @@ purrr::pwalk(list(data$path
 # prep -----------
 # use the just created mcps (this allows using, say, a different spatial reliability threshold for the mcps)
 
-max_cores <- nrow(data)
-use_cores <- min(max_cores, parallel::detectCores() - 1)
-
-future::plan(future::multisession(workers = use_cores))
+future::plan(future::multisession())
 
 furrr::future_pwalk(list(data$taxa
                   , data$out_dir

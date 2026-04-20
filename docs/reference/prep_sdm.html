@@ -382,11 +382,7 @@ against which background points are assigned.</p>
 <span class="r-in"><span><span class="co"># prep -----------</span></span></span>
 <span class="r-in"><span><span class="co"># use the just created mcps (this allows using, say, a different spatial reliability threshold for the mcps)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="va">max_cores</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">use_cores</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">min</a></span><span class="op">(</span><span class="va">max_cores</span>, <span class="fu">parallel</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/parallel/detectCores.html" class="external-link">detectCores</a></span><span class="op">(</span><span class="op">)</span> <span class="op">-</span> <span class="fl">1</span><span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="fu">future</span><span class="fu">::</span><span class="fu"><a href="https://future.futureverse.org/reference/plan.html" class="external-link">plan</a></span><span class="op">(</span><span class="fu">future</span><span class="fu">::</span><span class="fu"><a href="https://future.futureverse.org/reference/multisession.html" class="external-link">multisession</a></span><span class="op">(</span>workers <span class="op">=</span> <span class="va">use_cores</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in future::plan(future::multisession(workers = use_cores)):</span> object 'use_cores' not found</span>
+<span class="r-in"><span><span class="fu">future</span><span class="fu">::</span><span class="fu"><a href="https://future.futureverse.org/reference/plan.html" class="external-link">plan</a></span><span class="op">(</span><span class="fu">future</span><span class="fu">::</span><span class="fu"><a href="https://future.futureverse.org/reference/multisession.html" class="external-link">multisession</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">furrr</span><span class="fu">::</span><span class="fu"><a href="https://furrr.futureverse.org/reference/future_map2.html" class="external-link">future_pwalk</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">data</span><span class="op">$</span><span class="va">taxa</span></span></span>
 <span class="r-in"><span>                  , <span class="va">data</span><span class="op">$</span><span class="va">out_dir</span></span></span>
@@ -419,245 +415,245 @@ against which background points are assigned.</p>
 <span class="r-in"><span>                                             <span class="co">#, force_new = TRUE</span></span></span>
 <span class="r-in"><span>                                             <span class="op">)</span></span></span>
 <span class="r-in"><span>             <span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Rows: </span><span style="color: #0000BB;">103</span> <span style="font-weight: bold;">Columns: </span><span style="color: #0000BB;">2</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Column specification</span> <span style="color: #00BBBB;">────────────────────────────────────────────────────────</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Delimiter:</span> ","</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">dbl</span> (2): cell_lat, cell_long</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Rows: 103 Columns: 2</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ── Column specification ────────────────────────────────────────────────────────</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Delimiter: ","</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> dbl (2): cell_lat, cell_long</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Use `spec()` to retrieve the full column specification for this data.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Specify the column types or set `show_col_types = FALSE` to quiet this message.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ℹ Use `spec()` to retrieve the full column specification for this data.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> prep for chg</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> out_dir is /home/nwilloug/tmp/R/Rtmp8pIqU6/temp_libpathb0605789a6788/envSDM/examples/chg__0__10__TRUE.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> out_dir is /home/nwilloug/tmp/R/RtmpyM9r99/temp_libpathb95a03b2d909/envSDM/examples/chg__0__10__TRUE.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>  103 incoming presences</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Rows: </span><span style="color: #0000BB;">103</span> <span style="font-weight: bold;">Columns: </span><span style="color: #0000BB;">2</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Column specification</span> <span style="color: #00BBBB;">────────────────────────────────────────────────────────</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Delimiter:</span> ","</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">dbl</span> (2): cell_lat, cell_long</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Rows: 103 Columns: 2</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ── Column specification ────────────────────────────────────────────────────────</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Delimiter: ","</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> dbl (2): cell_lat, cell_long</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Use `spec()` to retrieve the full column specification for this data.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Specify the column types or set `show_col_types = FALSE` to quiet this message.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ℹ Use `spec()` to retrieve the full column specification for this data.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> prep for chg</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> out_dir is /home/nwilloug/tmp/R/Rtmp8pIqU6/temp_libpathb0605789a6788/envSDM/examples/chg__0.3__10__TRUE.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> out_dir is /home/nwilloug/tmp/R/RtmpyM9r99/temp_libpathb95a03b2d909/envSDM/examples/chg__0.3__10__TRUE.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>  103 incoming presences</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Rows: </span><span style="color: #0000BB;">103</span> <span style="font-weight: bold;">Columns: </span><span style="color: #0000BB;">2</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Column specification</span> <span style="color: #00BBBB;">────────────────────────────────────────────────────────</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Delimiter:</span> ","</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">dbl</span> (2): cell_lat, cell_long</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Rows: 103 Columns: 2</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ── Column specification ────────────────────────────────────────────────────────</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Delimiter: ","</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> dbl (2): cell_lat, cell_long</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Use `spec()` to retrieve the full column specification for this data.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Specify the column types or set `show_col_types = FALSE` to quiet this message.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ℹ Use `spec()` to retrieve the full column specification for this data.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> prep for chg</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> out_dir is /home/nwilloug/tmp/R/Rtmp8pIqU6/temp_libpathb0605789a6788/envSDM/examples/chg__0__30__TRUE.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> out_dir is /home/nwilloug/tmp/R/RtmpyM9r99/temp_libpathb95a03b2d909/envSDM/examples/chg__0__30__TRUE.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>  103 incoming presences</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Rows: </span><span style="color: #0000BB;">103</span> <span style="font-weight: bold;">Columns: </span><span style="color: #0000BB;">2</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Column specification</span> <span style="color: #00BBBB;">────────────────────────────────────────────────────────</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Delimiter:</span> ","</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">dbl</span> (2): cell_lat, cell_long</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Rows: 103 Columns: 2</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ── Column specification ────────────────────────────────────────────────────────</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Delimiter: ","</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> dbl (2): cell_lat, cell_long</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Use `spec()` to retrieve the full column specification for this data.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Specify the column types or set `show_col_types = FALSE` to quiet this message.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ℹ Use `spec()` to retrieve the full column specification for this data.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> prep for chg</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> out_dir is /home/nwilloug/tmp/R/Rtmp8pIqU6/temp_libpathb0605789a6788/envSDM/examples/chg__0.3__30__TRUE.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> out_dir is /home/nwilloug/tmp/R/RtmpyM9r99/temp_libpathb95a03b2d909/envSDM/examples/chg__0.3__30__TRUE.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>  103 incoming presences</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Rows: </span><span style="color: #0000BB;">103</span> <span style="font-weight: bold;">Columns: </span><span style="color: #0000BB;">2</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Column specification</span> <span style="color: #00BBBB;">────────────────────────────────────────────────────────</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Delimiter:</span> ","</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">dbl</span> (2): cell_lat, cell_long</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Rows: 103 Columns: 2</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ── Column specification ────────────────────────────────────────────────────────</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Delimiter: ","</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> dbl (2): cell_lat, cell_long</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Use `spec()` to retrieve the full column specification for this data.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Specify the column types or set `show_col_types = FALSE` to quiet this message.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ℹ Use `spec()` to retrieve the full column specification for this data.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> prep for chg</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> out_dir is /home/nwilloug/tmp/R/Rtmp8pIqU6/temp_libpathb0605789a6788/envSDM/examples/chg__0__10__FALSE.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> out_dir is /home/nwilloug/tmp/R/RtmpyM9r99/temp_libpathb95a03b2d909/envSDM/examples/chg__0__10__FALSE.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>  103 incoming presences</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Rows: </span><span style="color: #0000BB;">103</span> <span style="font-weight: bold;">Columns: </span><span style="color: #0000BB;">2</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Column specification</span> <span style="color: #00BBBB;">────────────────────────────────────────────────────────</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Delimiter:</span> ","</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">dbl</span> (2): cell_lat, cell_long</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Rows: 103 Columns: 2</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ── Column specification ────────────────────────────────────────────────────────</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Delimiter: ","</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> dbl (2): cell_lat, cell_long</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Use `spec()` to retrieve the full column specification for this data.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Specify the column types or set `show_col_types = FALSE` to quiet this message.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ℹ Use `spec()` to retrieve the full column specification for this data.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> prep for chg</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> out_dir is /home/nwilloug/tmp/R/Rtmp8pIqU6/temp_libpathb0605789a6788/envSDM/examples/chg__0.3__10__FALSE.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> out_dir is /home/nwilloug/tmp/R/RtmpyM9r99/temp_libpathb95a03b2d909/envSDM/examples/chg__0.3__10__FALSE.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>  103 incoming presences</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Rows: </span><span style="color: #0000BB;">103</span> <span style="font-weight: bold;">Columns: </span><span style="color: #0000BB;">2</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Column specification</span> <span style="color: #00BBBB;">────────────────────────────────────────────────────────</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Delimiter:</span> ","</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">dbl</span> (2): cell_lat, cell_long</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Rows: 103 Columns: 2</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ── Column specification ────────────────────────────────────────────────────────</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Delimiter: ","</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> dbl (2): cell_lat, cell_long</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Use `spec()` to retrieve the full column specification for this data.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Specify the column types or set `show_col_types = FALSE` to quiet this message.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ℹ Use `spec()` to retrieve the full column specification for this data.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> prep for chg</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> out_dir is /home/nwilloug/tmp/R/Rtmp8pIqU6/temp_libpathb0605789a6788/envSDM/examples/chg__0__30__FALSE.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> out_dir is /home/nwilloug/tmp/R/RtmpyM9r99/temp_libpathb95a03b2d909/envSDM/examples/chg__0__30__FALSE.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>  103 incoming presences</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Rows: </span><span style="color: #0000BB;">103</span> <span style="font-weight: bold;">Columns: </span><span style="color: #0000BB;">2</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Column specification</span> <span style="color: #00BBBB;">────────────────────────────────────────────────────────</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Delimiter:</span> ","</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">dbl</span> (2): cell_lat, cell_long</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Rows: 103 Columns: 2</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ── Column specification ────────────────────────────────────────────────────────</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Delimiter: ","</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> dbl (2): cell_lat, cell_long</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Use `spec()` to retrieve the full column specification for this data.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Specify the column types or set `show_col_types = FALSE` to quiet this message.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ℹ Use `spec()` to retrieve the full column specification for this data.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> prep for chg</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> out_dir is /home/nwilloug/tmp/R/Rtmp8pIqU6/temp_libpathb0605789a6788/envSDM/examples/chg__0.3__30__FALSE.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> out_dir is /home/nwilloug/tmp/R/RtmpyM9r99/temp_libpathb95a03b2d909/envSDM/examples/chg__0.3__30__FALSE.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>  103 incoming presences</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Rows: </span><span style="color: #0000BB;">677</span> <span style="font-weight: bold;">Columns: </span><span style="color: #0000BB;">2</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Column specification</span> <span style="color: #00BBBB;">────────────────────────────────────────────────────────</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Delimiter:</span> ","</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">dbl</span> (2): cell_lat, cell_long</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Rows: 677 Columns: 2</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ── Column specification ────────────────────────────────────────────────────────</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Delimiter: ","</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> dbl (2): cell_lat, cell_long</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Use `spec()` to retrieve the full column specification for this data.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Specify the column types or set `show_col_types = FALSE` to quiet this message.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ℹ Use `spec()` to retrieve the full column specification for this data.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> prep for mjs</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> out_dir is /home/nwilloug/tmp/R/Rtmp8pIqU6/temp_libpathb0605789a6788/envSDM/examples/mjs__0__10__TRUE.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> out_dir is /home/nwilloug/tmp/R/RtmpyM9r99/temp_libpathb95a03b2d909/envSDM/examples/mjs__0__10__TRUE.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>  677 incoming presences</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Rows: </span><span style="color: #0000BB;">677</span> <span style="font-weight: bold;">Columns: </span><span style="color: #0000BB;">2</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Column specification</span> <span style="color: #00BBBB;">────────────────────────────────────────────────────────</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Delimiter:</span> ","</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">dbl</span> (2): cell_lat, cell_long</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Rows: 677 Columns: 2</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ── Column specification ────────────────────────────────────────────────────────</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Delimiter: ","</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> dbl (2): cell_lat, cell_long</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Use `spec()` to retrieve the full column specification for this data.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Specify the column types or set `show_col_types = FALSE` to quiet this message.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ℹ Use `spec()` to retrieve the full column specification for this data.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> prep for mjs</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> out_dir is /home/nwilloug/tmp/R/Rtmp8pIqU6/temp_libpathb0605789a6788/envSDM/examples/mjs__0.3__10__TRUE.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> out_dir is /home/nwilloug/tmp/R/RtmpyM9r99/temp_libpathb95a03b2d909/envSDM/examples/mjs__0.3__10__TRUE.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>  677 incoming presences</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Rows: </span><span style="color: #0000BB;">677</span> <span style="font-weight: bold;">Columns: </span><span style="color: #0000BB;">2</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Column specification</span> <span style="color: #00BBBB;">────────────────────────────────────────────────────────</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Delimiter:</span> ","</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">dbl</span> (2): cell_lat, cell_long</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Rows: 677 Columns: 2</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ── Column specification ────────────────────────────────────────────────────────</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Delimiter: ","</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> dbl (2): cell_lat, cell_long</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Use `spec()` to retrieve the full column specification for this data.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Specify the column types or set `show_col_types = FALSE` to quiet this message.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ℹ Use `spec()` to retrieve the full column specification for this data.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> prep for mjs</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> out_dir is /home/nwilloug/tmp/R/Rtmp8pIqU6/temp_libpathb0605789a6788/envSDM/examples/mjs__0__30__TRUE.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> out_dir is /home/nwilloug/tmp/R/RtmpyM9r99/temp_libpathb95a03b2d909/envSDM/examples/mjs__0__30__TRUE.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>  677 incoming presences</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Rows: </span><span style="color: #0000BB;">677</span> <span style="font-weight: bold;">Columns: </span><span style="color: #0000BB;">2</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Column specification</span> <span style="color: #00BBBB;">────────────────────────────────────────────────────────</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Delimiter:</span> ","</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">dbl</span> (2): cell_lat, cell_long</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Rows: 677 Columns: 2</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ── Column specification ────────────────────────────────────────────────────────</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Delimiter: ","</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> dbl (2): cell_lat, cell_long</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Use `spec()` to retrieve the full column specification for this data.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Specify the column types or set `show_col_types = FALSE` to quiet this message.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ℹ Use `spec()` to retrieve the full column specification for this data.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> prep for mjs</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> out_dir is /home/nwilloug/tmp/R/Rtmp8pIqU6/temp_libpathb0605789a6788/envSDM/examples/mjs__0.3__30__TRUE.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> out_dir is /home/nwilloug/tmp/R/RtmpyM9r99/temp_libpathb95a03b2d909/envSDM/examples/mjs__0.3__30__TRUE.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>  677 incoming presences</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Rows: </span><span style="color: #0000BB;">677</span> <span style="font-weight: bold;">Columns: </span><span style="color: #0000BB;">2</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Column specification</span> <span style="color: #00BBBB;">────────────────────────────────────────────────────────</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Delimiter:</span> ","</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">dbl</span> (2): cell_lat, cell_long</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Rows: 677 Columns: 2</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ── Column specification ────────────────────────────────────────────────────────</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Delimiter: ","</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> dbl (2): cell_lat, cell_long</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Use `spec()` to retrieve the full column specification for this data.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Specify the column types or set `show_col_types = FALSE` to quiet this message.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ℹ Use `spec()` to retrieve the full column specification for this data.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> prep for mjs</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> out_dir is /home/nwilloug/tmp/R/Rtmp8pIqU6/temp_libpathb0605789a6788/envSDM/examples/mjs__0__10__FALSE.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> out_dir is /home/nwilloug/tmp/R/RtmpyM9r99/temp_libpathb95a03b2d909/envSDM/examples/mjs__0__10__FALSE.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>  677 incoming presences</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Rows: </span><span style="color: #0000BB;">677</span> <span style="font-weight: bold;">Columns: </span><span style="color: #0000BB;">2</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Column specification</span> <span style="color: #00BBBB;">────────────────────────────────────────────────────────</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Delimiter:</span> ","</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">dbl</span> (2): cell_lat, cell_long</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Rows: 677 Columns: 2</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ── Column specification ────────────────────────────────────────────────────────</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Delimiter: ","</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> dbl (2): cell_lat, cell_long</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Use `spec()` to retrieve the full column specification for this data.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Specify the column types or set `show_col_types = FALSE` to quiet this message.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ℹ Use `spec()` to retrieve the full column specification for this data.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> prep for mjs</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> out_dir is /home/nwilloug/tmp/R/Rtmp8pIqU6/temp_libpathb0605789a6788/envSDM/examples/mjs__0.3__10__FALSE.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> out_dir is /home/nwilloug/tmp/R/RtmpyM9r99/temp_libpathb95a03b2d909/envSDM/examples/mjs__0.3__10__FALSE.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>  677 incoming presences</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Rows: </span><span style="color: #0000BB;">677</span> <span style="font-weight: bold;">Columns: </span><span style="color: #0000BB;">2</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Column specification</span> <span style="color: #00BBBB;">────────────────────────────────────────────────────────</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Delimiter:</span> ","</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">dbl</span> (2): cell_lat, cell_long</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Rows: 677 Columns: 2</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ── Column specification ────────────────────────────────────────────────────────</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Delimiter: ","</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> dbl (2): cell_lat, cell_long</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Use `spec()` to retrieve the full column specification for this data.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Specify the column types or set `show_col_types = FALSE` to quiet this message.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ℹ Use `spec()` to retrieve the full column specification for this data.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> prep for mjs</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> out_dir is /home/nwilloug/tmp/R/Rtmp8pIqU6/temp_libpathb0605789a6788/envSDM/examples/mjs__0__30__FALSE.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> out_dir is /home/nwilloug/tmp/R/RtmpyM9r99/temp_libpathb95a03b2d909/envSDM/examples/mjs__0__30__FALSE.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>  677 incoming presences</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Rows: </span><span style="color: #0000BB;">677</span> <span style="font-weight: bold;">Columns: </span><span style="color: #0000BB;">2</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Column specification</span> <span style="color: #00BBBB;">────────────────────────────────────────────────────────</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Delimiter:</span> ","</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">dbl</span> (2): cell_lat, cell_long</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Rows: 677 Columns: 2</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ── Column specification ────────────────────────────────────────────────────────</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Delimiter: ","</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> dbl (2): cell_lat, cell_long</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Use `spec()` to retrieve the full column specification for this data.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Specify the column types or set `show_col_types = FALSE` to quiet this message.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ℹ Use `spec()` to retrieve the full column specification for this data.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> prep for mjs</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> out_dir is /home/nwilloug/tmp/R/Rtmp8pIqU6/temp_libpathb0605789a6788/envSDM/examples/mjs__0.3__30__FALSE.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> out_dir is /home/nwilloug/tmp/R/RtmpyM9r99/temp_libpathb95a03b2d909/envSDM/examples/mjs__0.3__30__FALSE.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>  677 incoming presences</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Rows: </span><span style="color: #0000BB;">5</span> <span style="font-weight: bold;">Columns: </span><span style="color: #0000BB;">2</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Column specification</span> <span style="color: #00BBBB;">────────────────────────────────────────────────────────</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Delimiter:</span> ","</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">dbl</span> (2): cell_lat, cell_long</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Rows: 5 Columns: 2</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ── Column specification ────────────────────────────────────────────────────────</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Delimiter: ","</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> dbl (2): cell_lat, cell_long</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Use `spec()` to retrieve the full column specification for this data.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Specify the column types or set `show_col_types = FALSE` to quiet this message.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ℹ Use `spec()` to retrieve the full column specification for this data.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> prep for wjb</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> out_dir is /home/nwilloug/tmp/R/Rtmp8pIqU6/temp_libpathb0605789a6788/envSDM/examples/wjb__0__10__TRUE.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> out_dir is /home/nwilloug/tmp/R/RtmpyM9r99/temp_libpathb95a03b2d909/envSDM/examples/wjb__0__10__TRUE.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>  5 incoming presences</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Rows: </span><span style="color: #0000BB;">5</span> <span style="font-weight: bold;">Columns: </span><span style="color: #0000BB;">2</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Column specification</span> <span style="color: #00BBBB;">────────────────────────────────────────────────────────</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Delimiter:</span> ","</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">dbl</span> (2): cell_lat, cell_long</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Rows: 5 Columns: 2</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ── Column specification ────────────────────────────────────────────────────────</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Delimiter: ","</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> dbl (2): cell_lat, cell_long</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Use `spec()` to retrieve the full column specification for this data.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Specify the column types or set `show_col_types = FALSE` to quiet this message.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ℹ Use `spec()` to retrieve the full column specification for this data.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> prep for wjb</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> out_dir is /home/nwilloug/tmp/R/Rtmp8pIqU6/temp_libpathb0605789a6788/envSDM/examples/wjb__0.3__10__TRUE.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> out_dir is /home/nwilloug/tmp/R/RtmpyM9r99/temp_libpathb95a03b2d909/envSDM/examples/wjb__0.3__10__TRUE.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>  5 incoming presences</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Rows: </span><span style="color: #0000BB;">5</span> <span style="font-weight: bold;">Columns: </span><span style="color: #0000BB;">2</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Column specification</span> <span style="color: #00BBBB;">────────────────────────────────────────────────────────</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Delimiter:</span> ","</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">dbl</span> (2): cell_lat, cell_long</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Rows: 5 Columns: 2</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ── Column specification ────────────────────────────────────────────────────────</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Delimiter: ","</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> dbl (2): cell_lat, cell_long</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Use `spec()` to retrieve the full column specification for this data.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Specify the column types or set `show_col_types = FALSE` to quiet this message.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ℹ Use `spec()` to retrieve the full column specification for this data.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> prep for wjb</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> out_dir is /home/nwilloug/tmp/R/Rtmp8pIqU6/temp_libpathb0605789a6788/envSDM/examples/wjb__0__30__TRUE.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> out_dir is /home/nwilloug/tmp/R/RtmpyM9r99/temp_libpathb95a03b2d909/envSDM/examples/wjb__0__30__TRUE.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>  5 incoming presences</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Rows: </span><span style="color: #0000BB;">5</span> <span style="font-weight: bold;">Columns: </span><span style="color: #0000BB;">2</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Column specification</span> <span style="color: #00BBBB;">────────────────────────────────────────────────────────</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Delimiter:</span> ","</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">dbl</span> (2): cell_lat, cell_long</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Rows: 5 Columns: 2</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ── Column specification ────────────────────────────────────────────────────────</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Delimiter: ","</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> dbl (2): cell_lat, cell_long</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Use `spec()` to retrieve the full column specification for this data.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Specify the column types or set `show_col_types = FALSE` to quiet this message.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ℹ Use `spec()` to retrieve the full column specification for this data.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> prep for wjb</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> out_dir is /home/nwilloug/tmp/R/Rtmp8pIqU6/temp_libpathb0605789a6788/envSDM/examples/wjb__0.3__30__TRUE.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> out_dir is /home/nwilloug/tmp/R/RtmpyM9r99/temp_libpathb95a03b2d909/envSDM/examples/wjb__0.3__30__TRUE.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>  5 incoming presences</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Rows: </span><span style="color: #0000BB;">5</span> <span style="font-weight: bold;">Columns: </span><span style="color: #0000BB;">2</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Column specification</span> <span style="color: #00BBBB;">────────────────────────────────────────────────────────</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Delimiter:</span> ","</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">dbl</span> (2): cell_lat, cell_long</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Rows: 5 Columns: 2</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ── Column specification ────────────────────────────────────────────────────────</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Delimiter: ","</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> dbl (2): cell_lat, cell_long</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Use `spec()` to retrieve the full column specification for this data.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Specify the column types or set `show_col_types = FALSE` to quiet this message.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ℹ Use `spec()` to retrieve the full column specification for this data.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> prep for wjb</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> out_dir is /home/nwilloug/tmp/R/Rtmp8pIqU6/temp_libpathb0605789a6788/envSDM/examples/wjb__0__10__FALSE.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> out_dir is /home/nwilloug/tmp/R/RtmpyM9r99/temp_libpathb95a03b2d909/envSDM/examples/wjb__0__10__FALSE.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>  5 incoming presences</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Rows: </span><span style="color: #0000BB;">5</span> <span style="font-weight: bold;">Columns: </span><span style="color: #0000BB;">2</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Column specification</span> <span style="color: #00BBBB;">────────────────────────────────────────────────────────</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Delimiter:</span> ","</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">dbl</span> (2): cell_lat, cell_long</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Rows: 5 Columns: 2</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ── Column specification ────────────────────────────────────────────────────────</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Delimiter: ","</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> dbl (2): cell_lat, cell_long</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Use `spec()` to retrieve the full column specification for this data.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Specify the column types or set `show_col_types = FALSE` to quiet this message.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ℹ Use `spec()` to retrieve the full column specification for this data.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> prep for wjb</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> out_dir is /home/nwilloug/tmp/R/Rtmp8pIqU6/temp_libpathb0605789a6788/envSDM/examples/wjb__0.3__10__FALSE.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> out_dir is /home/nwilloug/tmp/R/RtmpyM9r99/temp_libpathb95a03b2d909/envSDM/examples/wjb__0.3__10__FALSE.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>  5 incoming presences</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Rows: </span><span style="color: #0000BB;">5</span> <span style="font-weight: bold;">Columns: </span><span style="color: #0000BB;">2</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Column specification</span> <span style="color: #00BBBB;">────────────────────────────────────────────────────────</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Delimiter:</span> ","</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">dbl</span> (2): cell_lat, cell_long</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Rows: 5 Columns: 2</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ── Column specification ────────────────────────────────────────────────────────</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Delimiter: ","</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> dbl (2): cell_lat, cell_long</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Use `spec()` to retrieve the full column specification for this data.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Specify the column types or set `show_col_types = FALSE` to quiet this message.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ℹ Use `spec()` to retrieve the full column specification for this data.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> prep for wjb</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> out_dir is /home/nwilloug/tmp/R/Rtmp8pIqU6/temp_libpathb0605789a6788/envSDM/examples/wjb__0__30__FALSE.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> out_dir is /home/nwilloug/tmp/R/RtmpyM9r99/temp_libpathb95a03b2d909/envSDM/examples/wjb__0__30__FALSE.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>  5 incoming presences</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Rows: </span><span style="color: #0000BB;">5</span> <span style="font-weight: bold;">Columns: </span><span style="color: #0000BB;">2</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Column specification</span> <span style="color: #00BBBB;">────────────────────────────────────────────────────────</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Delimiter:</span> ","</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">dbl</span> (2): cell_lat, cell_long</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Rows: 5 Columns: 2</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ── Column specification ────────────────────────────────────────────────────────</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Delimiter: ","</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> dbl (2): cell_lat, cell_long</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Use `spec()` to retrieve the full column specification for this data.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Specify the column types or set `show_col_types = FALSE` to quiet this message.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ℹ Use `spec()` to retrieve the full column specification for this data.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> prep for wjb</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> out_dir is /home/nwilloug/tmp/R/Rtmp8pIqU6/temp_libpathb0605789a6788/envSDM/examples/wjb__0.3__30__FALSE.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> out_dir is /home/nwilloug/tmp/R/RtmpyM9r99/temp_libpathb95a03b2d909/envSDM/examples/wjb__0.3__30__FALSE.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>  5 incoming presences</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">future</span><span class="fu">::</span><span class="fu"><a href="https://future.futureverse.org/reference/plan.html" class="external-link">plan</a></span><span class="op">(</span><span class="fu">future</span><span class="fu">::</span><span class="fu"><a href="https://future.futureverse.org/reference/sequential.html" class="external-link">sequential</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></span>
