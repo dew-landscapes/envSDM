@@ -1,0 +1,21 @@
+wjb
+predict process started at 2026-04-21 08:49:08.703281
+predict did not run as:
+ prep abandoned
+ prep did not finish
+ prep log:
+  
+prep for wjb
+out_dir is /projects/dev/nige/packages/envSDM/inst/examples/wjb__0__30__TRUE.
+ 5 incoming presences
+wjb
+prep start at 2026-04-21 08:23:55.2672.
+5 rows in 'presence'
+19 predictors
+5 presences required for a single fold of 5. 2 presences in predict_boundary and on env rasters
+only 2 useable presence points. SDM abandoned
+ full run did not finish
+ full run log:
+  
+ 
+

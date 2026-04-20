@@ -1,8 +1,0 @@
-chg
-predict process started at 2026-03-27 13:48:04.130111
-predict for chg from maxnet model with arguments: fc = lq, rm = 2
- out file will be pred.tif
-predict finished in 0 minutes
-predict mask for chg
-predict mask created in 0 minutes
-predict process finished. elapsed time: 0.04 minutes
