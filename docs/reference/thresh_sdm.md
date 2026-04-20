@@ -114,22 +114,22 @@ purrr::pwalk(list(data$pred
                                      #, force_new = TRUE
                                      )
              )
-#> threshold file: /home/nwilloug/tmp/R/RtmpyM9r99/temp_libpathb95a03b2d909/envSDM/examples/chg__0__10__TRUE/thresh.tif already exists
-#> threshold file: /home/nwilloug/tmp/R/RtmpyM9r99/temp_libpathb95a03b2d909/envSDM/examples/chg__0.3__10__TRUE/thresh.tif already exists
-#> threshold file: /home/nwilloug/tmp/R/RtmpyM9r99/temp_libpathb95a03b2d909/envSDM/examples/chg__0__30__TRUE/thresh.tif already exists
-#> threshold file: /home/nwilloug/tmp/R/RtmpyM9r99/temp_libpathb95a03b2d909/envSDM/examples/chg__0.3__30__TRUE/thresh.tif already exists
-#> threshold file: /home/nwilloug/tmp/R/RtmpyM9r99/temp_libpathb95a03b2d909/envSDM/examples/chg__0__10__FALSE/thresh.tif already exists
-#> threshold file: /home/nwilloug/tmp/R/RtmpyM9r99/temp_libpathb95a03b2d909/envSDM/examples/chg__0.3__10__FALSE/thresh.tif already exists
-#> threshold file: /home/nwilloug/tmp/R/RtmpyM9r99/temp_libpathb95a03b2d909/envSDM/examples/chg__0__30__FALSE/thresh.tif already exists
-#> threshold file: /home/nwilloug/tmp/R/RtmpyM9r99/temp_libpathb95a03b2d909/envSDM/examples/chg__0.3__30__FALSE/thresh.tif already exists
-#> threshold file: /home/nwilloug/tmp/R/RtmpyM9r99/temp_libpathb95a03b2d909/envSDM/examples/mjs__0__10__TRUE/thresh.tif already exists
-#> threshold file: /home/nwilloug/tmp/R/RtmpyM9r99/temp_libpathb95a03b2d909/envSDM/examples/mjs__0.3__10__TRUE/thresh.tif already exists
-#> threshold file: /home/nwilloug/tmp/R/RtmpyM9r99/temp_libpathb95a03b2d909/envSDM/examples/mjs__0__30__TRUE/thresh.tif already exists
-#> threshold file: /home/nwilloug/tmp/R/RtmpyM9r99/temp_libpathb95a03b2d909/envSDM/examples/mjs__0.3__30__TRUE/thresh.tif already exists
-#> threshold file: /home/nwilloug/tmp/R/RtmpyM9r99/temp_libpathb95a03b2d909/envSDM/examples/mjs__0__10__FALSE/thresh.tif already exists
-#> threshold file: /home/nwilloug/tmp/R/RtmpyM9r99/temp_libpathb95a03b2d909/envSDM/examples/mjs__0.3__10__FALSE/thresh.tif already exists
-#> threshold file: /home/nwilloug/tmp/R/RtmpyM9r99/temp_libpathb95a03b2d909/envSDM/examples/mjs__0__30__FALSE/thresh.tif already exists
-#> threshold file: /home/nwilloug/tmp/R/RtmpyM9r99/temp_libpathb95a03b2d909/envSDM/examples/mjs__0.3__30__FALSE/thresh.tif already exists
+#> threshold file: /home/nwilloug/tmp/R/RtmpyM9r99/temp_libpathb95a05413af12/envSDM/examples/chg__0__10__TRUE/thresh.tif already exists
+#> threshold file: /home/nwilloug/tmp/R/RtmpyM9r99/temp_libpathb95a05413af12/envSDM/examples/chg__0.3__10__TRUE/thresh.tif already exists
+#> threshold file: /home/nwilloug/tmp/R/RtmpyM9r99/temp_libpathb95a05413af12/envSDM/examples/chg__0__30__TRUE/thresh.tif already exists
+#> threshold file: /home/nwilloug/tmp/R/RtmpyM9r99/temp_libpathb95a05413af12/envSDM/examples/chg__0.3__30__TRUE/thresh.tif already exists
+#> threshold file: /home/nwilloug/tmp/R/RtmpyM9r99/temp_libpathb95a05413af12/envSDM/examples/chg__0__10__FALSE/thresh.tif already exists
+#> threshold file: /home/nwilloug/tmp/R/RtmpyM9r99/temp_libpathb95a05413af12/envSDM/examples/chg__0.3__10__FALSE/thresh.tif already exists
+#> threshold file: /home/nwilloug/tmp/R/RtmpyM9r99/temp_libpathb95a05413af12/envSDM/examples/chg__0__30__FALSE/thresh.tif already exists
+#> threshold file: /home/nwilloug/tmp/R/RtmpyM9r99/temp_libpathb95a05413af12/envSDM/examples/chg__0.3__30__FALSE/thresh.tif already exists
+#> threshold file: /home/nwilloug/tmp/R/RtmpyM9r99/temp_libpathb95a05413af12/envSDM/examples/mjs__0__10__TRUE/thresh.tif already exists
+#> threshold file: /home/nwilloug/tmp/R/RtmpyM9r99/temp_libpathb95a05413af12/envSDM/examples/mjs__0.3__10__TRUE/thresh.tif already exists
+#> threshold file: /home/nwilloug/tmp/R/RtmpyM9r99/temp_libpathb95a05413af12/envSDM/examples/mjs__0__30__TRUE/thresh.tif already exists
+#> threshold file: /home/nwilloug/tmp/R/RtmpyM9r99/temp_libpathb95a05413af12/envSDM/examples/mjs__0.3__30__TRUE/thresh.tif already exists
+#> threshold file: /home/nwilloug/tmp/R/RtmpyM9r99/temp_libpathb95a05413af12/envSDM/examples/mjs__0__10__FALSE/thresh.tif already exists
+#> threshold file: /home/nwilloug/tmp/R/RtmpyM9r99/temp_libpathb95a05413af12/envSDM/examples/mjs__0.3__10__FALSE/thresh.tif already exists
+#> threshold file: /home/nwilloug/tmp/R/RtmpyM9r99/temp_libpathb95a05413af12/envSDM/examples/mjs__0__30__FALSE/thresh.tif already exists
+#> threshold file: /home/nwilloug/tmp/R/RtmpyM9r99/temp_libpathb95a05413af12/envSDM/examples/mjs__0.3__30__FALSE/thresh.tif already exists
 
 ## visualise-------
 # just use one taxa

@@ -87,6 +87,9 @@ out_dir <- file.path(system.file(package = "envSDM"), "examples")
 # setup -------
 data <- readRDS(fs::path(out_dir, "data.rds"))
 
+# predictors -------
+preds <- fs::dir_ls(fs::path(out_dir, "tif"))
+
 # Best combo--------
 ## run full SDM --------
 future::plan(future::multisession())
