@@ -1231,6 +1231,7 @@
               dplyr::mutate(folds_spat = purrr::map(training
                                                     , \(x) non_spatial_folds(k_folds
                                                                              , x
+                                                                             , min_in_fold = min_fold_n
                                                                              )
                                                     )
                             )
