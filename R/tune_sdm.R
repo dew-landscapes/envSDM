@@ -121,7 +121,7 @@
 
           }
 
-          if(exists(tune)) {
+          if(exists("tune", inherits = FALSE)) {
 
             # remove the tune file (and tune) if it is 'finished' but there is no tune_mean
             # this can happen with, say, few records, but that will also be quick to rerun
