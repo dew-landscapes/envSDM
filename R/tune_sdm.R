@@ -108,13 +108,24 @@
 
         if(file.exists(tune_file)) {
 
-          safe_import <- purrr::safely(rio::import)
+          safe_import <- purrr::safely(readRDS)
 
-          tune <- safe_import(tune_file, trust = TRUE)
+          tune <- safe_import(tune_file)
 
           if(is.null(tune$error)) tune <- tune$result else {
 
             # remove the tune file if it can't be opened
+            fs::file_delete(tune_file)
+
+            rm(tune)
+
+          }
+
+          # remove the tune file (and tune) if it is 'finished' but there is no tune_mean
+          # this can happen with, say, few records, but that will also be quick to rerun
+          # introduced to fix # 12
+          if(all(tune$finished, is.null(tune$tune_mean))) {
+
             fs::file_delete(tune_file)
 
             rm(tune)
@@ -726,7 +737,7 @@
 
     run <- all(!prep$abandoned
                , prep$finished
-               , if(exists("tune_mean", where = tune, inherits = FALSE)) force_new else TRUE
+               , if(isTRUE(tune$finished)) force_new else TRUE
                )
 
     if(run) {
