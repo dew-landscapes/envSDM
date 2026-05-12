@@ -121,14 +121,18 @@
 
           }
 
-          # remove the tune file (and tune) if it is 'finished' but there is no tune_mean
-          # this can happen with, say, few records, but that will also be quick to rerun
-          # introduced to fix # 12
-          if(all(tune$finished, is.null(tune$tune_mean))) {
+          if(exists(tune)) {
 
-            fs::file_delete(tune_file)
+            # remove the tune file (and tune) if it is 'finished' but there is no tune_mean
+            # this can happen with, say, few records, but that will also be quick to rerun
+            # introduced to fix # 12
+            if(all(tune$finished, is.null(tune$tune_mean))) {
 
-            rm(tune)
+              fs::file_delete(tune_file)
+
+              rm(tune)
+
+            }
 
           }
 
