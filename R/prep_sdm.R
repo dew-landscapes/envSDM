@@ -748,14 +748,15 @@
 
         if(run) {
 
-          spp_pa <- dplyr::bind_rows(prep$presence_ras %>%
-                                       tibble::as_tibble() %>%
+          spp_pa <- dplyr::bind_rows(prep$presence_ras |>
+                                       tibble::as_tibble() |>
+                                       dplyr::distinct() |> # to ensure env data is not duplicated if there are multiple visits to cells
                                        sf::st_as_sf(coords = c("x", "y")
                                                     , crs = prep$epsg_out
                                                     , remove = FALSE
-                                                    ) %>%
+                                                    ) |>
                                        dplyr::mutate(pa = 1)
-                                     , prep$bg_points %>%
+                                     , prep$bg_points |>
                                        dplyr::mutate(pa = 0)
                                      )
 
