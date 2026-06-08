@@ -596,11 +596,32 @@
 
           if(sum(prep$pa_ras$pa) < nrow(prep$pa_ras)) {
 
-            bw_p_only <- MASS::kde2d(as.matrix(prep$presence_ras[,1])
-                                     , as.matrix(prep$presence_ras[,2])
-                                     , n = c(nrow(temp_ras), ncol(temp_ras))
-                                     , lims = terra::ext(temp_ras) %>% as.vector()
-                                     )
+            safe_bw <- purrr::safely(MASS::kde2d)
+
+            # try without jitter first
+            test_bw <- safe_bw(as.matrix(prep$presence_ras[,1])
+                               , as.matrix(prep$presence_ras[,2])
+                               , n = c(nrow(temp_ras), ncol(temp_ras))
+                               , lims = terra::ext(temp_ras) %>% as.vector()
+                               )
+
+            # if errors, try with jitter
+            if(!is.null(test_bw$error)) {
+
+              test_bw <- safe_bw(as.matrix(prep$presence_ras[,1]) |> jitter(amount = terra::res(temp_ras)[[1]])
+                                 , as.matrix(prep$presence_ras[,2]) |> jitter(amount = terra::res(temp_ras)[[1]])
+                                 , n = c(nrow(temp_ras), ncol(temp_ras))
+                                 , lims = terra::ext(temp_ras) %>% as.vector()
+                                 )
+
+            }
+
+            # if still errors, give up on presence-only density raster
+            if(!is.null(test_bw$error)) {
+
+              rm(test_bw) # as tried but still errored
+
+            } else bw_p_only <- test_bw$result
 
           }
 
