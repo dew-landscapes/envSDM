@@ -200,8 +200,8 @@ data |>
 #> # A tibble: 2 × 25
 #>   taxa  algo  hold_prop stretch spatial_folds tunes  reps    rm trees nodesize
 #>   <chr> <chr>     <dbl>   <dbl> <lgl>         <dbl> <dbl> <dbl> <dbl>    <dbl>
-#> 1 chg   rf          0.3      10 FALSE            25     5    NA   500        1
-#> 2 mjs   rf          0        10 FALSE            25     5    NA   500        1
+#> 1 chg   rf            0      10 FALSE            25     5    NA   500        1
+#> 2 mjs   rf            0      10 FALSE            25     5    NA   500        1
 #> # ℹ 15 more variables: mtry <int>, spatial_tunes <int>,
 #> #   non_spatial_tunes <dbl>, max_spec_sens <dbl>, no_omission <dbl>,
 #> #   equal_prevalence <dbl>, equal_sens_spec <dbl>, auc_po <dbl>, ODP <dbl>,

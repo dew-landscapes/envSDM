@@ -1,5 +1,5 @@
 wjb
-predict process started at 2026-04-21 09:12:58.991256
+predict process started at 2026-06-09 08:13:13.020427
 predict did not run as:
  prep abandoned
  prep did not finish
@@ -9,7 +9,7 @@ prep for wjb
 out_dir is /projects/dev/nige/packages/envSDM/inst/examples/wjb__0__30__FALSE.
  5 incoming presences
 wjb
-prep start at 2026-04-21 08:23:55.278242.
+prep start at 2026-06-09 08:02:13.127666.
 5 rows in 'presence'
 19 predictors
 5 presences required for a single fold of 5. 2 presences in predict_boundary and on env rasters

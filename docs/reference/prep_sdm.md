@@ -413,7 +413,7 @@ furrr::future_pwalk(list(data$taxa
 #> ℹ Use `spec()` to retrieve the full column specification for this data.
 #> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 #> prep for chg
-#> out_dir is /home/nwilloug/tmp/R/RtmpyM9r99/temp_libpathb95a05413af12/envSDM/examples/chg__0__10__TRUE.
+#> out_dir is /tmp/RtmpmQhxEJ/temp_libpath1dfd606e7eb11f/envSDM/examples/chg__0__10__TRUE.
 #>  103 incoming presences
 #> Rows: 103 Columns: 2
 #> ── Column specification ────────────────────────────────────────────────────────
@@ -423,7 +423,7 @@ furrr::future_pwalk(list(data$taxa
 #> ℹ Use `spec()` to retrieve the full column specification for this data.
 #> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 #> prep for chg
-#> out_dir is /home/nwilloug/tmp/R/RtmpyM9r99/temp_libpathb95a05413af12/envSDM/examples/chg__0.3__10__TRUE.
+#> out_dir is /tmp/RtmpmQhxEJ/temp_libpath1dfd606e7eb11f/envSDM/examples/chg__0.3__10__TRUE.
 #>  103 incoming presences
 #> Rows: 103 Columns: 2
 #> ── Column specification ────────────────────────────────────────────────────────
@@ -433,7 +433,7 @@ furrr::future_pwalk(list(data$taxa
 #> ℹ Use `spec()` to retrieve the full column specification for this data.
 #> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 #> prep for chg
-#> out_dir is /home/nwilloug/tmp/R/RtmpyM9r99/temp_libpathb95a05413af12/envSDM/examples/chg__0__30__TRUE.
+#> out_dir is /tmp/RtmpmQhxEJ/temp_libpath1dfd606e7eb11f/envSDM/examples/chg__0__30__TRUE.
 #>  103 incoming presences
 #> Rows: 103 Columns: 2
 #> ── Column specification ────────────────────────────────────────────────────────
@@ -443,7 +443,7 @@ furrr::future_pwalk(list(data$taxa
 #> ℹ Use `spec()` to retrieve the full column specification for this data.
 #> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 #> prep for chg
-#> out_dir is /home/nwilloug/tmp/R/RtmpyM9r99/temp_libpathb95a05413af12/envSDM/examples/chg__0.3__30__TRUE.
+#> out_dir is /tmp/RtmpmQhxEJ/temp_libpath1dfd606e7eb11f/envSDM/examples/chg__0.3__30__TRUE.
 #>  103 incoming presences
 #> Rows: 103 Columns: 2
 #> ── Column specification ────────────────────────────────────────────────────────
@@ -453,7 +453,7 @@ furrr::future_pwalk(list(data$taxa
 #> ℹ Use `spec()` to retrieve the full column specification for this data.
 #> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 #> prep for chg
-#> out_dir is /home/nwilloug/tmp/R/RtmpyM9r99/temp_libpathb95a05413af12/envSDM/examples/chg__0__10__FALSE.
+#> out_dir is /tmp/RtmpmQhxEJ/temp_libpath1dfd606e7eb11f/envSDM/examples/chg__0__10__FALSE.
 #>  103 incoming presences
 #> Rows: 103 Columns: 2
 #> ── Column specification ────────────────────────────────────────────────────────
@@ -463,7 +463,7 @@ furrr::future_pwalk(list(data$taxa
 #> ℹ Use `spec()` to retrieve the full column specification for this data.
 #> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 #> prep for chg
-#> out_dir is /home/nwilloug/tmp/R/RtmpyM9r99/temp_libpathb95a05413af12/envSDM/examples/chg__0.3__10__FALSE.
+#> out_dir is /tmp/RtmpmQhxEJ/temp_libpath1dfd606e7eb11f/envSDM/examples/chg__0.3__10__FALSE.
 #>  103 incoming presences
 #> Rows: 103 Columns: 2
 #> ── Column specification ────────────────────────────────────────────────────────
@@ -473,7 +473,7 @@ furrr::future_pwalk(list(data$taxa
 #> ℹ Use `spec()` to retrieve the full column specification for this data.
 #> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 #> prep for chg
-#> out_dir is /home/nwilloug/tmp/R/RtmpyM9r99/temp_libpathb95a05413af12/envSDM/examples/chg__0__30__FALSE.
+#> out_dir is /tmp/RtmpmQhxEJ/temp_libpath1dfd606e7eb11f/envSDM/examples/chg__0__30__FALSE.
 #>  103 incoming presences
 #> Rows: 103 Columns: 2
 #> ── Column specification ────────────────────────────────────────────────────────
@@ -483,7 +483,7 @@ furrr::future_pwalk(list(data$taxa
 #> ℹ Use `spec()` to retrieve the full column specification for this data.
 #> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 #> prep for chg
-#> out_dir is /home/nwilloug/tmp/R/RtmpyM9r99/temp_libpathb95a05413af12/envSDM/examples/chg__0.3__30__FALSE.
+#> out_dir is /tmp/RtmpmQhxEJ/temp_libpath1dfd606e7eb11f/envSDM/examples/chg__0.3__30__FALSE.
 #>  103 incoming presences
 #> Rows: 677 Columns: 2
 #> ── Column specification ────────────────────────────────────────────────────────
@@ -493,7 +493,7 @@ furrr::future_pwalk(list(data$taxa
 #> ℹ Use `spec()` to retrieve the full column specification for this data.
 #> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 #> prep for mjs
-#> out_dir is /home/nwilloug/tmp/R/RtmpyM9r99/temp_libpathb95a05413af12/envSDM/examples/mjs__0__10__TRUE.
+#> out_dir is /tmp/RtmpmQhxEJ/temp_libpath1dfd606e7eb11f/envSDM/examples/mjs__0__10__TRUE.
 #>  677 incoming presences
 #> Rows: 677 Columns: 2
 #> ── Column specification ────────────────────────────────────────────────────────
@@ -503,7 +503,7 @@ furrr::future_pwalk(list(data$taxa
 #> ℹ Use `spec()` to retrieve the full column specification for this data.
 #> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 #> prep for mjs
-#> out_dir is /home/nwilloug/tmp/R/RtmpyM9r99/temp_libpathb95a05413af12/envSDM/examples/mjs__0.3__10__TRUE.
+#> out_dir is /tmp/RtmpmQhxEJ/temp_libpath1dfd606e7eb11f/envSDM/examples/mjs__0.3__10__TRUE.
 #>  677 incoming presences
 #> Rows: 677 Columns: 2
 #> ── Column specification ────────────────────────────────────────────────────────
@@ -513,7 +513,7 @@ furrr::future_pwalk(list(data$taxa
 #> ℹ Use `spec()` to retrieve the full column specification for this data.
 #> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 #> prep for mjs
-#> out_dir is /home/nwilloug/tmp/R/RtmpyM9r99/temp_libpathb95a05413af12/envSDM/examples/mjs__0__30__TRUE.
+#> out_dir is /tmp/RtmpmQhxEJ/temp_libpath1dfd606e7eb11f/envSDM/examples/mjs__0__30__TRUE.
 #>  677 incoming presences
 #> Rows: 677 Columns: 2
 #> ── Column specification ────────────────────────────────────────────────────────
@@ -523,7 +523,7 @@ furrr::future_pwalk(list(data$taxa
 #> ℹ Use `spec()` to retrieve the full column specification for this data.
 #> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 #> prep for mjs
-#> out_dir is /home/nwilloug/tmp/R/RtmpyM9r99/temp_libpathb95a05413af12/envSDM/examples/mjs__0.3__30__TRUE.
+#> out_dir is /tmp/RtmpmQhxEJ/temp_libpath1dfd606e7eb11f/envSDM/examples/mjs__0.3__30__TRUE.
 #>  677 incoming presences
 #> Rows: 677 Columns: 2
 #> ── Column specification ────────────────────────────────────────────────────────
@@ -533,7 +533,7 @@ furrr::future_pwalk(list(data$taxa
 #> ℹ Use `spec()` to retrieve the full column specification for this data.
 #> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 #> prep for mjs
-#> out_dir is /home/nwilloug/tmp/R/RtmpyM9r99/temp_libpathb95a05413af12/envSDM/examples/mjs__0__10__FALSE.
+#> out_dir is /tmp/RtmpmQhxEJ/temp_libpath1dfd606e7eb11f/envSDM/examples/mjs__0__10__FALSE.
 #>  677 incoming presences
 #> Rows: 677 Columns: 2
 #> ── Column specification ────────────────────────────────────────────────────────
@@ -543,7 +543,7 @@ furrr::future_pwalk(list(data$taxa
 #> ℹ Use `spec()` to retrieve the full column specification for this data.
 #> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 #> prep for mjs
-#> out_dir is /home/nwilloug/tmp/R/RtmpyM9r99/temp_libpathb95a05413af12/envSDM/examples/mjs__0.3__10__FALSE.
+#> out_dir is /tmp/RtmpmQhxEJ/temp_libpath1dfd606e7eb11f/envSDM/examples/mjs__0.3__10__FALSE.
 #>  677 incoming presences
 #> Rows: 677 Columns: 2
 #> ── Column specification ────────────────────────────────────────────────────────
@@ -553,7 +553,7 @@ furrr::future_pwalk(list(data$taxa
 #> ℹ Use `spec()` to retrieve the full column specification for this data.
 #> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 #> prep for mjs
-#> out_dir is /home/nwilloug/tmp/R/RtmpyM9r99/temp_libpathb95a05413af12/envSDM/examples/mjs__0__30__FALSE.
+#> out_dir is /tmp/RtmpmQhxEJ/temp_libpath1dfd606e7eb11f/envSDM/examples/mjs__0__30__FALSE.
 #>  677 incoming presences
 #> Rows: 677 Columns: 2
 #> ── Column specification ────────────────────────────────────────────────────────
@@ -563,7 +563,7 @@ furrr::future_pwalk(list(data$taxa
 #> ℹ Use `spec()` to retrieve the full column specification for this data.
 #> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 #> prep for mjs
-#> out_dir is /home/nwilloug/tmp/R/RtmpyM9r99/temp_libpathb95a05413af12/envSDM/examples/mjs__0.3__30__FALSE.
+#> out_dir is /tmp/RtmpmQhxEJ/temp_libpath1dfd606e7eb11f/envSDM/examples/mjs__0.3__30__FALSE.
 #>  677 incoming presences
 #> Rows: 5 Columns: 2
 #> ── Column specification ────────────────────────────────────────────────────────
@@ -573,7 +573,7 @@ furrr::future_pwalk(list(data$taxa
 #> ℹ Use `spec()` to retrieve the full column specification for this data.
 #> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 #> prep for wjb
-#> out_dir is /home/nwilloug/tmp/R/RtmpyM9r99/temp_libpathb95a05413af12/envSDM/examples/wjb__0__10__TRUE.
+#> out_dir is /tmp/RtmpmQhxEJ/temp_libpath1dfd606e7eb11f/envSDM/examples/wjb__0__10__TRUE.
 #>  5 incoming presences
 #> Rows: 5 Columns: 2
 #> ── Column specification ────────────────────────────────────────────────────────
@@ -583,7 +583,7 @@ furrr::future_pwalk(list(data$taxa
 #> ℹ Use `spec()` to retrieve the full column specification for this data.
 #> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 #> prep for wjb
-#> out_dir is /home/nwilloug/tmp/R/RtmpyM9r99/temp_libpathb95a05413af12/envSDM/examples/wjb__0.3__10__TRUE.
+#> out_dir is /tmp/RtmpmQhxEJ/temp_libpath1dfd606e7eb11f/envSDM/examples/wjb__0.3__10__TRUE.
 #>  5 incoming presences
 #> Rows: 5 Columns: 2
 #> ── Column specification ────────────────────────────────────────────────────────
@@ -593,7 +593,7 @@ furrr::future_pwalk(list(data$taxa
 #> ℹ Use `spec()` to retrieve the full column specification for this data.
 #> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 #> prep for wjb
-#> out_dir is /home/nwilloug/tmp/R/RtmpyM9r99/temp_libpathb95a05413af12/envSDM/examples/wjb__0__30__TRUE.
+#> out_dir is /tmp/RtmpmQhxEJ/temp_libpath1dfd606e7eb11f/envSDM/examples/wjb__0__30__TRUE.
 #>  5 incoming presences
 #> Rows: 5 Columns: 2
 #> ── Column specification ────────────────────────────────────────────────────────
@@ -603,7 +603,7 @@ furrr::future_pwalk(list(data$taxa
 #> ℹ Use `spec()` to retrieve the full column specification for this data.
 #> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 #> prep for wjb
-#> out_dir is /home/nwilloug/tmp/R/RtmpyM9r99/temp_libpathb95a05413af12/envSDM/examples/wjb__0.3__30__TRUE.
+#> out_dir is /tmp/RtmpmQhxEJ/temp_libpath1dfd606e7eb11f/envSDM/examples/wjb__0.3__30__TRUE.
 #>  5 incoming presences
 #> Rows: 5 Columns: 2
 #> ── Column specification ────────────────────────────────────────────────────────
@@ -613,7 +613,7 @@ furrr::future_pwalk(list(data$taxa
 #> ℹ Use `spec()` to retrieve the full column specification for this data.
 #> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 #> prep for wjb
-#> out_dir is /home/nwilloug/tmp/R/RtmpyM9r99/temp_libpathb95a05413af12/envSDM/examples/wjb__0__10__FALSE.
+#> out_dir is /tmp/RtmpmQhxEJ/temp_libpath1dfd606e7eb11f/envSDM/examples/wjb__0__10__FALSE.
 #>  5 incoming presences
 #> Rows: 5 Columns: 2
 #> ── Column specification ────────────────────────────────────────────────────────
@@ -623,7 +623,7 @@ furrr::future_pwalk(list(data$taxa
 #> ℹ Use `spec()` to retrieve the full column specification for this data.
 #> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 #> prep for wjb
-#> out_dir is /home/nwilloug/tmp/R/RtmpyM9r99/temp_libpathb95a05413af12/envSDM/examples/wjb__0.3__10__FALSE.
+#> out_dir is /tmp/RtmpmQhxEJ/temp_libpath1dfd606e7eb11f/envSDM/examples/wjb__0.3__10__FALSE.
 #>  5 incoming presences
 #> Rows: 5 Columns: 2
 #> ── Column specification ────────────────────────────────────────────────────────
@@ -633,7 +633,7 @@ furrr::future_pwalk(list(data$taxa
 #> ℹ Use `spec()` to retrieve the full column specification for this data.
 #> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 #> prep for wjb
-#> out_dir is /home/nwilloug/tmp/R/RtmpyM9r99/temp_libpathb95a05413af12/envSDM/examples/wjb__0__30__FALSE.
+#> out_dir is /tmp/RtmpmQhxEJ/temp_libpath1dfd606e7eb11f/envSDM/examples/wjb__0__30__FALSE.
 #>  5 incoming presences
 #> Rows: 5 Columns: 2
 #> ── Column specification ────────────────────────────────────────────────────────
@@ -643,7 +643,7 @@ furrr::future_pwalk(list(data$taxa
 #> ℹ Use `spec()` to retrieve the full column specification for this data.
 #> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 #> prep for wjb
-#> out_dir is /home/nwilloug/tmp/R/RtmpyM9r99/temp_libpathb95a05413af12/envSDM/examples/wjb__0.3__30__FALSE.
+#> out_dir is /tmp/RtmpmQhxEJ/temp_libpath1dfd606e7eb11f/envSDM/examples/wjb__0.3__30__FALSE.
 #>  5 incoming presences
 
 future::plan(future::sequential())
@@ -659,9 +659,9 @@ names(prep)
 
 # variables to remove prior to SDM
 prep$reduce_env$remove
-#>  [1] "bio02"     "bio04"     "bio08"     "bio09"     "bio12"     "bio13"    
-#>  [7] "bio16"     "bio17"     "bio19"     "cell"      "cell_lat"  "cell_long"
-#> [13] "fold"      "id"        "pa"        "x"         "y"        
+#>  [1] "bio04"     "bio07"     "bio08"     "bio09"     "bio12"     "bio13"    
+#>  [7] "bio16"     "bio17"     "bio18"     "bio19"     "cell"      "cell_lat" 
+#> [13] "cell_long" "fold"      "id"        "pa"        "x"         "y"        
 
 # spatial blocks used
 purrr::map(prep$training$cv_spatial, \(x) x$result$blocks |> dplyr::mutate(size = paste0("size_", x$result$size))) |>
