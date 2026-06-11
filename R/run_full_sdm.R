@@ -137,7 +137,12 @@
                                     , ...
                                     )
 
-          if(is.null(full_run_tune$tune_mean)) row_id = row_id + 1
+          if(any(is.null(full_run_tune$tune_mean), nrow(full_run_tune[[paste0("tune_", algo)]]) == 0)) {
+
+            full_run_tune <- NULL
+            row_id = row_id + 1
+
+          }
 
         }
 
