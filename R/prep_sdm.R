@@ -1237,6 +1237,8 @@
                 as.numeric() |>
                 sort()
 
+              change_to_non_spatial <- which(prep$training$rep %in% change_to_non_spatial)
+
               if(length(change_to_non_spatial) > 0) {
 
                 prep$training$spatial_folds[change_to_non_spatial] <- FALSE
