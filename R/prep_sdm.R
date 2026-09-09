@@ -604,7 +604,7 @@
 
             rm(bw_pa)
 
-          }
+          } else bw_pa <- bw_pa$result
 
           if(sum(prep$pa_ras$pa) < nrow(prep$pa_ras)) {
 
