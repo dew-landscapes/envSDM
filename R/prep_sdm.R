@@ -588,60 +588,63 @@
                                   , vals = 1
                                   )
 
-          bw <- MASS::kde2d(as.matrix(prep$pa_ras[,1])
-                            , as.matrix(prep$pa_ras[,2])
+          safe_bw <- purrr::safely(MASS::kde2d)
+
+          bw_pa <- safe_bw(as.matrix(prep$pa_ras[,1])
+                           , as.matrix(prep$pa_ras[,2])
+                           , n = c(nrow(temp_ras), ncol(temp_ras))
+                           , lims = terra::ext(temp_ras) %>% as.vector()
+                           )
+
+          if(!is.null(bw_pa$error)) {
+
+            message("warning from p + a bandwidth: "
+                    , bw_pa$error
+                    )
+
+            rm(bw_pa)
+
+          }
+
+          if(sum(prep$pa_ras$pa) < nrow(prep$pa_ras)) {
+
+            # try without jitter first
+            bw_p <- safe_bw(as.matrix(prep$presence_ras[,1])
+                            , as.matrix(prep$presence_ras[,2])
                             , n = c(nrow(temp_ras), ncol(temp_ras))
                             , lims = terra::ext(temp_ras) %>% as.vector()
                             )
 
-          if(sum(prep$pa_ras$pa) < nrow(prep$pa_ras)) {
-
-            safe_bw <- purrr::safely(MASS::kde2d)
-
-            # try without jitter first
-            test_bw <- safe_bw(as.matrix(prep$presence_ras[,1])
-                               , as.matrix(prep$presence_ras[,2])
-                               , n = c(nrow(temp_ras), ncol(temp_ras))
-                               , lims = terra::ext(temp_ras) %>% as.vector()
-                               )
-
             # if errors, try with jitter
-            if(!is.null(test_bw$error)) {
+            if(!is.null(bw_p$error)) {
 
-              test_bw <- safe_bw(as.matrix(prep$presence_ras[,1]) |> jitter(amount = terra::res(temp_ras)[[1]])
-                                 , as.matrix(prep$presence_ras[,2]) |> jitter(amount = terra::res(temp_ras)[[1]])
-                                 , n = c(nrow(temp_ras), ncol(temp_ras))
-                                 , lims = terra::ext(temp_ras) %>% as.vector()
-                                 )
+              bw_p <- safe_bw(as.matrix(prep$presence_ras[,1]) |> jitter(amount = terra::res(temp_ras)[[1]])
+                              , as.matrix(prep$presence_ras[,2]) |> jitter(amount = terra::res(temp_ras)[[1]])
+                              , n = c(nrow(temp_ras), ncol(temp_ras))
+                              , lims = terra::ext(temp_ras) %>% as.vector()
+                              )
 
             }
 
             # if still errors, give up on presence-only density raster
-            if(!is.null(test_bw$error)) {
+            if(!is.null(bw_p$error)) {
 
-              rm(test_bw) # as tried but still errored
+              message("warning from p only bandwidth: "
+                      , bw_p$error
+                      )
 
-            } else bw_p_only <- test_bw$result
+
+              rm(bw_p) # as tried but still errored
+
+            } else bw_p <- bw_p$result
 
           }
 
-          target_density <- raster::raster(bw
-                                           , crs = paste0("epsg:", prep$epsg_out)
-                                           ) %>%
-            terra::rast() %>%
-            terra::project(temp_ras) %>%
-            terra::focal(3
-                         , mean
-                         , na.policy = "only"
-                         , na.rm = TRUE
-                         ) |>
-            terra::stretch(1, stretch_value)
+          if(exists("bw_pa", inherits = FALSE)) {
 
-          if(exists("bw_p_only", inherits = FALSE)) {
-
-            target_density2 <- raster::raster(bw_p_only
-                                              , crs = paste0("epsg:", prep$epsg_out)
-                                              ) %>%
+            target_density_pa <- raster::raster(bw_pa
+                                                , crs = paste0("epsg:", prep$epsg_out)
+                                                ) %>%
               terra::rast() %>%
               terra::project(temp_ras) %>%
               terra::focal(3
@@ -651,11 +654,39 @@
                            ) |>
               terra::stretch(1, stretch_value)
 
-            target_density <- terra::app(c(target_density
-                                           , target_density2
+          }
+
+          if(exists("bw_p", inherits = FALSE)) {
+
+            target_density_p <- raster::raster(bw_p
+                                               , crs = paste0("epsg:", prep$epsg_out)
+                                               ) %>%
+              terra::rast() %>%
+              terra::project(temp_ras) %>%
+              terra::focal(3
+                           , mean
+                           , na.policy = "only"
+                           , na.rm = TRUE
+                           ) |>
+              terra::stretch(1, stretch_value)
+
+          }
+
+          if(all(exists("bw_p", inherits = FALSE), exists("bw_pa", inherits = FALSE))) {
+
+            target_density <- terra::app(c(target_density_pa
+                                           , target_density_p
                                            )
                                          , "mean"
                                          )
+
+          } else if(exists("bw_pa", inherits = FALSE)) {
+
+            target_density <- target_density_pa
+
+          } else if(exists("bw_p", inherits = FALSE)) {
+
+            target_density <- target_density_p
 
           }
 
