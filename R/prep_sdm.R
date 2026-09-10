@@ -644,9 +644,10 @@
 
             target_density_pa <- raster::raster(bw_pa
                                                 , crs = paste0("epsg:", prep$epsg_out)
-                                                ) %>%
-              terra::rast() %>%
-              terra::project(temp_ras) %>%
+                                                ) |>
+              terra::rast() |>
+              terra::stretch(1, stretch_value) |>
+              terra::project(temp_ras) |>
               terra::focal(3
                            , mean
                            , na.policy = "only"
@@ -660,15 +661,15 @@
 
             target_density_p <- raster::raster(bw_p
                                                , crs = paste0("epsg:", prep$epsg_out)
-                                               ) %>%
-              terra::rast() %>%
-              terra::project(temp_ras) %>%
+                                               ) |>
+              terra::rast() |>
+              terra::stretch(1, stretch_value) |>
+              terra::project(temp_ras) |>
               terra::focal(3
                            , mean
                            , na.policy = "only"
                            , na.rm = TRUE
-                           ) |>
-              terra::stretch(1, stretch_value)
+                           )
 
           }
 
