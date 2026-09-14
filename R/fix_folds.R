@@ -24,9 +24,16 @@ fix_folds <- function(folds, pres, min_fold_n = 8, pres_val = 1) {
 
     k_folds <- old_k_folds - how_many_below_thresh
 
+    if(k_folds < 1) k_folds <- 1
+
     folds_adj <- tibble::tibble(fold_ids = unique(folds)) |>
       dplyr::mutate(n = purrr::map_dbl(fold_ids, \(x) sum(folds_p == x))) |>
-      dplyr::mutate(fold_ids_adj = forcats::fct_lump_n(as.factor(fold_ids), k_folds - 1, w = n, ties.method = "random")) |>
+      dplyr::mutate(fold_ids_adj = forcats::fct_lump_n(as.factor(fold_ids)
+                                                       , k_folds - 1
+                                                       , w = n
+                                                       , ties.method = "random"
+                                                       )
+                    ) |>
       dplyr::mutate(fold_ids_adj = as.numeric(fold_ids_adj)) |>
       dplyr::distinct()
 
