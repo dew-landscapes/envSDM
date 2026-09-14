@@ -16,7 +16,7 @@ fix_folds <- function(folds, pres, min_fold_n = 8, pres_val = 1) {
 
   folds_p <- folds[pres == pres_val]
 
-  if(any(table(folds_p) < min_fold_n, length(setdiff(1:k_folds, unique(folds_p))) > 0)) {
+  if(any(table(folds_p) < min_fold_n, length(setdiff(unique(folds), unique(folds_p))) > 0)) {
 
     how_many_below_thresh <- sum(purrr::map_dbl(1:k_folds, \(x) sum(folds_p == x)) < min_fold_n)
 
@@ -24,7 +24,7 @@ fix_folds <- function(folds, pres, min_fold_n = 8, pres_val = 1) {
 
     k_folds <- old_k_folds - how_many_below_thresh
 
-    folds_adj <- tibble::tibble(fold_ids = unique(folds_p)) |>
+    folds_adj <- tibble::tibble(fold_ids = unique(folds)) |>
       dplyr::mutate(n = purrr::map_dbl(fold_ids, \(x) sum(folds_p == x))) |>
       dplyr::mutate(fold_ids_adj = forcats::fct_lump_n(as.factor(fold_ids), k_folds - 1, w = n, ties.method = "random")) |>
       dplyr::mutate(fold_ids_adj = as.numeric(fold_ids_adj)) |>
