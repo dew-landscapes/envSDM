@@ -842,13 +842,17 @@
 
           if(nrow(prep$env[prep$env$pa == 0,]) > num_bg) {
 
-            prep$bg_points <- prep$bg_points %>%
-              dplyr::sample_n(num_bg)
+            pres <- prep$env |>
+              dplyr::filter(pa == 1)
 
-            prep$env <- prep$env |>
-              dplyr::inner_join(prep$presence_ras |>
-                                  dplyr::bind_rows(sf::st_set_geometry(prep$bg_points, NULL))
-                                )
+            abse <- prep$env |>
+              dplyr::filter(pa == 0) |>
+              dplyr::slice_sample(n = num_bg)
+
+            prep$env <- pres |>
+              dplyr::bind_rows(abse)
+
+            rm(pres, abse)
 
           }
 
