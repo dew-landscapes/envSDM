@@ -803,7 +803,6 @@
 
           spp_pa <- dplyr::bind_rows(prep$presence_ras |>
                                        tibble::as_tibble() |>
-                                       dplyr::distinct() |> # to ensure env data is not duplicated if there are multiple visits to cells
                                        sf::st_as_sf(coords = c("x", "y")
                                                     , crs = prep$epsg_out
                                                     , remove = FALSE
@@ -814,12 +813,13 @@
                                      )
 
           env <- terra::extract(prep_preds
-                                , y = terra::vect(spp_pa)
+                                , y = terra::vect(dplyr::distinct(spp_pa))
                                 , include_cols = "pa"
                                 , ID = FALSE
                                 , bind = TRUE
                                 ) %>%
-            tibble::as_tibble()
+            tibble::as_tibble() |>
+            dplyr::right_join(spp_pa)
 
           test_na <- env |>
             dplyr::filter(pa == 1) |>
