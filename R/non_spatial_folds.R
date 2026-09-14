@@ -37,7 +37,7 @@ non_spatial_folds <- function(use_folds
   counter <- 0
 
   # attempt to get min_in_fold presences in each fold
-  while(any(min(table(p_fold)) < min_in_fold, counter <= max_attempts)) {
+  while(all(min(table(p_fold)) < min_in_fold, counter <= max_attempts)) {
 
     counter <- counter + 1
     p_fold <- flds()
