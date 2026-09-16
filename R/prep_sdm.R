@@ -923,8 +923,6 @@
 
         }
 
-        # folds------
-
         if(!prep$abandoned) {
 
           start_folds <- Sys.time()
@@ -1094,23 +1092,18 @@
 
         if(!prep$abandoned) {
 
-          to_split <- training_split
+          prep$training <- training_split
 
-          prep$training <- tibble::tibble(rep = 1:repeats_adj
-                                          , training = list(to_split)
-                                          ) |>
-            dplyr::mutate(spatial_folds = dplyr::if_else(k_folds == 1, FALSE, spatial_folds))
-
-          rm(to_split)
+          prep$spatial_folds <- if(k_folds == 1) FALSE else spatial_folds
 
           text <- paste0("test/training split\n "
                          , as.character(nrow(prep$testing))
                          , " test data, including "
                          , as.character(sum(prep$testing$pa == 1))
-                         , " presences.\n"
-                         , as.character(nrow(prep$training$training[[1]]))
+                         , " presences.\n "
+                         , as.character(nrow(prep$training))
                          , " training data, including "
-                         , as.character(sum(prep$training$training[[1]]$pa == 1))
+                         , as.character(sum(prep$training$pa == 1))
                          , " presences."
                          )
 
@@ -1144,6 +1137,8 @@
 
           }
 
+          # folds------
+
           if(all(k_folds > 1, spatial_folds)) {
 
             ## spatial ------
@@ -1170,44 +1165,46 @@
                                                   ) |>
               as.numeric()
 
-            prep$training <- prep$training |>
-              dplyr::mutate(point_sf = purrr::map(training
-                                                  , \(x) x |>
-                                                    dplyr::select(x, y, pa) %>%
-                                                    sf::st_as_sf(coords = c("x", "y")
-                                                                 , crs = prep$epsg_out
-                                                                 )
-                                                  )
-                            , folds_div = folds_div[1:nrow(prep$training)]
+            point_sf <- prep$training |>
+              dplyr::select(x, y, pa) |>
+              sf::st_as_sf(coords = c("x", "y")
+                           , crs = prep$epsg_out
+                           )
+
+            prep$folds <- tibble::tibble(rep = 1:repeats_adj
+                                         , spatial_folds = spatial_folds
+                                         ) |>
+              dplyr::mutate(fold = list(1:k_folds)) |>
+              dplyr::mutate(folds_div = purrr::map_dbl(rep, \(x) folds_div[1:repeats_adj][x])
                             , fold_dist = purrr::map_dbl(folds_div
                                                          , \(x) use_area |>
                                                            sqrt() |>
                                                            magrittr::divide_by(x)
                                                          )
-                            , cv_spatial = purrr::map2(point_sf
-                                                       , fold_dist
-                                                       , \(x, y) suppressWarnings(
-                                                         # The warnings are dealt with below by 'fix_folds'
-                                                         safe_cv_spatial(x
-                                                                         , column = "pa"
-                                                                         , k = k_folds
-                                                                         , size = y
-                                                                         , iteration = 200
-                                                                         , selection = "random"
-                                                                         , extend = 0.5
-                                                                         , progress = FALSE
-                                                                         , report = FALSE
-                                                                         , plot = FALSE
-                                                                         )
-                                                         )
-                                                       )
+                            , cv_spatial = purrr::map(fold_dist
+                                                      , \(x) suppressWarnings(
+                                                        # The warnings are dealt with below by 'fix_folds'
+                                                        safe_cv_spatial(point_sf
+                                                                        , column = "pa"
+                                                                        , k = k_folds
+                                                                        , size = x
+                                                                        , iteration = 200
+                                                                        , selection = "random"
+                                                                        , extend = 0.5
+                                                                        , progress = FALSE
+                                                                        , report = FALSE
+                                                                        , plot = FALSE
+                                                                        )
+                                                        )
+                                                      )
                             , error = purrr::map(cv_spatial, "error")
                             )
 
-            ### spatial cv errors -------
-            if(any(purrr::map_lgl(prep$training$error, \(x) !is.null(x)))) {
 
-              errs <- prep$training |>
+            ### spatial cv errors -------
+            if(any(purrr::map_lgl(prep$folds$error, \(x) !is.null(x)))) {
+
+              errs <- prep$folds |>
                 dplyr::filter(purrr::map_lgl(error, \(x) !is.null(x)))
 
               prep$log <- paste0(prep$log
@@ -1221,27 +1218,26 @@
             }
 
             ### extract folds from cv_spatial --------
-            prep$training <- prep$training |>
+            prep$folds <- prep$folds |>
               dplyr::filter(purrr::map_lgl(error, \(x) is.null(x))) |> # remove errors
               dplyr::mutate(folds_spat = purrr::map(cv_spatial, \(x) x$result$folds_ids))
 
 
             ### fix spatial folds --------
-            prep$training <- prep$training |>
-              dplyr::mutate(folds_spat = purrr::map2(folds_spat, training
-                                                     , \(x, y) fix_folds(x, y$pa, min_fold_n)
-                                                     )
+            prep$folds <- prep$folds |>
+              dplyr::mutate(folds_spat = purrr::map(folds_spat
+                                                    , \(x) fix_folds(x, prep$training$pa, min_fold_n)
+                                                    )
                             )
 
             ### spatial cv correlation --------
-            if(nrow(prep$training) > 1) {
+            if(nrow(prep$folds) > 1) {
 
-              reps <- prep$training$rep
+              reps <- prep$folds$rep
 
-              check_pres_corr <- purrr::map2(prep$training$folds_spat
-                                             , prep$training$training
-                                             , \(x, y) x[y$pa == 1]
-                                             ) |>
+              check_pres_corr <- purrr::map(prep$folds$folds_spat
+                                            , \(x) x[prep$training$pa == 1]
+                                            ) |>
                 purrr::set_names(reps)
 
               # catch any folds coming out of blockCV::cv_spatial that have all the presences in just one fold
@@ -1273,11 +1269,11 @@
                 as.numeric() |>
                 sort()
 
-              change_to_non_spatial <- which(prep$training$rep %in% change_to_non_spatial)
+              change_to_non_spatial <- which(prep$folds$rep %in% change_to_non_spatial)
 
               if(length(change_to_non_spatial) > 0) {
 
-                prep$training$spatial_folds[change_to_non_spatial] <- FALSE
+                prep$folds$spatial_folds[change_to_non_spatial] <- FALSE
 
               }
 
@@ -1287,10 +1283,10 @@
 
             # hack as folds_spat is actually non spatial in this case.
             # this hack is used as folds_spat is needed in the following section
-            prep$training <- prep$training |>
-              dplyr::mutate(folds_spat = purrr::map(training
+            prep$folds <- prep$folds |>
+              dplyr::mutate(folds_spat = purrr::map(rep
                                                     , \(x) non_spatial_folds(k_folds
-                                                                             , x
+                                                                             , prep$training
                                                                              , min_in_fold = min_fold_n
                                                                              )
                                                     )
@@ -1299,12 +1295,12 @@
           }
 
           ## folds to use -------
-          prep$training <- prep$training %>%
-            dplyr::mutate(folds_nonspat = purrr::map(training
-                                           , \(x) non_spatial_folds(k_folds
-                                                                     , x
-                                                                     )
-                                           )
+          prep$folds <- prep$folds %>%
+            dplyr::mutate(folds_nonspat = purrr::map(rep
+                                                     , \(x) non_spatial_folds(k_folds
+                                                                              , prep$training
+                                                                              )
+                                                     )
                           , folds = purrr::pmap(list(spatial_folds
                                                      , folds_spat
                                                      , folds_nonspat
@@ -1318,10 +1314,10 @@
                           )
 
           ### too few p --------
-          prep$training <- prep$training |>
-            dplyr::mutate(folds = purrr::map2(folds, training
-                                                 , \(x, y) fix_folds(x, y$pa, min_fold_n)
-                                                 )
+          prep$folds <- prep$folds |>
+            dplyr::mutate(folds = purrr::map(folds
+                                             , \(x) fix_folds(x, prep$training$pa, min_fold_n)
+                                             )
                           , single_fold = purrr::map_lgl(folds
                                                          , \(x) length(unique(x)) == 1
                                                          )
@@ -1343,21 +1339,11 @@
                                                 )
                           )
 
-          prep$training <- prep$training |>
-            dplyr::mutate(training = purrr::map2(training
-                                                 , folds
-                                                 , \(x, y) x |>
-                                                   dplyr::bind_cols(tibble::tibble(fold = y))
-                                                 )
-                          )
-
           # Find correlation for log
-          if(length(prep$training$folds) > 1) {
+          if(length(prep$folds$folds) > 1) {
 
-            check_pres_corr <- purrr::map(prep$training$training
-                                          , \(x) x |>
-                                            dplyr::filter(pa == 1) |>
-                                            dplyr::pull(fold)
+            check_pres_corr <- purrr::map(prep$folds$folds
+                                          , \(x) x[prep$training$pa == 1]
                                           )
 
             prep$prep_fold_corr <- stats::cor(tibble::as_tibble(check_pres_corr, .name_repair = "unique_quiet"))
@@ -1441,6 +1427,53 @@
             }
 
           }
+
+          # tune df ---------
+          prep$tune_df <- prep$folds |>
+            dplyr::mutate(n_folds = purrr::map_int(fold, \(x) length(unique(x)))
+                          , .by = rep
+                          ) |>
+            tidyr::unnest(cols = c(fold)) |>
+            dplyr::mutate(train = purrr::pmap(list(rep, fold, n_folds)
+                                              , \(this_rep, this_fold, n_folds) {
+
+                                                if(n_folds == 1) {
+
+                                                  prep$training |>
+                                                    dplyr::select(pa, prep$reduce_env$keep)
+
+                                                } else {
+
+                                                  prep$training |>
+                                                    dplyr::mutate(fold = folds[[this_rep]]) |>
+                                                    dplyr::filter(fold != this_fold) |>
+                                                    dplyr::select(pa, prep$reduce_env$keep)
+
+                                                }
+
+                                              }
+                                              )
+                          , test = purrr::pmap(list(rep, fold, n_folds)
+                                               , \(this_rep, this_fold, n_folds) {
+
+                                                 if(n_folds == 1) {
+
+                                                   prep$training |>
+                                                     dplyr::select(pa, prep$reduce_env$keep)
+
+                                                 } else {
+
+                                                   prep$training |>
+                                                     dplyr::mutate(fold = folds[[this_rep]]) |>
+                                                     dplyr::filter(fold == this_fold) |>
+                                                     dplyr::select(pa, prep$reduce_env$keep)
+
+                                                 }
+
+                                               }
+                                               )
+                          ) |>
+            dplyr::select(rep, fold, spatial_folds, n_folds, test, train)
 
           # end timer ------
 
