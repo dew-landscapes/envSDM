@@ -1428,53 +1428,6 @@
 
           }
 
-          # tune df ---------
-          prep$tune_df <- prep$folds |>
-            dplyr::mutate(n_folds = purrr::map_int(fold, \(x) length(unique(x)))
-                          , .by = rep
-                          ) |>
-            tidyr::unnest(cols = c(fold)) |>
-            dplyr::mutate(train = purrr::pmap(list(rep, fold, n_folds)
-                                              , \(this_rep, this_fold, n_folds) {
-
-                                                if(n_folds == 1) {
-
-                                                  prep$training |>
-                                                    dplyr::select(pa, prep$reduce_env$keep)
-
-                                                } else {
-
-                                                  prep$training |>
-                                                    dplyr::mutate(fold = folds[[this_rep]]) |>
-                                                    dplyr::filter(fold != this_fold) |>
-                                                    dplyr::select(pa, prep$reduce_env$keep)
-
-                                                }
-
-                                              }
-                                              )
-                          , test = purrr::pmap(list(rep, fold, n_folds)
-                                               , \(this_rep, this_fold, n_folds) {
-
-                                                 if(n_folds == 1) {
-
-                                                   prep$training |>
-                                                     dplyr::select(pa, prep$reduce_env$keep)
-
-                                                 } else {
-
-                                                   prep$training |>
-                                                     dplyr::mutate(fold = folds[[this_rep]]) |>
-                                                     dplyr::filter(fold == this_fold) |>
-                                                     dplyr::select(pa, prep$reduce_env$keep)
-
-                                                 }
-
-                                               }
-                                               )
-                          ) |>
-            dplyr::select(rep, fold, spatial_folds, n_folds, test, train)
-
           # end timer ------
 
           prep$log <- paste0(prep$log
