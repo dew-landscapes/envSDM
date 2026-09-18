@@ -44,6 +44,7 @@
 
     # requireNamespace not fixing issue
     if("envelope_model" %in% class(m)) library("predicts")
+    if("maxnet" %in% class(m)) library("maxnet")
 
     new_data <- dplyr::bind_rows(p_test, b_test)
 
@@ -67,17 +68,18 @@
 
       e_fsdm <- flexsdm::sdm_eval(p[p$p == 1, 1][[1]]
                                  , p[p$p == 0, 1][[1]]
-                                 , thr = c("sensitivity", sens = "0.9")
+                                 , thr = c("max_sens_spec", "max_fpb", "sensitivity", sens = "0.9")
                                  )
 
       e@stats$auc_po <- e@stats$auc
       e@stats$auc_po_flexsdm <- mean(e_fsdm$AUC, na.rm = TRUE)
-      e@stats$CBI <- if(is.na(e_fsdm$BOYCE)) -1 else mean(e_fsdm$BOYCE, na.rm = TRUE)
+      e@stats$CBI <- if(is.na(unique(e_fsdm$BOYCE))) -1 else mean(e_fsdm$BOYCE, na.rm = TRUE)
       e@stats$CBI_rescale <- scales::rescale(e@stats$CBI, to = c(0, 1), from = c(-1, 1))
       e@stats$IMAE <- mean(e_fsdm$IMAE, na.rm = TRUE)
 
       # 10% omission rate
       e@thresholds$or10 <- e@tr_stats$treshold[which.min(abs(e@tr_stats$TPR - 0.9))]
+      e@thresholds$max_fpb <- e_fsdm$thr_value[e_fsdm$threshold == "max_fpb"]
 
       if(do_gc) {
 
