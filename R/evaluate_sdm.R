@@ -68,7 +68,7 @@
 
       e_fsdm <- flexsdm::sdm_eval(p[p$p == 1, 1][[1]]
                                  , p[p$p == 0, 1][[1]]
-                                 , thr = c("max_sens_spec", "max_fpb", "sensitivity", sens = "0.9")
+                                 , thr = c("max_fpb", "sensitivity", sens = "0.9")
                                  )
 
       e@stats$auc_po <- e@stats$auc
