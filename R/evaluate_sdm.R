@@ -46,12 +46,12 @@
     if("envelope_model" %in% class(m)) library("predicts")
     if("maxnet" %in% class(m)) library("maxnet")
 
-    new_data <- dplyr::bind_rows(p_test, b_test)
+    new_data <- dplyr::bind_rows(p_test, b_test) |>
+      as.data.frame()
 
     p <- predict(m
                  , type = p_type
                  , newdata = new_data
-                 , x = new_data
                  , ...
                  ) %>%
       tibble::as_tibble(.name_repair = "minimal") %>%
