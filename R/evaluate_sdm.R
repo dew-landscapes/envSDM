@@ -52,6 +52,7 @@
     p <- predict(m
                  , type = p_type
                  , newdata = new_data
+                 , x = new_data
                  , ...
                  ) %>%
       tibble::as_tibble(.name_repair = "minimal") %>%
