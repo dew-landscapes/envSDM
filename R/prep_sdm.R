@@ -599,7 +599,7 @@
           if(!is.null(bw_pa$error)) {
 
             message("warning from p + a bandwidth: "
-                    , bw_pa$error
+                    , as.character(bw_pa$error)
                     )
 
             rm(bw_pa)
@@ -688,6 +688,10 @@
           } else if(exists("bw_p", inherits = FALSE)) {
 
             target_density <- target_density_p
+
+          } else {
+
+            target_density <- temp_ras
 
           }
 
