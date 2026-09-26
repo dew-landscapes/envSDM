@@ -691,7 +691,10 @@
 
           } else {
 
+            # if bandwidths all failed, generate random raster
             target_density <- temp_ras
+
+            terra::values(target_density) <- runif(terra::ncell(target_density))
 
           }
 
