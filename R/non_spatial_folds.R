@@ -25,8 +25,8 @@ non_spatial_folds <- function(use_folds
 
     n_folds <- length(unique(fs))
 
-    sample(fs
-           , sum(data[,pa_col] == val)
+    sample(x = fs
+           , size = sum(data[,pa_col] == val)
            , replace = TRUE
            , prob = rep(1 / n_folds, n_folds)
            )
