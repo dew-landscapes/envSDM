@@ -21,44 +21,48 @@ non_spatial_folds <- function(use_folds
                               , max_attempts = 99
                               ) {
 
-  flds <- function(fs = 1:use_folds, val = 1) {
+  flds <- function(fs = use_folds, val = 1) {
 
-    n_folds <- length(unique(fs))
-
-    sample(fs
-           , sum(data[,pa_col] == val)
+    sample(x = fs
+           , size = sum(data[,pa_col] == val)
            , replace = TRUE
-           , prob = rep(1 / n_folds, n_folds)
+           , prob = rep(1 / fs, fs)
            )
 
   }
 
-  p_fold <- flds()
+  result <- flds()
   counter <- 0
 
   # attempt to get min_in_fold presences in each fold
-  while(all(min(table(p_fold)) < min_in_fold, counter <= max_attempts)) {
+  while(all(min(table(result)) < min_in_fold, counter <= max_attempts)) {
 
     counter <- counter + 1
-    p_fold <- flds()
+    result <- flds()
 
   }
 
   # if that fails, use fix_folds
-  if(min(table(p_fold)) < min_in_fold) {
+  if(min(table(result)) < min_in_fold) {
 
-    p_fold <- fix_folds(folds = p_fold
-                        , pres = rep(1, length(p_fold))
+    result <- fix_folds(folds = result
+                        , pres = rep(1, length(result))
                         , min_fold_n = min_in_fold
                         , pres_val = pres_val
                         )
 
   }
 
-  c(p_fold
-    , flds(fs = unique(p_fold)
-           , val = 0
-           )
-    )
+  if(sum(data[[pa_col]] != pres_val)) {
+
+    result <- c(result
+                , flds(fs = use_folds
+                       , val = 0
+                       )
+                )
+
+  }
+
+  return(result)
 
 }
